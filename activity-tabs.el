@@ -62,28 +62,61 @@ accordingly."
         (tab-bar-mode 1)
         (advice-add #'activity-resume :before #'activity-tabs-before-resume)
         (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p)
-        (advice-add #'activity--set :override #'activity-tabs-activity--set))
+        (advice-add #'activity--set :override #'activity-tabs-activity--set)
+        (advice-add #'activity-switch :override #'activity-tabs-switch)
+        (advice-add #'activity-activities :override #'activity-tabs-activities)
+        (advice-add #'activity-current :override #'activity-tabs-current))
     (advice-remove #'activity-resume #'activity-tabs-before-resume)
     (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)
-    (advice-remove #'activity--set #'activity-tabs-activity--set)))
+    (advice-remove #'activity--set #'activity-tabs-activity--set)
+    (advice-remove #'activity-switch #'activity-tabs-switch)
+    (advice-remove #'activity-activities #'activity-tabs-activities)
+    (advice-remove #'activity-current #'activity-tabs-current)))
 
 ;;;; Functions
+
+(defun activity-tabs-switch (activity)
+  "Switch to ACTIVITY.
+Selects its tab."
+  (tab-bar-switch-to-tab (alist-get 'name (activity-tabs--tab activity))))
+
+(defun activity-tabs--tab (activity)
+  "Return ACTIVITY's tab."
+  (pcase-let (((cl-struct activity name) activity))
+    (cl-find-if (lambda (tab)
+                  (when-let ((tab-activity (alist-get 'activity (cdr tab))))
+                    (equal name (activity-name tab-activity))))
+                (funcall tab-bar-tabs-function))))
+
+(defun activity-tabs-activities ()
+  "Return list of activities.
+Includes bookmarked ones and active ones in tabs."
+  (delete-dups
+   (append (activity--bookmarks)
+           (remq nil
+                 (mapcar (lambda (tab)
+                           (activity-tabs--tab-parameter 'activity tab))
+                         (funcall tab-bar-tabs-function))))))
+
+(defun activity-tabs-current ()
+  "Return current activity."
+  (activity-tabs--tab-parameter 'activity (tab-bar--current-tab-find)))
+
+(defun activity-tabs--tab-parameter (parameter tab)
+  "Return TAB's PARAMETER."
+  (alist-get parameter (cdr tab)))
 
 (defun activity-tabs-activity--set (activity)
   "Set the current activity.
 Sets the current tab's `activity' parameter to ACTIVITY."
   (let ((tab (tab-bar--current-tab-find)))
-    (setf (alist-get 'activity tab) activity)))
+    (setf (alist-get 'activity (cdr tab)) activity)))
 
 (defun activity-tabs-activity-active-p (activity)
   "Return non-nil if ACTIVITY is active.
 That is, if any tabs have an `activity' parameter whose
 activity's name is NAME."
-  (pcase-let (((cl-struct activity name) activity))
-    (cl-some (lambda (tab)
-               (when-let ((activity (alist-get 'activity tab)))
-                 (equal name (activity-name activity))))
-             (funcall tab-bar-tabs-function))))
+  (activity-tabs--tab activity))
 
 (defun activity-tabs-before-resume (activity &rest _)
   "Called before resuming ACTIVITY."

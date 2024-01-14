@@ -133,6 +133,28 @@ keywords are supported:
            nil)
       `(ignore ,@args))))
 
+;;;; Macros
+
+(defmacro activity-with (activity &rest body)
+  "Evaluate BODY with ACTIVITY active.
+Selects ACTIVITY's frame/tab and then switches back."
+  (declare (indent defun) (debug (sexp body)))
+  (let ((original-state-var (gensym)))
+    `(let ((,original-state-var (activity--state-for-macro)))
+       (unless (activity-active-p ,activity)
+         (error "Activity %S not active" (activity-name ,activity)))
+       (unwind-protect
+           (progn
+             (activity-switch ,activity)
+             ,@body)
+         (pcase-let (((map :frame :window :tab-index) ,original-state-var))
+           (when frame
+             (select-frame frame))
+           (when window
+             (select-window window))
+           (when tab-index
+             (tab-bar-select-tab (1+ tab-index))))))))
+
 ;;;; Variables
 
 (defvar activity-buffer-local-variables nil
@@ -218,9 +240,7 @@ If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
   (interactive (list (activity-completing-read) :resetp current-prefix-arg))
-  (run-hook-with-args 'activity-before-resume-functions activity)
-  (activity-open activity :state (if resetp 'default 'last))
-  (run-hook-with-args 'activity-after-resume-functions activity))
+  (activity-open activity :state (if resetp 'default 'last)))
 
 (defun activity-suspend (activity)
   "Suspend ACTIVITY.
@@ -237,14 +257,15 @@ If DEFAULTP, save its default state; if LASTP, its last."
                      :defaultp t :lastp t))
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
-  (pcase-let* (((cl-struct activity name default last) activity)
-               (default (if defaultp (activity-state) default))
-               (last (if lastp (activity-state) last))
-               (record `((handler . activity-bookmark-handler)
-                         (activity . ,(prog1 activity
-                                        (setf (activity-default activity) default
-                                              (activity-last activity) last))))))
-    (bookmark-store name record nil)))
+  (activity-with activity
+    (pcase-let* (((cl-struct activity name default last) activity)
+                 (default (if defaultp (activity-state) default))
+                 (last (if lastp (activity-state) last))
+                 (props `((handler . activity-bookmark-handler)
+                          (activity . ,(prog1 activity
+                                         (setf (activity-default activity) default
+                                               (activity-last activity) last))))))
+      (bookmark-store name props nil))))
 
 (defun activity-save-all ()
   "Save all active activities' last states.
@@ -253,6 +274,13 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   (with-demoted-errors "activity-save-all: ERROR: %S"
     (dolist (activity (cl-remove-if-not #'activity-active-p (activity-activities)))
       (activity-save activity :lastp t))))
+
+(defun activity-reset (activity)
+  "Reset ACTIVITY to its default state."
+  (interactive (list (activity-current)))
+  (unless activity
+    (user-error "No active activity"))
+  (activity-open activity :state 'default))
 
 ;;;; Activity mode
 
@@ -299,6 +327,10 @@ Its STATE is loaded into the current frame."
                (message "Activity %S has no last state.  Resuming default." name))))
     (activity--set activity)))
 
+(defun activity-current ()
+  "Return the current activity."
+  (frame-parameter nil 'activity))
+
 (defun activity--set (activity)
   "Set the current activity.
 Sets the current frame's `activity' parameter to ACTIVITY."
@@ -318,6 +350,27 @@ closed."
       ;; Not only frame: delete it.
       (delete-frame frame))))
 
+(defun activity-switch (activity)
+  "Switch to ACTIVITY.
+Its STATE is loaded into the current frame.  Does not modify its
+state."
+  (select-frame (activity--frame activity)))
+
+(defun activity--frame (activity)
+  "Return ACTIVITY's frame."
+  (pcase-let (((cl-struct activity name) activity))
+    (cl-find-if (lambda (frame)
+                  (when-let ((frame-activity (frame-parameter frame 'activity)))
+                    (equal name (activity-name frame-activity))))
+                (frame-list))))
+
+(defun activity--state-for-macro ()
+  "FIXME: Docstring."
+  `( :frame ,(selected-frame)
+     :window ,(selected-window)
+     :tab-index ,(when (bound-and-true-p tab-bar-mode)
+                   (tab-bar--current-tab-index))))
+
 (defun activity-state ()
   "Return an activity state for the current frame."
   (make-activity-state
@@ -327,11 +380,7 @@ closed."
   "Return non-nil if ACTIVITY is active.
 That is, if any frames have an `activity' parameter whose
 activity's name is NAME."
-  (pcase-let (((cl-struct activity name) activity))
-    (cl-some (lambda (frame)
-               (when-let ((activity (frame-parameter frame 'activity)))
-                 (equal name (activity-name activity))))
-             (frame-list))))
+  (activity--frame activity))
 
 (defun activity--window-state (frame)
   "Return FRAME's window state."
@@ -365,7 +414,7 @@ activity's name is NAME."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters ('buffer `(,buffer-name . ,_))) attrs))
                   (setf (map-elt parameters 'activity-buffer)
-                        ;; HACK: Set buffer record parameter (maybe not the "right" place).
+                        ;; HACK: Set buffer props parameter (maybe not the "right" place).
                         (activity--serialize (get-buffer buffer-name)))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
@@ -427,7 +476,7 @@ activity's name is NAME."
 
 (cl-defstruct activity-buffer
   "FIXME: Docstring."
-  (bookmark nil :documentation "Bookmark record")
+  (bookmark nil :documentation "Bookmark props")
   (filename nil :documentation "Filename, if file-backed")
   (name nil :documentation "Buffer name")
   (local-variables nil)
@@ -465,9 +514,9 @@ activity's name is NAME."
   "Return buffer for `activity-buffer' STRUCT."
   ;; NOTE: Be aware of the following note from burly.el:
   ;; NOTE: Due to changes in help-mode.el which serialize natively
-  ;; compiled subrs in the bookmark record, which cannot be read
+  ;; compiled subrs in the bookmark props, which cannot be read
   ;; back (which actually break the entire bookmark system when
-  ;; such a record is saved in the bookmarks file), we have to
+  ;; such a props is saved in the bookmarks file), we have to
   ;; workaround a failure to read here.  See bug#56643.
   (pcase-let* (((cl-struct activity-buffer bookmark) struct))
     (save-window-excursion
@@ -493,22 +542,22 @@ activity's name is NAME."
                                  (cons (const open-record-fn)
                                        (function :tag "Follow-record function")))))
 
-(defun activity--filename-buffer (record)
+(defun activity--filename-buffer (props)
   "Return buffer for filename RECORD."
-  (pcase-let* (((cl-struct activity-buffer filename) record)
+  (pcase-let* (((cl-struct activity-buffer filename) props)
                (buffer (find-file-noselect filename))
                (major-mode (buffer-local-value 'major-mode buffer))
                (follow-fn (map-nested-elt activity-major-mode-alist (list major-mode 'open-record-fn))))
     (cl-assert follow-fn nil "Major mode not in `activity-major-mode-alist': %s" major-mode)
-    (funcall follow-fn :buffer buffer :record record)))
+    (funcall follow-fn :buffer buffer :record props)))
 
-(defun activity--name-buffer (record)
+(defun activity--name-buffer (props)
   "Return buffer for name RECORD."
-  (pcase-let (((cl-struct activity-buffer name) record))
+  (pcase-let (((cl-struct activity-buffer name) props))
     (or (get-buffer name)
         (with-current-buffer (get-buffer-create (concat "*Activity (error): " name "*"))
           (insert "Activity was unable to get a buffer named: " name "\n"
-                  "Record: " (format "%S" record) "\n"
+                  "Record: " (format "%S" props) "\n"
                   "Please report this error to the developer\n\n")
           (current-buffer)))))
 
@@ -523,7 +572,16 @@ PROMPT is passed to `completing-read', which see."
         (make-activity :name name))))
 
 (defun activity-activities ()
-  "Return list of activities."
+  "Return list of activities.
+Includes bookmarked ones and active ones in frames."
+  (delete-dups
+   (append (activity--bookmarks)
+           (cl-remove-if-not (lambda (frame)
+                               (frame-parameter frame 'activity))
+                             (frame-list)))))
+
+(defun activity--bookmarks ()
+  "Return list of activity bookmarks."
   (bookmark-maybe-load-default-file)
   (mapcar (lambda (bookmark)
             (bookmark-prop-get bookmark 'activity))
