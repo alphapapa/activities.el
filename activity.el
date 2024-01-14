@@ -59,6 +59,80 @@
 (require 'map)
 (require 'subr-x)
 
+;;;; Debugging
+
+(require 'warnings)
+
+;; NOTE: Uncomment this form and `emacs-lisp-byte-compile-and-load'
+;; the file to enable `activity-debug' messages.  This is commented
+;; out by default because, even though the messages are only displayed
+;; when `warning-minimum-log-level' is `:debug' at runtime, if that is
+;; so at expansion time, the expanded macro calls format the message
+;; and check the log level at runtime, which is not zero-cost.
+
+;; (eval-and-compile
+;;   (setq-local warning-minimum-log-level nil)
+;;   (setq-local warning-minimum-log-level :debug))
+
+(cl-defmacro activity-debug (&rest args)
+  "Display a debug warning showing the runtime value of ARGS.
+The warning automatically includes the name of the containing
+function, and it is only displayed if `warning-minimum-log-level'
+is `:debug' at expansion time (otherwise the macro expands to a
+call to `ignore' with ARGS and is eliminated by the
+byte-compiler).  When debugging, the form also returns nil so,
+e.g. it may be used in a conditional in place of nil.
+
+Each of ARGS may be a string, which is displayed as-is, or a
+symbol, the value of which is displayed prefixed by its name, or
+a Lisp form, which is displayed prefixed by its first symbol.
+
+Before the actual ARGS arguments, you can write keyword
+arguments, i.e. alternating keywords and values.  The following
+keywords are supported:
+
+  :buffer BUFFER   Name of buffer to pass to `display-warning'.
+  :level  LEVEL    Level passed to `display-warning', which see.
+                   Default is :debug."
+  ;; TODO: Can we use a compiler macro to handle this more elegantly?
+  (pcase-let* ((fn-name (when byte-compile-current-buffer
+                          (with-current-buffer byte-compile-current-buffer
+                            ;; This is a hack, but a nifty one.
+                            (save-excursion
+                              (beginning-of-defun)
+                              (cl-second (read (current-buffer)))))))
+               (plist-args (cl-loop while (keywordp (car args))
+                                    collect (pop args)
+                                    collect (pop args)))
+               ((map (:buffer buffer) (:level level)) plist-args)
+               (level (or level :debug))
+               (string (cl-loop for arg in args
+                                concat (pcase arg
+                                         ((pred stringp) "%S ")
+                                         ((pred symbolp)
+                                          (concat (upcase (symbol-name arg)) ":%S "))
+                                         ((pred listp)
+                                          (concat "(" (upcase (symbol-name (car arg)))
+                                                  (pcase (length arg)
+                                                    (1 ")")
+                                                    (_ "...)"))
+                                                  ":%S "))))))
+    (if (eq :debug warning-minimum-log-level)
+        `(let ((fn-name ,(if fn-name
+                             `',fn-name
+                           ;; In an interpreted function: use `backtrace-frame' to get the
+                           ;; function name (we have to use a little hackery to figure out
+                           ;; how far up the frame to look, but this seems to work).
+                           `(cl-loop for frame in (backtrace-frames)
+                                     for fn = (cl-second frame)
+                                     when (not (or (subrp fn)
+                                                   (special-form-p fn)
+                                                   (eq 'backtrace-frames fn)))
+                                     return (make-symbol (format "%s [interpreted]" fn))))))
+           (display-warning fn-name (format ,string ,@args) ,level ,buffer)
+           nil)
+      `(ignore ,@args))))
+
 ;;;; Variables
 
 (defvar activity-buffer-local-variables nil
@@ -255,6 +329,7 @@ If DEFAULTP, save its default state; if LASTP, its last."
                              ((map activity-buffer) parameters)
                              (`(,_buffer-name . ,buffer-attrs) buffer)
                              (new-buffer (activity--deserialize activity-buffer)))
+                  (activity-debug activity-buffer new-buffer)
                   (setf (map-elt attrs 'buffer) (cons new-buffer buffer-attrs))
                   (cons 'leaf attrs)))
               (translate-leaf (leaf)
@@ -304,30 +379,32 @@ If DEFAULTP, save its default state; if LASTP, its last."
 (cl-defmethod activity--deserialize ((struct activity-buffer))
   "Return buffer for `activity-buffer' STRUCT."
   (pcase-let (((cl-struct activity-buffer bookmark filename name) struct))
-    (cond (bookmark (activity--bookmark-buffer struct))
-          (filename (activity--filename-buffer struct))
-          (name (activity--name-buffer struct))
-          (t (error "Activity struct is invalid: %S" struct)))))
+    (let ((buffer (cond (bookmark (activity--bookmark-buffer struct))
+                        (filename (activity--filename-buffer struct))
+                        (name (activity--name-buffer struct))
+                        (t (error "Activity struct is invalid: %S" struct)))))
+      (activity-debug struct buffer)
+      buffer)))
 
-(defun activity--bookmark-buffer (record)
-  "Return buffer for bookmark RECORD."
+(defun activity--bookmark-buffer (struct)
+  "Return buffer for `activity-buffer' STRUCT."
   ;; NOTE: Be aware of the following note from burly.el:
   ;; NOTE: Due to changes in help-mode.el which serialize natively
   ;; compiled subrs in the bookmark record, which cannot be read
   ;; back (which actually break the entire bookmark system when
   ;; such a record is saved in the bookmarks file), we have to
   ;; workaround a failure to read here.  See bug#56643.
-  (pcase-let* (((cl-struct activity-buffer bookmark) record))
+  (pcase-let* (((cl-struct activity-buffer bookmark) struct))
     (save-window-excursion
       (condition-case err
           (progn
-            (bookmark-jump record)
+            (bookmark-jump bookmark)
             (when-let ((local-variable-map
                         (bookmark-prop-get bookmark 'activity-buffer-local-variables)))
               (cl-loop for (variable . value) in local-variable-map
                        do (setf (buffer-local-value variable (current-buffer)) value))))
         (error (delay-warning 'activity
-                              (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err record))))
+                              (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
       (current-buffer))))
 
 (defcustom activity-major-mode-alist
