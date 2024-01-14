@@ -61,6 +61,10 @@
 
 ;;;; Variables
 
+(defvar activity-buffer-local-variables nil
+  "Variables whose value are saved and restored by activities.
+Intended to be bound around code calling `activity-' commands.")
+
 (defvar activity-completing-read-history nil
   "History for `activity-completing-read'.")
 
@@ -185,8 +189,8 @@ If DEFAULTP, save its default state; if LASTP, its last."
   (with-selected-frame frame
     ;; Set window parameter.
     (mapc (lambda (window)
-            (let ((value (activity-buffer-record (window-buffer window))))
-              (set-window-parameter window 'activity-buffer-record value)))
+            (let ((value (activity--serialize (window-buffer window))))
+              (set-window-parameter window 'activity-buffer value)))
           (window-list))
     (let* ((window-persistent-parameters (append activity-window-persistent-parameters
                                                  window-persistent-parameters))
@@ -194,40 +198,9 @@ If DEFAULTP, save its default state; if LASTP, its last."
       ;; Clear window parameters we set (because they aren't kept
       ;; current, so leaving them could be confusing).
       (mapc (lambda (window)
-              (set-window-parameter window 'activity-buffer-record nil))
+              (set-window-parameter window 'activity-buffer nil))
             (window-list))
       (activity--window-serialized window-state))))
-
-(defun activity-buffer-record (buffer)
-  "Return bookmark record for BUFFER."
-  (let* ((major-mode (buffer-local-value 'major-mode buffer))
-         (make-record-fn (map-nested-elt activity-major-mode-alist (list major-mode 'make-record-fn))))
-    (cond (make-record-fn (funcall make-record-fn buffer))
-          (t (or (with-current-buffer buffer
-                   (when-let* ((record (ignore-errors
-                                         (bookmark-make-record))))
-                     (when activity-buffer-local-variables
-                       ;; TODO: Also do this in non-bookmark URL functions?
-                       (setf record (activity--add-buffer-local-variables record activity-buffer-local-variables)))
-		     (cl-labels ((encode (element)
-				   (cl-typecase element
-				     (string (encode-coding-string element 'utf-8-unix))
-				     ((satisfies proper-list-p) (mapcar #'encode element))
-				     (cons (cons (encode (car element))
-						 (encode (cdr element))))
-				     (t element))))
-		       ;; Encode all strings in record with UTF-8.
-		       ;; NOTE: If we stop using URLs in the future, maybe this won't be needed.
-		       (setf record (encode record)))
-                     (activity--bookmark-record-url record)))
-                 ;; Buffer can't seem to be bookmarked, so record it as
-                 ;; a name-only buffer.  For some reason, it works
-                 ;; better to use the buffer name in the query string
-                 ;; rather than the filename/path part.
-                 (url-recreate-url (url-parse-make-urlobj "emacs+activity+name" nil nil nil nil
-                                                          (concat "?" (encode-coding-string (buffer-name buffer)
-											    'utf-8-unix))
-							  nil nil 'fullness)))))))
 
 (defun activity--window-serialized (state)
   "Return window STATE having serialized its parameters."
@@ -242,9 +215,9 @@ If DEFAULTP, save its default state; if LASTP, its last."
                 "Translate window parameters in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters buffer) attrs))
-                  (setf (map-elt parameters 'activity-buffer-record)
+                  (setf (map-elt parameters 'activity-buffer)
                         ;; HACK: Set buffer record parameter (maybe not the "right" place).
-                        (activity-buffer-record buffer))
+                        (activity--serialize buffer))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
@@ -279,9 +252,9 @@ If DEFAULTP, save its default state; if LASTP, its last."
                 "Recreate buffers in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters buffer) attrs)
-                             ((map activity-buffer-record) parameters)
+                             ((map activity-buffer) parameters)
                              (`(,_buffer-name . ,buffer-attrs) buffer)
-                             (new-buffer (activity--buffer-for activity-buffer-record)))
+                             (new-buffer (activity--deserialize activity-buffer)))
                   (setf (map-elt attrs 'buffer) (cons new-buffer buffer-attrs))
                   (cons 'leaf attrs)))
               (translate-leaf (leaf)
@@ -307,15 +280,34 @@ If DEFAULTP, save its default state; if LASTP, its last."
   (bookmark nil :documentation "Bookmark record")
   (filename nil :documentation "Filename, if file-backed")
   (name nil :documentation "Buffer name")
+  (local-variables nil)
   (etc nil :documentation "Alist for other data."))
 
-(defun activity--buffer-for (record)
-  "Return buffer for activity buffer RECORD."
-  (pcase-let (((cl-struct activity-buffer bookmark filename name) record))
-    (cond (bookmark (activity--bookmark-buffer record))
-          (filename (activity--filename-buffer record))
-          (name (activity--name-buffer record))
-          (t (error "Activity record is invalid: %S" record)))))
+(cl-defmethod activity--serialize ((buffer buffer))
+  "Return `activity-buffer' struct for BUFFER."
+  (with-current-buffer buffer
+    (make-activity-buffer :bookmark (ignore-errors
+                                      (bookmark-make-record))
+                          :filename (buffer-file-name buffer)
+                          :name (buffer-name buffer)
+                          ;; TODO: Handle indirect buffers, narrowing.
+                          :etc `((indirectp . ,(not (not (buffer-base-buffer buffer))))
+                                 (narrowedp . ,(buffer-narrowed-p)))
+                          :local-variables
+                          (when activity-buffer-local-variables
+                            (cl-loop
+                             for variable in activity-buffer-local-variables
+                             when (buffer-local-boundp variable (current-buffer))
+                             collect (cons variable
+                                           (buffer-local-value variable (current-buffer))))))))
+
+(cl-defmethod activity--deserialize ((struct buffer))
+  "Return buffer for `activity-buffer' STRUCT."
+  (pcase-let (((cl-struct activity-buffer bookmark filename name) struct))
+    (cond (bookmark (activity--bookmark-buffer struct))
+          (filename (activity--filename-buffer struct))
+          (name (activity--name-buffer struct))
+          (t (error "Activity struct is invalid: %S" struct)))))
 
 (defun activity--bookmark-buffer (record)
   "Return buffer for bookmark RECORD."
@@ -396,6 +388,14 @@ PROMPT is passed to `completing-read', which see."
 (defun activity-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
   (activity-resume (bookmark-prop-get bookmark 'activity)))
+
+(defun activity--buffer-local-variables (variables)
+  "Return alist of buffer-local VARIABLES for current buffer.
+Variables without buffer-local bindings in the current buffer are
+ignored."
+  (cl-loop for variable in variables
+           when (buffer-local-boundp variable (current-buffer))
+           collect (cons variable (buffer-local-value variable (current-buffer)))))
 
 ;;;; Tabs mode
 
