@@ -219,12 +219,9 @@ closed."
   (activity-save activity :lastp t)
   (activity-close activity))
 
-(cl-defmethod activity-open (activity &context (activity-tabs-mode (eql nil))
-                                      &key (state 'last))
+(cl-defun activity-open (activity &key (state 'last))
   "Open ACTIVITY.
-Its STATE is loaded into the current frame.  Used when
-ACTIVITY-TABS-MODE is inactive."
-  ;; TODO: Use a hook to optionally open a new frame.
+Its STATE is loaded into the current frame."
   (pcase-let (((cl-struct activity name default last) activity))
     (pcase state
       ('default (activity--windows-set (activity-state-window-state default)))
@@ -233,10 +230,10 @@ ACTIVITY-TABS-MODE is inactive."
                (activity--windows-set (activity-state-window-state default))
                (message "Activity %S has no last state.  Resuming default." name))))))
 
-(cl-defmethod activity-close (activity &context (activity-tabs-mode (eql nil)))
+(cl-defun activity-close (activity)
   "Close ACTIVITY.
 Its state is not saved, and its frames, windows, and tabs are
-closed.  Used when ACTIVITY-TABS-MODE is inactive."
+closed."
   (pcase-let* (((cl-struct activity name) activity)
                (frame (cl-find-if
                        (lambda (frame)

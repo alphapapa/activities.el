@@ -57,18 +57,20 @@ accordingly."
   :group 'activity
   (if activity-tabs-mode
       (progn
+        (tab-bar-mode 1)
         (advice-add #'activity-resume :before #'activity-tabs-before-resume))
     (advice-remove #'activity-resume #'activity-tabs-before-resume)))
 
 ;;;; Functions
 
-(defun activity-tabs-before-resume (activity)
+(defun activity-tabs-before-resume (activity &rest _)
   "Called before resuming ACTIVITY."
-  (run-hook-with-args activity-tabs-before-resume-functions activity))
+  (run-hook-with-args 'activity-tabs-before-resume-functions activity))
 
 (defun activity-tabs-switch-to-tab (activity)
   "Switch to a tab for ACTIVITY."
   (pcase-let* (((cl-struct activity name) activity)
+               (name (string-remove-prefix activity-bookmark-prefix name))
                (tab-name (concat activity-tabs-prefix name)))
     (tab-bar-switch-to-tab tab-name)))
 
