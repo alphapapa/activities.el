@@ -105,7 +105,7 @@ See Info node `(elisp)Window Parameters'.  See also option
 
 (cl-defstruct activity
   "FIXME: Docstring."
-  name default-state last-state etc)
+  name default last etc)
 
 (cl-defstruct activity-state
   "FIXME: Docstring."
@@ -113,11 +113,63 @@ See Info node `(elisp)Window Parameters'.  See also option
 
 ;;;; Commands
 
-(defun activity-save (name)
-  "Save activity as NAME."
+(cl-defun activity-resume (activity &key resetp)
+  "Resume ACTIVITY.
+If RESETP (interactively, with universal prefix), reset to
+ACTIVITY's default state; otherwise, resume its last state, if
+available."
+  (interactive (list (activity-completing-read) current-prefix-arg))
+  (activity-open activity :state (if resetp 'default 'last)))
+
+(defun activity-suspend (activity)
+  "Suspend ACTIVITY.
+Its last is saved, and its frames, windows, and tabs are
+closed."
+  (interactive (list (activity-completing-read :prompt "Suspend activity: ")))
+  (activity-save activity :lastp t)
+  (activity-close activity))
+
+(cl-defmethod activity-open (activity &context (activity-tabs-mode (eql nil))
+                                      &key (state 'last))
+  "Open ACTIVITY.
+Its STATE is loaded into the current frame.  Used when
+ACTIVITY-TABS-MODE is inactive."
+  ;; TODO: Use a hook to optionally open a new frame.
+  (pcase-let (((cl-struct activity name default last) activity))
+    (pcase state
+      ('default (activity--windows-set default))
+      ('last (if last
+                 (activity--windows-set last)
+               (activity--windows-set default)
+               (message "Activity %S has no last state.  Resuming default." name))))))
+
+(cl-defmethod activity-close (activity &context (activity-tabs-mode (eql nil)))
+  "Close ACTIVITY.
+Its state is not saved, and its frames, windows, and tabs are
+closed.  Used when ACTIVITY-TABS-MODE is inactive."
+  (pcase-let* (((cl-struct activity name) activity)
+               (frame (cl-find-if
+                       (lambda (frame)
+                         (equal name (activity-name (frame-parameter frame 'activity))))
+                       (frame-list))))
+    ;; TODO: Set frame parameter when resuming.
+    (unless (length= 1 (frame-list))
+      ;; Not only frame: delete it.
+      (delete-frame frame))))
+
+(cl-defun activity-save (activity &key defaultp lastp)
+  "Save ACTIVITY's states.
+If DEFAULTP, save its default state; if LASTP, its last."
   (interactive (list (activity-completing-read :prompt "Save activity as: ")))
-  (let ((record `((handler . activity-bookmark-handler)
-                  (activity . ,(make-activity :name name :default-state (activity-state))))))
+  (unless (or defaultp lastp)
+    (user-error "Neither DEFAULTP nor LASTP specified"))
+  (pcase-let* (((cl-struct activity name default last) activity)
+               (default (if defaultp (activity-state) default))
+               (last (if lastp (activity-state) last))
+               (record `((handler . activity-bookmark-handler)
+                         (activity . ,(prog1 activity
+                                        (setf (activity-default activity) default
+                                              (activity-last activity) last))))))
     (bookmark-store name record nil)))
 
 ;;;; Functions
@@ -157,8 +209,8 @@ See Info node `(elisp)Window Parameters'.  See also option
                   (cons 'leaf attrs))))
     (translate-state state)))
 
-(defun activity--windows-set (config)
-  "Set window configuration according to CONFIG."
+(defun activity--windows-set (state)
+  "Set window configuration according to STATE."
   (setf window-persistent-parameters (copy-sequence activity-window-persistent-parameters))
   (pcase-let* ((window-persistent-parameters (append activity-window-persistent-parameters
                                                      window-persistent-parameters))
@@ -218,7 +270,7 @@ See Info node `(elisp)Window Parameters'.  See also option
     (cond (bookmark (activity--bookmark-buffer record))
           (filename (activity--filename-buffer record))
           (name (activity--name-buffer record))
-          (t (error "Activity record is invalid: %S")))))
+          (t (error "Activity record is invalid: %S" record)))))
 
 (defun activity--bookmark-buffer (record)
   "Return buffer for bookmark RECORD."
@@ -269,11 +321,15 @@ See Info node `(elisp)Window Parameters'.  See also option
                   "Please report this error to the developer\n\n")
           (current-buffer)))))
 
-(cl-defun activity-completing-read (&key (prompt "Open activity: "))
-  "Return an activity name read with completion.
+(cl-defun activity-completing-read
+    (&key (activities (activity-activities)) (prompt "Open activity: "))
+  "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
-  (completing-read prompt (activity-names)
-		   nil nil activity-bookmark-prefix activity-completing-read-history))
+  (let* ((names (activity-names activities))
+         (name (completing-read prompt names nil nil
+                                activity-bookmark-prefix activity-completing-read-history)))
+    (or (cl-find name activities :key #'activity-name :test #'equal)
+        (make-activity :name name))))
 
 (defun activity-activities ()
   "Return list of activities."
@@ -282,15 +338,57 @@ PROMPT is passed to `completing-read', which see."
                       (equal #'activity-bookmark-handler handler))
                     bookmark-alist))
 
-(cl-defun activity-names (&optional (activities (activity-activities)))
-  "Return list of names of ACTIVITIES."
+(cl-defun activity-names (&key (activities (activity-activities)) (predicate #'identity))
+  "Return list of names of ACTIVITIES matching PREDICATE."
   (thread-last activities
+               (cl-remove-if-not predicate)
                (mapcar #'car)
                (mapcar (lambda (name)
                          (string-remove-prefix activity-bookmark-prefix name)))))
 
 (defun activity-bookmark-handler (bookmark)
-  "Switch to BOOKMARK's activity.")
+  "Switch to BOOKMARK's activity."
+  (activity-resume (bookmark-prop-get bookmark 'activity)))
+
+;;;; Tabs mode
+
+;; When this mode is active, activities are loaded into `tab-bar-mode'
+;; tabs.
+
+;;;###autoload
+(define-minor-mode activity-tabs-mode
+  "Integrate Activity with `tab-bar-mode'.
+When active, activities are opened in new tabs and named
+accordingly."
+  :global t
+  :group 'activity)
+
+(cl-defmethod activity-open (activity &context (activity-tabs-mode (eql t))
+                                      &key (state 'last))
+  "Open ACTIVITY.
+Its STATE is loaded into the current frame.  Used when
+ACTIVITY-TABS-MODE is active."
+  ;; TODO: Use a hook to optionally open a new frame.
+  (pcase-let (((cl-struct activity name default last) activity))
+    (pcase state
+      ('default (activity--windows-set default))
+      ('last (if last
+                 (activity--windows-set last)
+               (activity--windows-set default)
+               (message "Activity %S has no last state.  Resuming default." name))))))
+
+(cl-defmethod activity-close (activity &context (activity-tabs-mode (eql t)))
+  "Close ACTIVITY.
+Its state is not saved, and its frames, windows, and tabs are
+closed.  Used when ACTIVITY-TABS-MODE is active."
+  (pcase-let* (((cl-struct activity name) activity)
+               (tab (cl-find-if
+                     (lambda (tab)
+                       (equal name (activity-name (alist-get 'activity tab))))
+                     (funcall tab-bar-tabs-function)))
+               (tab-name (alist-get 'name tab)))
+    ;; TODO: Set tab parameter when resuming.
+    (tab-bar-close-tab-by-name tab-name)))
 
 ;;;; Footer
 
