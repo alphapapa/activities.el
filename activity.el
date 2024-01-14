@@ -224,15 +224,15 @@ Called with one argument, the activity."
 ;;;; Commands
 
 (defun activity-new (name)
-  "Switch to a new, empty activity named NAME."
+  "Save current state as a new activity with NAME."
   ;; Not sure if this is needed, but let's experiment.
   (interactive (list (read-string "New activity name: ")))
   (when (member name (activity-names))
     (user-error "Activity named %S already exists" name))
-  (scratch-buffer)
-  (delete-other-windows)
   (let ((activity (make-activity :name name)))
-    (run-hook-with-args 'activity-after-resume-functions activity)))
+    (activity--set activity)
+    (activity-save name :defaultp t :lastp t)
+    activity))
 
 (cl-defun activity-resume (activity &key resetp)
   "Resume ACTIVITY.
@@ -250,22 +250,21 @@ closed."
   (activity-save activity :lastp t)
   (activity-close activity))
 
-(cl-defun activity-save (activity &key defaultp lastp)
-  "Save ACTIVITY's states.
+(cl-defun activity-save (name &key defaultp lastp)
+  "Save states of activity having NAME.
 If DEFAULTP, save its default state; if LASTP, its last."
-  (interactive (list (activity-completing-read :prompt "Save activity as: ")
-                     :defaultp t :lastp t))
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
-  (activity-with activity
-    (pcase-let* (((cl-struct activity name default last) activity)
-                 (default (if defaultp (activity-state) default))
-                 (last (if lastp (activity-state) last))
-                 (props `((handler . activity-bookmark-handler)
-                          (activity . ,(prog1 activity
-                                         (setf (activity-default activity) default
-                                               (activity-last activity) last))))))
-      (bookmark-store name props nil))))
+  (let ((activity (or (activity-named name) (activity-new name))))
+    (activity-with activity
+      (pcase-let* (((cl-struct activity name default last) activity)
+                   (default (if defaultp (activity-state) default))
+                   (last (if lastp (activity-state) last))
+                   (props `((handler . activity-bookmark-handler)
+                            (activity . ,(prog1 activity
+                                           (setf (activity-default activity) default
+                                                 (activity-last activity) last))))))
+        (bookmark-store name props nil)))))
 
 (defun activity-save-all ()
   "Save all active activities' last states.
@@ -349,6 +348,10 @@ closed."
     (unless (length= 1 (frame-list))
       ;; Not only frame: delete it.
       (delete-frame frame))))
+
+(defun activity-named (name)
+  "Return activity having NAME."
+  (cl-find name (activity-activities) :key #'activity-name :test #'equal))
 
 (defun activity-switch (activity)
   "Switch to ACTIVITY.
