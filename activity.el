@@ -181,6 +181,16 @@ See Info node `(elisp)Window Parameters'.  See also option
                 :value-type (choice (const :tag "Not saved" nil)
                                     (const :tag "Saved" writable))))
 
+(defcustom activity-after-resume-functions nil
+  "Functions called after resuming an activity.
+Called with one argument, the activity."
+  :type 'hook)
+
+(defcustom activity-before-resume-functions nil
+  "Functions called before resuming an activity.
+Called with one argument, the activity."
+  :type 'hook)
+
 (cl-defstruct activity
   "FIXME: Docstring."
   name default last etc)
@@ -197,7 +207,9 @@ If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
   (interactive (list (activity-completing-read) :resetp current-prefix-arg))
-  (activity-open activity :state (if resetp 'default 'last)))
+  (run-hook-with-args 'activity-before-resume-functions activity)
+  (activity-open activity :state (if resetp 'default 'last))
+  (run-hook-with-args 'activity-after-resume-functions activity))
 
 (defun activity-suspend (activity)
   "Suspend ACTIVITY.
@@ -473,47 +485,6 @@ ignored."
   (cl-loop for variable in variables
            when (buffer-local-boundp variable (current-buffer))
            collect (cons variable (buffer-local-value variable (current-buffer)))))
-
-;;;; Tabs mode
-
-;; When this mode is active, activities are loaded into `tab-bar-mode'
-;; tabs.
-
-;;;###autoload
-(define-minor-mode activity-tabs-mode
-  "Integrate Activity with `tab-bar-mode'.
-When active, activities are opened in new tabs and named
-accordingly."
-  :global t
-  :group 'activity)
-
-(cl-defmethod activity-open (activity &context (activity-tabs-mode (eql t))
-                                      &key (state 'last))
-  "Open ACTIVITY.
-Its STATE is loaded into the current frame.  Used when
-ACTIVITY-TABS-MODE is active."
-  ;; TODO: Use a hook to optionally open a new frame.
-  ;; TODO: Deduplicate this with the method for when the mode is inactive.
-  (pcase-let (((cl-struct activity name default last) activity))
-    (pcase state
-      ('default (activity--windows-set (activity-state-window-state default)))
-      ('last (if last
-                 (activity--windows-set (activity-state-window-state last))
-               (activity--windows-set (activity-state-window-state default))
-               (message "Activity %S has no last state.  Resuming default." name))))))
-
-(cl-defmethod activity-close (activity &context (activity-tabs-mode (eql t)))
-  "Close ACTIVITY.
-Its state is not saved, and its frames, windows, and tabs are
-closed.  Used when ACTIVITY-TABS-MODE is active."
-  (pcase-let* (((cl-struct activity name) activity)
-               (tab (cl-find-if
-                     (lambda (tab)
-                       (equal name (activity-name (alist-get 'activity tab))))
-                     (funcall tab-bar-tabs-function)))
-               (tab-name (alist-get 'name tab)))
-    ;; TODO: Set tab parameter when resuming.
-    (tab-bar-close-tab-by-name tab-name)))
 
 ;;;; Footer
 
