@@ -30,6 +30,8 @@
 
 (require 'activity)
 
+(require 'tab-bar)
+
 ;;;; Customization
 
 (defgroup activity-tabs nil
@@ -59,11 +61,19 @@ accordingly."
       (progn
         (tab-bar-mode 1)
         (advice-add #'activity-resume :before #'activity-tabs-before-resume)
-        (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p))
+        (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p)
+        (advice-add #'activity--set :override #'activity-tabs-activity--set))
     (advice-remove #'activity-resume #'activity-tabs-before-resume)
-    (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)))
+    (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)
+    (advice-remove #'activity--set #'activity-tabs-activity--set)))
 
 ;;;; Functions
+
+(defun activity-tabs-activity--set (activity)
+  "Set the current activity.
+Sets the current tab's `activity' parameter to ACTIVITY."
+  (let ((tab (tab-bar--current-tab-find)))
+    (setf (alist-get 'activity tab) activity)))
 
 (defun activity-tabs-activity-active-p (activity)
   "Return non-nil if ACTIVITY is active.
@@ -82,8 +92,14 @@ activity's name is NAME."
 (defun activity-tabs-switch-to-tab (activity)
   "Switch to a tab for ACTIVITY."
   (pcase-let* (((cl-struct activity name) activity)
-               (name (string-remove-prefix activity-bookmark-prefix name))
-               (tab-name (concat activity-tabs-prefix name)))
+               (tab (cl-find-if (lambda (tab)
+                                  (when-let ((tab-activity (alist-get 'activity tab)))
+                                    (equal name (activity-name tab-activity))))
+                                (funcall tab-bar-tabs-function))) 
+               (tab-name (if tab
+                             (alist-get 'name tab)
+                           (concat activity-tabs-prefix
+                                   (string-remove-prefix activity-bookmark-prefix name)))))
     (tab-bar-switch-to-tab tab-name)))
 
 ;;;; Footer

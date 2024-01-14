@@ -201,6 +201,17 @@ Called with one argument, the activity."
 
 ;;;; Commands
 
+(defun activity-new (name)
+  "Switch to a new, empty activity named NAME."
+  ;; Not sure if this is needed, but let's experiment.
+  (interactive (list (read-string "New activity name: ")))
+  (when (member name (activity-names))
+    (user-error "Activity named %S already exists" name))
+  (scratch-buffer)
+  (delete-other-windows)
+  (let ((activity (make-activity :name name)))
+    (run-hook-with-args 'activity-after-resume-functions activity)))
+
 (cl-defun activity-resume (activity &key resetp)
   "Resume ACTIVITY.
 If RESETP (interactively, with universal prefix), reset to
@@ -218,31 +229,6 @@ closed."
   (interactive (list (activity-completing-read :prompt "Suspend activity: ")))
   (activity-save activity :lastp t)
   (activity-close activity))
-
-(cl-defun activity-open (activity &key (state 'last))
-  "Open ACTIVITY.
-Its STATE is loaded into the current frame."
-  (pcase-let (((cl-struct activity name default last) activity))
-    (pcase state
-      ('default (activity--windows-set (activity-state-window-state default)))
-      ('last (if last
-                 (activity--windows-set (activity-state-window-state last))
-               (activity--windows-set (activity-state-window-state default))
-               (message "Activity %S has no last state.  Resuming default." name))))))
-
-(cl-defun activity-close (activity)
-  "Close ACTIVITY.
-Its state is not saved, and its frames, windows, and tabs are
-closed."
-  (pcase-let* (((cl-struct activity name) activity)
-               (frame (cl-find-if
-                       (lambda (frame)
-                         (equal name (activity-name (frame-parameter frame 'activity))))
-                       (frame-list))))
-    ;; TODO: Set frame parameter when resuming.
-    (unless (length= 1 (frame-list))
-      ;; Not only frame: delete it.
-      (delete-frame frame))))
 
 (cl-defun activity-save (activity &key defaultp lastp)
   "Save ACTIVITY's states.
@@ -297,8 +283,39 @@ accordingly."
 
 ;;;; Functions
 
+(cl-defun activity-open (activity &key (state 'last))
+  "Open ACTIVITY.
+Its STATE is loaded into the current frame."
+  (pcase-let (((cl-struct activity name default last) activity))
+    (pcase state
+      ('default (activity--windows-set (activity-state-window-state default)))
+      ('last (if last
+                 (activity--windows-set (activity-state-window-state last))
+               (activity--windows-set (activity-state-window-state default))
+               (message "Activity %S has no last state.  Resuming default." name))))
+    (activity--set activity)))
+
+(defun activity--set (activity)
+  "Set the current activity.
+Sets the current frame's `activity' parameter to ACTIVITY."
+  (set-frame-parameter nil 'activity activity))
+
+(cl-defun activity-close (activity)
+  "Close ACTIVITY.
+Its state is not saved, and its frames, windows, and tabs are
+closed."
+  (pcase-let* (((cl-struct activity name) activity)
+               (frame (cl-find-if
+                       (lambda (frame)
+                         (equal name (activity-name (frame-parameter frame 'activity))))
+                       (frame-list))))
+    ;; TODO: Set frame parameter when resuming.
+    (unless (length= 1 (frame-list))
+      ;; Not only frame: delete it.
+      (delete-frame frame))))
+
 (defun activity-state ()
-  "Return the current activity's state."
+  "Return an activity state for the current frame."
   (make-activity-state
    :window-state (activity--window-state (selected-frame))))
 
