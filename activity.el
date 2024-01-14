@@ -260,12 +260,57 @@ If DEFAULTP, save its default state; if LASTP, its last."
                                               (activity-last activity) last))))))
     (bookmark-store name record nil)))
 
+(defun activity-save-all ()
+  "Save all active activities' last states."
+  (interactive)
+  (dolist (activity (cl-remove-if-not #'activity-active-p (activity-activities)))
+    (activity-save activity :lastp t)))
+
+;;;; Activity mode
+
+;; This mode automatically saves active activities.
+
+(defvar activity-mode-timer nil
+  "Automatically saves activities according to `activity-mode-idle-frequency'.")
+
+(defgroup activity-mode nil
+  "Automatically save activities."
+  :group 'activity)
+
+(defcustom activity-mode-idle-frequency 5
+  "Automatically save activities when Emacs has been idle this many seconds."
+  :type 'natnum)
+
+;;;###autoload
+(define-minor-mode activity-mode
+  "Automatically remember activities' state.
+accordingly."
+  :global t
+  :group 'activity
+  (if activity-mode
+      (progn
+        (setf activity-mode-timer (run-at-time activity-mode-idle-frequency activity-mode-idle-frequency
+                                               #'activity-save-all)))
+    (when (timerp activity-mode-timer)
+      (cancel-timer activity-mode-timer)
+      (setf activity-mode-timer nil))))
+
 ;;;; Functions
 
 (defun activity-state ()
   "Return the current activity's state."
   (make-activity-state
    :window-state (activity--window-state (selected-frame))))
+
+(defun activity-active-p (activity)
+  "Return non-nil if ACTIVITY is active.
+That is, if any frames have an `activity' parameter whose
+activity's name is NAME."
+  (pcase-let (((cl-struct activity name) activity))
+    (cl-some (lambda (frame)
+               (when-let ((activity (frame-parameter frame 'activity)))
+                 (equal name (activity-name activity))))
+             (frame-list))))
 
 (defun activity--window-state (frame)
   "Return FRAME's window state."

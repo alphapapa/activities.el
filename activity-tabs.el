@@ -58,10 +58,22 @@ accordingly."
   (if activity-tabs-mode
       (progn
         (tab-bar-mode 1)
-        (advice-add #'activity-resume :before #'activity-tabs-before-resume))
-    (advice-remove #'activity-resume #'activity-tabs-before-resume)))
+        (advice-add #'activity-resume :before #'activity-tabs-before-resume)
+        (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p))
+    (advice-remove #'activity-resume #'activity-tabs-before-resume)
+    (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)))
 
 ;;;; Functions
+
+(defun activity-tabs-activity-active-p (activity)
+  "Return non-nil if ACTIVITY is active.
+That is, if any tabs have an `activity' parameter whose
+activity's name is NAME."
+  (pcase-let (((cl-struct activity name) activity))
+    (cl-some (lambda (tab)
+               (when-let ((activity (alist-get 'activity tab)))
+                 (equal name (activity-name activity))))
+             (funcall tab-bar-tabs-function))))
 
 (defun activity-tabs-before-resume (activity &rest _)
   "Called before resuming ACTIVITY."
