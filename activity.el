@@ -214,10 +214,10 @@ If DEFAULTP, save its default state; if LASTP, its last."
               (translate-leaf (leaf)
                 "Translate window parameters in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
-                             ((map parameters buffer) attrs))
+                             ((map parameters ('buffer `(,buffer-name . ,_))) attrs))
                   (setf (map-elt parameters 'activity-buffer)
                         ;; HACK: Set buffer record parameter (maybe not the "right" place).
-                        (activity--serialize buffer))
+                        (activity--serialize (get-buffer buffer-name)))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
@@ -301,7 +301,7 @@ If DEFAULTP, save its default state; if LASTP, its last."
                              collect (cons variable
                                            (buffer-local-value variable (current-buffer))))))))
 
-(cl-defmethod activity--deserialize ((struct buffer))
+(cl-defmethod activity--deserialize ((struct activity-buffer))
   "Return buffer for `activity-buffer' STRUCT."
   (pcase-let (((cl-struct activity-buffer bookmark filename name) struct))
     (cond (bookmark (activity--bookmark-buffer struct))
