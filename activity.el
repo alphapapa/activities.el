@@ -118,7 +118,7 @@ See Info node `(elisp)Window Parameters'.  See also option
 If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
-  (interactive (list (activity-completing-read) current-prefix-arg))
+  (interactive (list (activity-completing-read) :resetp current-prefix-arg))
   (activity-open activity :state (if resetp 'default 'last)))
 
 (defun activity-suspend (activity)
@@ -137,10 +137,10 @@ ACTIVITY-TABS-MODE is inactive."
   ;; TODO: Use a hook to optionally open a new frame.
   (pcase-let (((cl-struct activity name default last) activity))
     (pcase state
-      ('default (activity--windows-set default))
+      ('default (activity--windows-set (activity-state-window-state default)))
       ('last (if last
-                 (activity--windows-set last)
-               (activity--windows-set default)
+                 (activity--windows-set (activity-state-window-state last))
+               (activity--windows-set (activity-state-window-state default))
                (message "Activity %S has no last state.  Resuming default." name))))))
 
 (cl-defmethod activity-close (activity &context (activity-tabs-mode (eql nil)))
@@ -160,7 +160,8 @@ closed.  Used when ACTIVITY-TABS-MODE is inactive."
 (cl-defun activity-save (activity &key defaultp lastp)
   "Save ACTIVITY's states.
 If DEFAULTP, save its default state; if LASTP, its last."
-  (interactive (list (activity-completing-read :prompt "Save activity as: ")))
+  (interactive (list (activity-completing-read :prompt "Save activity as: ")
+                     :defaultp t :lastp t))
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
   (pcase-let* (((cl-struct activity name default last) activity)
@@ -186,6 +187,37 @@ If DEFAULTP, save its default state; if LASTP, its last."
          (window-state (with-selected-frame frame
                          (window-state-get nil 'writable))))
     (activity--window-serialized window-state)))
+
+(defun activity-buffer-record (buffer)
+  "Return bookmark record for BUFFER."
+  (let* ((major-mode (buffer-local-value 'major-mode buffer))
+         (make-record-fn (map-nested-elt activity-major-mode-alist (list major-mode 'make-record-fn))))
+    (cond (make-record-fn (funcall make-record-fn buffer))
+          (t (or (with-current-buffer buffer
+                   (when-let* ((record (ignore-errors
+                                         (bookmark-make-record))))
+                     (when activity-buffer-local-variables
+                       ;; TODO: Also do this in non-bookmark URL functions?
+                       (setf record (activity--add-buffer-local-variables record activity-buffer-local-variables)))
+		     (cl-labels ((encode (element)
+				   (cl-typecase element
+				     (string (encode-coding-string element 'utf-8-unix))
+				     ((satisfies proper-list-p) (mapcar #'encode element))
+				     (cons (cons (encode (car element))
+						 (encode (cdr element))))
+				     (t element))))
+		       ;; Encode all strings in record with UTF-8.
+		       ;; NOTE: If we stop using URLs in the future, maybe this won't be needed.
+		       (setf record (encode record)))
+                     (activity--bookmark-record-url record)))
+                 ;; Buffer can't seem to be bookmarked, so record it as
+                 ;; a name-only buffer.  For some reason, it works
+                 ;; better to use the buffer name in the query string
+                 ;; rather than the filename/path part.
+                 (url-recreate-url (url-parse-make-urlobj "emacs+activity+name" nil nil nil nil
+                                                          (concat "?" (encode-coding-string (buffer-name buffer)
+											    'utf-8-unix))
+							  nil nil 'fullness)))))))
 
 (defun activity--window-serialized (state)
   "Return window STATE having serialized its parameters."
@@ -295,19 +327,21 @@ If DEFAULTP, save its default state; if LASTP, its last."
 
 (defcustom activity-major-mode-alist
   (list (cons 'org-mode
-              (list (cons 'make-url-fn #'activity--org-mode-buffer-url)
-                    (cons 'follow-url-fn #'activity-follow-url-org-mode))))
+              (list (cons 'make-record-fn #'activity--org-mode-buffer-url)
+                    (cons 'open-record-fn #'activity-follow-url-org-mode))))
   "Alist mapping major modes to the appropriate Activity functions."
   :type '(alist :key-type symbol
-                :value-type (set (cons (const make-url-fn) (function :tag "Make-URL function"))
-                                 (cons (const follow-url-fn) (function :tag "Follow-URL function")))))
+                :value-type (set (cons (const make-record-fn)
+                                       (function :tag "Make-record function"))
+                                 (cons (const open-record-fn)
+                                       (function :tag "Follow-record function")))))
 
 (defun activity--filename-buffer (record)
   "Return buffer for filename RECORD."
   (pcase-let* (((cl-struct activity-buffer filename) record)
                (buffer (find-file-noselect filename))
                (major-mode (buffer-local-value 'major-mode buffer))
-               (follow-fn (map-nested-elt activity-major-mode-alist (list major-mode 'follow-url-fn))))
+               (follow-fn (map-nested-elt activity-major-mode-alist (list major-mode 'open-record-fn))))
     (cl-assert follow-fn nil "Major mode not in `activity-major-mode-alist': %s" major-mode)
     (funcall follow-fn :buffer buffer :record record)))
 
@@ -325,7 +359,7 @@ If DEFAULTP, save its default state; if LASTP, its last."
     (&key (activities (activity-activities)) (prompt "Open activity: "))
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
-  (let* ((names (activity-names activities))
+  (let* ((names (activity-names :activities activities))
          (name (completing-read prompt names nil nil
                                 activity-bookmark-prefix activity-completing-read-history)))
     (or (cl-find name activities :key #'activity-name :test #'equal)
@@ -334,17 +368,17 @@ PROMPT is passed to `completing-read', which see."
 (defun activity-activities ()
   "Return list of activities."
   (bookmark-maybe-load-default-file)
-  (cl-remove-if-not (pcase-lambda (`(,_name . ,(map handler)))
-                      (equal #'activity-bookmark-handler handler))
-                    bookmark-alist))
+  (mapcar (lambda (bookmark)
+            (bookmark-prop-get bookmark 'activity))
+          (cl-remove-if-not (pcase-lambda (`(,_name . ,(map handler)))
+                              (equal #'activity-bookmark-handler handler))
+                            bookmark-alist)))
 
 (cl-defun activity-names (&key (activities (activity-activities)) (predicate #'identity))
   "Return list of names of ACTIVITIES matching PREDICATE."
   (thread-last activities
                (cl-remove-if-not predicate)
-               (mapcar #'car)
-               (mapcar (lambda (name)
-                         (string-remove-prefix activity-bookmark-prefix name)))))
+               (mapcar #'activity-name)))
 
 (defun activity-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
@@ -369,12 +403,13 @@ accordingly."
 Its STATE is loaded into the current frame.  Used when
 ACTIVITY-TABS-MODE is active."
   ;; TODO: Use a hook to optionally open a new frame.
+  ;; TODO: Deduplicate this with the method for when the mode is inactive.
   (pcase-let (((cl-struct activity name default last) activity))
     (pcase state
-      ('default (activity--windows-set default))
+      ('default (activity--windows-set (activity-state-window-state default)))
       ('last (if last
-                 (activity--windows-set last)
-               (activity--windows-set default)
+                 (activity--windows-set (activity-state-window-state last))
+               (activity--windows-set (activity-state-window-state default))
                (message "Activity %S has no last state.  Resuming default." name))))))
 
 (cl-defmethod activity-close (activity &context (activity-tabs-mode (eql t)))
