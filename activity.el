@@ -182,11 +182,21 @@ If DEFAULTP, save its default state; if LASTP, its last."
 
 (defun activity--window-state (frame)
   "Return FRAME's window state."
-  (let* ((window-persistent-parameters (append activity-window-persistent-parameters
-                                               window-persistent-parameters))
-         (window-state (with-selected-frame frame
-                         (window-state-get nil 'writable))))
-    (activity--window-serialized window-state)))
+  (with-selected-frame frame
+    ;; Set window parameter.
+    (mapc (lambda (window)
+            (let ((value (activity-buffer-record (window-buffer window))))
+              (set-window-parameter window 'activity-buffer-record value)))
+          (window-list))
+    (let* ((window-persistent-parameters (append activity-window-persistent-parameters
+                                                 window-persistent-parameters))
+           (window-state (window-state-get nil 'writable)))
+      ;; Clear window parameters we set (because they aren't kept
+      ;; current, so leaving them could be confusing).
+      (mapc (lambda (window)
+              (set-window-parameter window 'activity-buffer-record nil))
+            (window-list))
+      (activity--window-serialized window-state))))
 
 (defun activity-buffer-record (buffer)
   "Return bookmark record for BUFFER."
@@ -231,7 +241,10 @@ If DEFAULTP, save its default state; if LASTP, its last."
               (translate-leaf (leaf)
                 "Translate window parameters in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
-                             ((map parameters) attrs))
+                             ((map parameters buffer) attrs))
+                  (setf (map-elt parameters 'activity-buffer-record)
+                        ;; HACK: Set buffer record parameter (maybe not the "right" place).
+                        (activity-buffer-record buffer))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
