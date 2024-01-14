@@ -247,10 +247,12 @@ If DEFAULTP, save its default state; if LASTP, its last."
     (bookmark-store name record nil)))
 
 (defun activity-save-all ()
-  "Save all active activities' last states."
+  "Save all active activities' last states.
+In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
-  (dolist (activity (cl-remove-if-not #'activity-active-p (activity-activities)))
-    (activity-save activity :lastp t)))
+  (with-demoted-errors "activity-save-all: ERROR: %S"
+    (dolist (activity (cl-remove-if-not #'activity-active-p (activity-activities)))
+      (activity-save activity :lastp t))))
 
 ;;;; Activity mode
 
@@ -275,11 +277,13 @@ accordingly."
   :group 'activity
   (if activity-mode
       (progn
-        (setf activity-mode-timer (run-at-time activity-mode-idle-frequency activity-mode-idle-frequency
-                                               #'activity-save-all)))
+        (setf activity-mode-timer
+              (run-with-idle-timer activity-mode-idle-frequency t #'activity-save-all))
+        (add-hook 'kill-emacs-hook #'activity-save-all))
     (when (timerp activity-mode-timer)
       (cancel-timer activity-mode-timer)
-      (setf activity-mode-timer nil))))
+      (setf activity-mode-timer nil))
+    (remove-hook 'kill-emacs-hook #'activity-save-all)))
 
 ;;;; Functions
 
