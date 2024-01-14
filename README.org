@@ -42,3 +42,12 @@ If you choose to install it otherwise, you'll need to load both the ~activity~ a
 6. Return to the original activity state with ~activity-reset~ (or ~C-u M-x activity-resume RET~).
 7. Suspend the activity with ~activity-suspend~ (which saves its last state and closes its frame/tab).
 
+* FAQ
+
++ How is this different from [[https://github.com/alphapapa/burly.el][Burly.el]] or [[https://github.com/alphapapa/bufler.el/][Bufler.el]]? :: Burly is a well-polished tool for restoring window and frame configurations, which could be considered an incubator for some of the ideas furthered here.  Bufler's ~bufler-workspace~ library uses Burly to provide some similar functionality, which is at an exploratory stage.  ~activity~ hopes to provide a longer-term solution more suitable for integration into Emacs.
+
++ "Activities" haven't seemed to pan out for KDE.  Why would they in Emacs? :: KDE Plasma's Activities system requires applications that can save and restore their state through Plasma, which only (or mostly only?) KDE apps can do, limiting the usefulness of the system.  However, Emacs offers a coherent environment, similar to Lisp machines of yore, and its ~bookmarks~ library offers a way for any buffer's major mode to save and restore state, if implemented (which many already are).
+
++ How does this differ from "workspace" packages? :: Yes, there are many Emacs packages that provide "workspace"-like features in one way or another.  To date, only Burly and Bufler seem to offer the ability to restore one across Emacs sessions.  As mentioned, ~activity~ is intended to be more refined and easier to use (e.g. automatically saving activities' states when ~activity-mode~ is enabled).  Comparisons to other packages are left to the reader; suffice to say that ~activity~ is intended to provide what other tools haven't, in an idiomatic, intuitive way.  (Feedback is welcome.)
+
++ Why did I get an error? :: Because ~activity~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
