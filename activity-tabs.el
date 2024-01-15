@@ -38,8 +38,7 @@
   "Integrates activities and tabs."
   :group 'activity)
 
-(defcustom activity-tabs-before-resume-functions
-  '(activity-tabs-switch-to-tab)
+(defcustom activity-tabs-before-resume-functions nil
   "Functions called before resuming an activity.
 Each is called with one argument, the activity."
   :type 'hook)

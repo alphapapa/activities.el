@@ -1,4 +1,4 @@
-;;; activity.el --- Suspend/resume sets of windows, frames, and buffers  -*- lexical-binding: t; -*-
+ ;;; activity.el --- Suspend/resume sets of windows, frames, and buffers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  Free Software Foundation, Inc.
 
@@ -154,10 +154,10 @@ Selects ACTIVITY's frame/tab and then switches back."
          (pcase-let (((map :frame :window :tab-index) ,original-state-var))
            (when frame
              (select-frame frame))
-           (when window
-             (select-window window))
            (when tab-index
-             (tab-bar-select-tab (1+ tab-index))))))))
+             (tab-bar-select-tab (1+ tab-index)))
+           (when window
+             (select-window window)))))))
 
 ;;;; Variables
 
@@ -236,8 +236,8 @@ Called with one argument, the activity."
   (when (member name (activity-names))
     (user-error "Activity named %S already exists" name))
   (let ((activity (make-activity :name name)))
+    (activity--set activity)
     (activity-save activity :defaultp t :lastp t)
-    (activity-set activity)
     activity))
 
 (cl-defun activity-resume (activity &key resetp)
@@ -274,7 +274,7 @@ If DEFAULTP, save its default state; if LASTP, its last."
 In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
   (with-demoted-errors "activity-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activity-active-p (multisession-value activity-activities)))
+    (dolist (activity (cl-remove-if-not #'activity-active-p (map-values (multisession-value activity-activities))))
       (activity-save activity :lastp t))))
 
 (defun activity-reset (activity)
@@ -320,6 +320,7 @@ accordingly."
 (cl-defun activity-set (activity &key (state 'last))
   "Set ACTIVITY as the current one.
 Its STATE (`last' or `default') is loaded into the current frame."
+  (activity--set activity)
   (activity-with activity
     (pcase-let (((cl-struct activity name default last) activity))
       (pcase state
@@ -327,8 +328,7 @@ Its STATE (`last' or `default') is loaded into the current frame."
         ('last (if last
                    (activity--windows-set (activity-state-window-state last))
                  (activity--windows-set (activity-state-window-state default))
-                 (message "Activity %S has no last state.  Resuming default." name)))))
-    (activity--set activity)))
+                 (message "Activity %S has no last state.  Resuming default." name)))))))
 
 (defun activity--set (activity)
   "Set current frame's activity parameter to ACTIVITY."
@@ -361,7 +361,8 @@ closed."
 Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
   (select-frame (or (activity--frame activity)
-                    (make-frame `(activity . ,activity)))))
+                    (make-frame `(activity . ,activity))))
+  (redisplay))
 
 (defun activity--frame (activity)
   "Return ACTIVITY's frame."
@@ -386,18 +387,18 @@ activity's name is NAME."
   "Return FRAME's window state."
   (with-selected-frame frame
     ;; Set window parameter.
-    (mapc (lambda (window)
-            (let ((value (activity--serialize (window-buffer window))))
-              (set-window-parameter window 'activity-buffer value)))
-          (window-list))
+    ;; (mapc (lambda (window)
+    ;;         (let ((value (activity--serialize (window-buffer window))))
+    ;;           (set-window-parameter window 'activity-buffer value)))
+    ;;       (window-list))
     (let* ((window-persistent-parameters (append activity-window-persistent-parameters
                                                  window-persistent-parameters))
            (window-state (window-state-get nil 'writable)))
       ;; Clear window parameters we set (because they aren't kept
       ;; current, so leaving them could be confusing).
-      (mapc (lambda (window)
-              (set-window-parameter window 'activity-buffer nil))
-            (window-list))
+      ;; (mapc (lambda (window)
+      ;;         (set-window-parameter window 'activity-buffer nil))
+      ;;       (window-list))
       (activity--window-serialized window-state))))
 
 (defun activity--window-serialized (state)
@@ -412,16 +413,22 @@ activity's name is NAME."
               (translate-leaf (leaf)
                 "Translate window parameters in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
-                             ((map parameters ('buffer `(,buffer-name . ,_))) attrs))
+                             ((map parameters ('buffer `(,buffer-name-or-buffer . ,_))) attrs))
                   (setf (map-elt parameters 'activity-buffer)
                         ;; HACK: Set buffer props parameter (maybe not the "right" place).
-                        (activity--serialize (get-buffer buffer-name)))
+                        (activity--serialize (get-buffer buffer-name-or-buffer))
+                        ;; HACK: Replace unserializable buffer (though
+                        ;; `window-state-get' should be filtering that
+                        ;; out...).
+                        (map-elt attrs 'buffer) (buffer-name (get-buffer buffer-name-or-buffer)))
+                  (message "activity--window-serialized: (map-elt attrs 'buffer):%S" (map-elt attrs 'buffer))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
                       (setf (map-elt parameters parameter)
                             (funcall serialize (map-elt parameters parameter)))))
                   (setf (map-elt attrs 'parameters) parameters)
+                  (message "activity--window-serialized: (cons 'leaf attrs):%S" (cons 'leaf attrs))
                   (cons 'leaf attrs))))
     (translate-state state)))
 
@@ -566,7 +573,7 @@ activity's name is NAME."
     (&key (activities (multisession-value activity-activities)) (prompt "Open activity: "))
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
-  (let* ((names (activity-names :activities activities))
+  (let* ((names (activity-names activities))
          (name (completing-read prompt names nil nil nil activity-completing-read-history)))
     (or (map-elt (multisession-value activity-activities) name)
         (make-activity :name name))))
