@@ -64,21 +64,22 @@ accordingly."
         (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p)
         (advice-add #'activity--set :override #'activity-tabs-activity--set)
         (advice-add #'activity-switch :override #'activity-tabs-switch)
-        (advice-add #'activity-activities :override #'activity-tabs-activities)
         (advice-add #'activity-current :override #'activity-tabs-current))
     (advice-remove #'activity-resume #'activity-tabs-before-resume)
     (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)
     (advice-remove #'activity--set #'activity-tabs-activity--set)
     (advice-remove #'activity-switch #'activity-tabs-switch)
-    (advice-remove #'activity-activities #'activity-tabs-activities)
     (advice-remove #'activity-current #'activity-tabs-current)))
 
 ;;;; Functions
 
 (defun activity-tabs-switch (activity)
   "Switch to ACTIVITY.
-Selects its tab."
-  (tab-bar-switch-to-tab (alist-get 'name (activity-tabs--tab activity))))
+Selects its tab, making one if needed.  Its state is not changed."
+  (if-let ((tab (activity-tabs--tab activity)))
+      (tab-bar-switch-to-tab (alist-get 'name tab))
+    (tab-bar-new-tab)
+    (tab-bar-rename-tab (activity-name-for activity))))
 
 (defun activity-tabs--tab (activity)
   "Return ACTIVITY's tab."
@@ -88,22 +89,13 @@ Selects its tab."
                     (equal name (activity-name tab-activity))))
                 (funcall tab-bar-tabs-function))))
 
-(defun activity-tabs-activities ()
-  "Return list of activities.
-Includes bookmarked ones and active ones in tabs."
-  (delete-dups
-   (append (activity--bookmarks)
-           (remq nil
-                 (mapcar (lambda (tab)
-                           (activity-tabs--tab-parameter 'activity tab))
-                         (funcall tab-bar-tabs-function))))))
-
 (defun activity-tabs-current ()
   "Return current activity."
   (activity-tabs--tab-parameter 'activity (tab-bar--current-tab-find)))
 
 (defun activity-tabs--tab-parameter (parameter tab)
   "Return TAB's PARAMETER."
+  ;; TODO: Make this a gv.
   (alist-get parameter (cdr tab)))
 
 (defun activity-tabs-activity--set (activity)
@@ -122,18 +114,18 @@ activity's name is NAME."
   "Called before resuming ACTIVITY."
   (run-hook-with-args 'activity-tabs-before-resume-functions activity))
 
-(defun activity-tabs-switch-to-tab (activity)
-  "Switch to a tab for ACTIVITY."
-  (pcase-let* (((cl-struct activity name) activity)
-               (tab (cl-find-if (lambda (tab)
-                                  (when-let ((tab-activity (alist-get 'activity tab)))
-                                    (equal name (activity-name tab-activity))))
-                                (funcall tab-bar-tabs-function))) 
-               (tab-name (if tab
-                             (alist-get 'name tab)
-                           (concat activity-tabs-prefix
-                                   (string-remove-prefix activity-bookmark-prefix name)))))
-    (tab-bar-switch-to-tab tab-name)))
+;; (defun activity-tabs-switch-to-tab (activity)
+;;   "Switch to a tab for ACTIVITY."
+;;   (pcase-let* (((cl-struct activity name) activity)
+;;                (tab (cl-find-if (lambda (tab)
+;;                                   (when-let ((tab-activity (alist-get 'activity tab)))
+;;                                     (equal name (activity-name tab-activity))))
+;;                                 (funcall tab-bar-tabs-function))) 
+;;                (tab-name (if tab
+;;                              (alist-get 'name tab)
+;;                            (concat activity-tabs-prefix
+;;                                    (string-remove-prefix activity-bookmark-prefix name)))))
+;;     (tab-bar-switch-to-tab tab-name)))
 
 ;;;; Footer
 

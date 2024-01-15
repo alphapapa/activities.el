@@ -57,6 +57,7 @@
 (require 'cl-lib)
 (require 'bookmark)
 (require 'map)
+(require 'multisession)
 (require 'subr-x)
 
 ;;;; Debugging
@@ -140,7 +141,10 @@ keywords are supported:
 Selects ACTIVITY's frame/tab and then switches back."
   (declare (indent defun) (debug (sexp body)))
   (let ((original-state-var (gensym)))
-    `(let ((,original-state-var (activity--state-for-macro)))
+    `(let ((,original-state-var `( :frame ,(selected-frame)
+                                   :window ,(selected-window)
+                                   :tab-index ,(when (bound-and-true-p tab-bar-mode)
+                                                 (tab-bar--current-tab-index)))))
        (unless (activity-active-p ,activity)
          (error "Activity %S not active" (activity-name ,activity)))
        (unwind-protect
@@ -156,6 +160,8 @@ Selects ACTIVITY's frame/tab and then switches back."
              (tab-bar-select-tab (1+ tab-index))))))))
 
 ;;;; Variables
+
+(define-multisession-variable activity-activities nil)
 
 (defvar activity-buffer-local-variables nil
   "Variables whose value are saved and restored by activities.
@@ -183,8 +189,8 @@ deserialized back to the buffer after it is reincarnated.")
   :link '(url-link "https://github.com/alphapapa/activity.el")
   :group 'convenience)
 
-(defcustom activity-bookmark-prefix "Activity: "
-  "Prefix applied to activity bookmark names."
+(defcustom activity-name-prefix "α: "
+  "Prefix applied to activity names in frames/tabs."
   :type 'string)
 
 (defcustom activity-window-persistent-parameters
@@ -230,8 +236,8 @@ Called with one argument, the activity."
   (when (member name (activity-names))
     (user-error "Activity named %S already exists" name))
   (let ((activity (make-activity :name name)))
-    (activity--set activity)
-    (activity-save name :defaultp t :lastp t)
+    (activity-save activity :defaultp t :lastp t)
+    (activity-set activity)
     activity))
 
 (cl-defun activity-resume (activity &key resetp)
@@ -240,7 +246,8 @@ If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
   (interactive (list (activity-completing-read) :resetp current-prefix-arg))
-  (activity-open activity :state (if resetp 'default 'last)))
+  (activity-switch activity)
+  (activity-set activity :state (if resetp 'default 'last)))
 
 (defun activity-suspend (activity)
   "Suspend ACTIVITY.
@@ -250,28 +257,24 @@ closed."
   (activity-save activity :lastp t)
   (activity-close activity))
 
-(cl-defun activity-save (name &key defaultp lastp)
-  "Save states of activity having NAME.
+(cl-defun activity-save (activity &key defaultp lastp)
+  "Save states of ACTIVITY.
 If DEFAULTP, save its default state; if LASTP, its last."
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
-  (let ((activity (or (activity-named name) (activity-new name))))
-    (activity-with activity
-      (pcase-let* (((cl-struct activity name default last) activity)
-                   (default (if defaultp (activity-state) default))
-                   (last (if lastp (activity-state) last))
-                   (props `((handler . activity-bookmark-handler)
-                            (activity . ,(prog1 activity
-                                           (setf (activity-default activity) default
-                                                 (activity-last activity) last))))))
-        (bookmark-store name props nil)))))
+  (activity-with activity
+    (pcase-let* (((cl-struct activity name default last) activity)
+                 (new-state (activity-state)))
+      (setf (activity-default activity) (if (or defaultp (not default)) new-state default)
+            (activity-last activity) (if (or lastp (not last)) new-state last)
+            (map-elt (multisession-value activity-activities) name) activity))))
 
 (defun activity-save-all ()
   "Save all active activities' last states.
 In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
   (with-demoted-errors "activity-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activity-active-p (activity-activities)))
+    (dolist (activity (cl-remove-if-not #'activity-active-p (multisession-value activity-activities)))
       (activity-save activity :lastp t))))
 
 (defun activity-reset (activity)
@@ -279,7 +282,7 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive (list (activity-current)))
   (unless activity
     (user-error "No active activity"))
-  (activity-open activity :state 'default))
+  (activity-set activity :state 'default))
 
 ;;;; Activity mode
 
@@ -314,26 +317,26 @@ accordingly."
 
 ;;;; Functions
 
-(cl-defun activity-open (activity &key (state 'last))
-  "Open ACTIVITY.
-Its STATE is loaded into the current frame."
-  (pcase-let (((cl-struct activity name default last) activity))
-    (pcase state
-      ('default (activity--windows-set (activity-state-window-state default)))
-      ('last (if last
-                 (activity--windows-set (activity-state-window-state last))
-               (activity--windows-set (activity-state-window-state default))
-               (message "Activity %S has no last state.  Resuming default." name))))
+(cl-defun activity-set (activity &key (state 'last))
+  "Set ACTIVITY as the current one.
+Its STATE (`last' or `default') is loaded into the current frame."
+  (activity-with activity
+    (pcase-let (((cl-struct activity name default last) activity))
+      (pcase state
+        ('default (activity--windows-set (activity-state-window-state default)))
+        ('last (if last
+                   (activity--windows-set (activity-state-window-state last))
+                 (activity--windows-set (activity-state-window-state default))
+                 (message "Activity %S has no last state.  Resuming default." name)))))
     (activity--set activity)))
+
+(defun activity--set (activity)
+  "Set current frame's activity parameter to ACTIVITY."
+  (set-frame-parameter nil 'activity activity))
 
 (defun activity-current ()
   "Return the current activity."
   (frame-parameter nil 'activity))
-
-(defun activity--set (activity)
-  "Set the current activity.
-Sets the current frame's `activity' parameter to ACTIVITY."
-  (set-frame-parameter nil 'activity activity))
 
 (cl-defun activity-close (activity)
   "Close ACTIVITY.
@@ -351,13 +354,14 @@ closed."
 
 (defun activity-named (name)
   "Return activity having NAME."
-  (cl-find name (activity-activities) :key #'activity-name :test #'equal))
+  (map-elt (multisession-value activity-activities) name))
 
 (defun activity-switch (activity)
   "Switch to ACTIVITY.
-Its STATE is loaded into the current frame.  Does not modify its
-state."
-  (select-frame (activity--frame activity)))
+Select's ACTIVITY's frame, making a new one if needed.  Its state
+is not changed."
+  (select-frame (or (activity--frame activity)
+                    (make-frame `(activity . ,activity)))))
 
 (defun activity--frame (activity)
   "Return ACTIVITY's frame."
@@ -366,13 +370,6 @@ state."
                   (when-let ((frame-activity (frame-parameter frame 'activity)))
                     (equal name (activity-name frame-activity))))
                 (frame-list))))
-
-(defun activity--state-for-macro ()
-  "FIXME: Docstring."
-  `( :frame ,(selected-frame)
-     :window ,(selected-window)
-     :tab-index ,(when (bound-and-true-p tab-bar-mode)
-                   (tab-bar--current-tab-index))))
 
 (defun activity-state ()
   "Return an activity state for the current frame."
@@ -510,6 +507,7 @@ activity's name is NAME."
                         (filename (activity--filename-buffer struct))
                         (name (activity--name-buffer struct))
                         (t (error "Activity struct is invalid: %S" struct)))))
+      (cl-assert (buffer-live-p buffer))
       (activity-debug struct buffer)
       buffer)))
 
@@ -545,62 +543,50 @@ activity's name is NAME."
                                  (cons (const open-record-fn)
                                        (function :tag "Follow-record function")))))
 
-(defun activity--filename-buffer (props)
-  "Return buffer for filename RECORD."
-  (pcase-let* (((cl-struct activity-buffer filename) props)
+(defun activity--filename-buffer (activity-buffer)
+  "Return buffer for ACTIVITY-BUFFER having `filename' set."
+  (pcase-let* (((cl-struct activity-buffer filename) activity-buffer)
                (buffer (find-file-noselect filename))
                (major-mode (buffer-local-value 'major-mode buffer))
                (follow-fn (map-nested-elt activity-major-mode-alist (list major-mode 'open-record-fn))))
     (cl-assert follow-fn nil "Major mode not in `activity-major-mode-alist': %s" major-mode)
-    (funcall follow-fn :buffer buffer :record props)))
+    (funcall follow-fn :buffer buffer :record activity-buffer)))
 
-(defun activity--name-buffer (props)
-  "Return buffer for name RECORD."
-  (pcase-let (((cl-struct activity-buffer name) props))
+(defun activity--name-buffer (activity-buffer)
+  "Return buffer for ACTIVITY-BUFFER having `name' set."
+  (pcase-let (((cl-struct activity-buffer name) activity-buffer))
     (or (get-buffer name)
         (with-current-buffer (get-buffer-create (concat "*Activity (error): " name "*"))
           (insert "Activity was unable to get a buffer named: " name "\n"
-                  "Record: " (format "%S" props) "\n"
+                  "activity-buffer: " (format "%S" activity-buffer) "\n"
                   "Please report this error to the developer\n\n")
           (current-buffer)))))
 
 (cl-defun activity-completing-read
-    (&key (activities (activity-activities)) (prompt "Open activity: "))
+    (&key (activities (multisession-value activity-activities)) (prompt "Open activity: "))
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
   (let* ((names (activity-names :activities activities))
-         (name (completing-read prompt names nil nil
-                                activity-bookmark-prefix activity-completing-read-history)))
-    (or (cl-find name activities :key #'activity-name :test #'equal)
+         (name (completing-read prompt names nil nil nil activity-completing-read-history)))
+    (or (map-elt (multisession-value activity-activities) name)
         (make-activity :name name))))
 
-(defun activity-activities ()
-  "Return list of activities.
-Includes bookmarked ones and active ones in frames."
-  (delete-dups
-   (append (activity--bookmarks)
-           (cl-remove-if-not (lambda (frame)
-                               (frame-parameter frame 'activity))
-                             (frame-list)))))
+;; (defun activity--bookmarks ()
+;;   "Return list of activity bookmarks."
+;;   (bookmark-maybe-load-default-file)
+;;   (mapcar (lambda (bookmark)
+;;             (bookmark-prop-get bookmark 'activity))
+;;           (cl-remove-if-not (pcase-lambda (`(,_name . ,(map handler)))
+;;                               (equal #'activity-bookmark-handler handler))
+;;                             bookmark-alist)))
 
-(defun activity--bookmarks ()
-  "Return list of activity bookmarks."
-  (bookmark-maybe-load-default-file)
-  (mapcar (lambda (bookmark)
-            (bookmark-prop-get bookmark 'activity))
-          (cl-remove-if-not (pcase-lambda (`(,_name . ,(map handler)))
-                              (equal #'activity-bookmark-handler handler))
-                            bookmark-alist)))
-
-(cl-defun activity-names (&key (activities (activity-activities)) (predicate #'identity))
-  "Return list of names of ACTIVITIES matching PREDICATE."
-  (thread-last activities
-               (cl-remove-if-not predicate)
-               (mapcar #'activity-name)))
+(cl-defun activity-names (&optional (activities (multisession-value activity-activities)))
+  "Return list of names of ACTIVITIES."
+  (map-keys activities))
 
 (defun activity-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
-  (activity-resume (bookmark-prop-get bookmark 'activity)))
+  (activity-switch (map-elt (multisession-value activity-activities) (car bookmark))))
 
 (defun activity--buffer-local-variables (variables)
   "Return alist of buffer-local VARIABLES for current buffer.
@@ -609,6 +595,11 @@ ignored."
   (cl-loop for variable in variables
            when (buffer-local-boundp variable (current-buffer))
            collect (cons variable (buffer-local-value variable (current-buffer)))))
+
+(defun activity-name-for (activity)
+  "Return frame/tab name for ACTIVITY.
+Adds `activity-name-prefix'."
+  (concat activity-name-prefix (activity-name activity)))
 
 ;;;; Footer
 
