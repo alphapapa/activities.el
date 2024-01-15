@@ -5,7 +5,7 @@
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; Keywords: convenience
 ;; Version: 0.1-pre
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "29.1") (persist "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@
 (require 'cl-lib)
 (require 'bookmark)
 (require 'map)
-(require 'multisession)
+(require 'persist)
 (require 'subr-x)
 
 ;;;; Debugging
@@ -161,7 +161,8 @@ Selects ACTIVITY's frame/tab and then switches back."
 
 ;;;; Variables
 
-(define-multisession-variable activity-activities nil)
+(persist-defvar activity-activities nil
+                "FIXME: Docstring.")
 
 (defvar activity-buffer-local-variables nil
   "Variables whose value are saved and restored by activities.
@@ -267,14 +268,14 @@ If DEFAULTP, save its default state; if LASTP, its last."
                  (new-state (activity-state)))
       (setf (activity-default activity) (if (or defaultp (not default)) new-state default)
             (activity-last activity) (if (or lastp (not last)) new-state last)
-            (map-elt (multisession-value activity-activities) name) activity))))
+            (map-elt activity-activities name) activity))))
 
 (defun activity-save-all ()
   "Save all active activities' last states.
 In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
   (with-demoted-errors "activity-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activity-active-p (map-values (multisession-value activity-activities))))
+    (dolist (activity (cl-remove-if-not #'activity-active-p (map-values activity-activities)))
       (activity-save activity :lastp t))))
 
 (defun activity-reset (activity)
@@ -354,7 +355,7 @@ closed."
 
 (defun activity-named (name)
   "Return activity having NAME."
-  (map-elt (multisession-value activity-activities) name))
+  (map-elt activity-activities name))
 
 (defun activity-switch (activity)
   "Switch to ACTIVITY.
@@ -413,22 +414,20 @@ activity's name is NAME."
               (translate-leaf (leaf)
                 "Translate window parameters in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
-                             ((map parameters ('buffer `(,buffer-name-or-buffer . ,_))) attrs))
+                             ((map parameters ('buffer `(,buffer-or-buffer-name . ,_buffer-attrs))) attrs))
                   (setf (map-elt parameters 'activity-buffer)
                         ;; HACK: Set buffer props parameter (maybe not the "right" place).
-                        (activity--serialize (get-buffer buffer-name-or-buffer))
-                        ;; HACK: Replace unserializable buffer (though
-                        ;; `window-state-get' should be filtering that
-                        ;; out...).
-                        (map-elt attrs 'buffer) (buffer-name (get-buffer buffer-name-or-buffer)))
-                  (message "activity--window-serialized: (map-elt attrs 'buffer):%S" (map-elt attrs 'buffer))
+                        (activity--serialize (get-buffer (car (map-elt attrs 'buffer))))
+                        ;; HACK: Replace unserializable buffer (though `window-state-get'
+                        ;; should be filtering that out...).  NOTE: We must include the
+                        ;; "buffr-attrs" as-is.
+                        (car (map-elt attrs 'buffer)) (buffer-name (get-buffer buffer-or-buffer-name)))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
                       (setf (map-elt parameters parameter)
                             (funcall serialize (map-elt parameters parameter)))))
                   (setf (map-elt attrs 'parameters) parameters)
-                  (message "activity--window-serialized: (cons 'leaf attrs):%S" (cons 'leaf attrs))
                   (cons 'leaf attrs))))
     (translate-state state)))
 
@@ -570,12 +569,12 @@ activity's name is NAME."
           (current-buffer)))))
 
 (cl-defun activity-completing-read
-    (&key (activities (multisession-value activity-activities)) (prompt "Open activity: "))
+    (&key (activities activity-activities) (prompt "Open activity: "))
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
   (let* ((names (activity-names activities))
          (name (completing-read prompt names nil nil nil activity-completing-read-history)))
-    (or (map-elt (multisession-value activity-activities) name)
+    (or (map-elt activity-activities name)
         (make-activity :name name))))
 
 ;; (defun activity--bookmarks ()
@@ -587,13 +586,13 @@ PROMPT is passed to `completing-read', which see."
 ;;                               (equal #'activity-bookmark-handler handler))
 ;;                             bookmark-alist)))
 
-(cl-defun activity-names (&optional (activities (multisession-value activity-activities)))
+(cl-defun activity-names (&optional (activities activity-activities))
   "Return list of names of ACTIVITIES."
   (map-keys activities))
 
 (defun activity-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
-  (activity-switch (map-elt (multisession-value activity-activities) (car bookmark))))
+  (activity-switch (map-elt activity-activities (car bookmark))))
 
 (defun activity--buffer-local-variables (variables)
   "Return alist of buffer-local VARIABLES for current buffer.
