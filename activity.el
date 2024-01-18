@@ -362,7 +362,9 @@ closed."
 Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
   (select-frame (or (activity--frame activity)
-                    (make-frame `(activity . ,activity))))
+                    (make-frame `((activity . ,activity)))))
+  (set-frame-name (activity-name-for activity))
+  ;; Not sure if calling `redisplay' is necessary.
   (redisplay))
 
 (defun activity--frame (activity)
