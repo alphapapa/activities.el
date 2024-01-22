@@ -71,9 +71,7 @@
 ;; so at expansion time, the expanded macro calls format the message
 ;; and check the log level at runtime, which is not zero-cost.
 
-;; (eval-and-compile
-;;   (setq-local warning-minimum-log-level nil)
-;;   (setq-local warning-minimum-log-level :debug))
+;; (eval-and-compile (setq-local warning-minimum-log-level nil) (setq-local warning-minimum-log-level :debug))
 
 (cl-defmacro activity-debug (&rest args)
   "Display a debug warning showing the runtime value of ARGS.
@@ -161,8 +159,8 @@ Selects ACTIVITY's frame/tab and then switches back."
 
 ;;;; Variables
 
-(persist-defvar activity-activities nil
-                "FIXME: Docstring.")
+(with-demoted-errors "activity: Variable `activity-activities' failed to load persisted data: %S"
+  (persist-defvar activity-activities nil "FIXME: Docstring."))
 
 (defvar activity-buffer-local-variables nil
   "Variables whose value are saved and restored by activities.
@@ -189,6 +187,17 @@ deserialized back to the buffer after it is reincarnated.")
   :link '(emacs-commentary-link "activity")
   :link '(url-link "https://github.com/alphapapa/activity.el")
   :group 'convenience)
+
+(defcustom activity-always-persist t
+  "Always persist activity states to disk when saving.
+When disabled, only persist them when exiting Emacs or disabling
+`activity-mode'.
+
+Generally, leaving this enabled should be fine.  However, in case
+of unusual bugs, it could be helpful to only save upon exiting
+Emacs, so that any unusual state that caused a crash would not be
+persisted."
+  :type 'boolean)
 
 (defcustom activity-name-prefix "α: "
   "Prefix applied to activity names in frames/tabs."
@@ -258,9 +267,11 @@ closed."
   (activity-save activity :lastp t)
   (activity-close activity))
 
-(cl-defun activity-save (activity &key defaultp lastp)
+(cl-defun activity-save (activity &key defaultp lastp persistp)
   "Save states of ACTIVITY.
-If DEFAULTP, save its default state; if LASTP, its last."
+If DEFAULTP, save its default state; if LASTP, its last.  If
+PERSISTP, force persisting of data (otherwise, data is persisted
+according to option `activity-always-persist', which see)."
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
   (activity-with activity
@@ -268,7 +279,8 @@ If DEFAULTP, save its default state; if LASTP, its last."
                  (new-state (activity-state)))
       (setf (activity-default activity) (if (or defaultp (not default)) new-state default)
             (activity-last activity) (if (or lastp (not last)) new-state last)
-            (map-elt activity-activities name) activity))))
+            (map-elt activity-activities name) activity)))
+  (activity--persist persistp))
 
 (defun activity-save-all ()
   "Save all active activities' last states.
@@ -284,6 +296,12 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   (unless activity
     (user-error "No active activity"))
   (activity-set activity :state 'default))
+
+(defun activity-discard (activity)
+  "Discard ACTIVITY and its state.
+It will not be recoverable."
+  (interactive (list (activity-completing-read :prompt "Discard activity: ")))
+  (map-delete activity-activities (activity-name activity)))
 
 ;;;; Activity mode
 
@@ -310,11 +328,17 @@ accordingly."
       (progn
         (setf activity-mode-timer
               (run-with-idle-timer activity-mode-idle-frequency t #'activity-save-all))
-        (add-hook 'kill-emacs-hook #'activity-save-all))
+        (add-hook 'kill-emacs-hook #'activity-mode--killing-emacs))
     (when (timerp activity-mode-timer)
       (cancel-timer activity-mode-timer)
       (setf activity-mode-timer nil))
-    (remove-hook 'kill-emacs-hook #'activity-save-all)))
+    (remove-hook 'kill-emacs-hook #'activity-mode--killing-emacs)))
+
+(defun activity-mode--killing-emacs ()
+  "Persist all activities' states.
+To be called from `kill-emacs-hook'."
+  (let ((activity-always-persist t))
+    (activity-save-all)))
 
 ;;;; Functions
 
@@ -334,6 +358,12 @@ Its STATE (`last' or `default') is loaded into the current frame."
 (defun activity--set (activity)
   "Set current frame's activity parameter to ACTIVITY."
   (set-frame-parameter nil 'activity activity))
+
+(defun activity--persist (&optional forcep)
+  "Persist `activity-activities' to disk if enabled or FORCEP.
+See option `activity-always-persist'."
+  (when (or forcep activity-always-persist)
+    (persist-save 'activity-activities)))
 
 (defun activity-current ()
   "Return the current activity."
