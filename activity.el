@@ -377,15 +377,9 @@ See option `activity-always-persist'."
   "Close ACTIVITY.
 Its state is not saved, and its frames, windows, and tabs are
 closed."
-  (pcase-let* (((cl-struct activity name) activity)
-               (frame (cl-find-if
-                       (lambda (frame)
-                         (equal name (activity-name (frame-parameter frame 'activity))))
-                       (frame-list))))
-    ;; TODO: Set frame parameter when resuming.
-    (unless (length= 1 (frame-list))
-      ;; Not only frame: delete it.
-      (delete-frame frame))))
+  (activity-switch activity)
+  ;; TODO: Set frame parameter when resuming.
+  (delete-frame))
 
 (defun activity-named (name)
   "Return activity having NAME."

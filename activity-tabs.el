@@ -63,14 +63,23 @@ accordingly."
         (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p)
         (advice-add #'activity--set :override #'activity-tabs-activity--set)
         (advice-add #'activity-switch :override #'activity-tabs-switch)
-        (advice-add #'activity-current :override #'activity-tabs-current))
+        (advice-add #'activity-current :override #'activity-tabs-current)
+        (advice-add #'activity-close :override #'activity-tabs-close))
     (advice-remove #'activity-resume #'activity-tabs-before-resume)
     (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)
     (advice-remove #'activity--set #'activity-tabs-activity--set)
     (advice-remove #'activity-switch #'activity-tabs-switch)
-    (advice-remove #'activity-current #'activity-tabs-current)))
+    (advice-remove #'activity-current #'activity-tabs-current)
+    (advice-remove #'activity-close #'activity-tabs-close)))
 
 ;;;; Functions
+
+(cl-defun activity-tabs-close (activity)
+  "Close ACTIVITY.
+Its state is not saved, and its frames, windows, and tabs are
+closed."
+  (activity-switch activity)
+  (tab-bar-close-tab))
 
 (defun activity-tabs-switch (activity)
   "Switch to ACTIVITY.
