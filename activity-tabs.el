@@ -86,8 +86,8 @@ closed."
 Selects its tab, making one if needed.  Its state is not changed."
   (if-let ((tab (activity-tabs--tab activity)))
       (tab-bar-switch-to-tab (alist-get 'name tab))
-    (tab-bar-new-tab)
-    (tab-bar-rename-tab (activity-name-for activity))))
+    (tab-bar-new-tab))
+  (tab-bar-rename-tab (activity-name-for activity)))
 
 (defun activity-tabs--tab (activity)
   "Return ACTIVITY's tab."

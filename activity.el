@@ -245,10 +245,10 @@ Called with one argument, the activity."
   (interactive (list (read-string "New activity name: ")))
   (when (member name (activity-names))
     (user-error "Activity named %S already exists" name))
-  ;; FIXME: Rename tab/frame to have prefix.
   (let ((activity (make-activity :name name)))
     (activity--set activity)
     (activity-save activity :defaultp t :lastp t)
+    (activity-switch activity)
     activity))
 
 (cl-defun activity-resume (activity &key resetp)
