@@ -245,6 +245,7 @@ Called with one argument, the activity."
   (interactive (list (read-string "New activity name: ")))
   (when (member name (activity-names))
     (user-error "Activity named %S already exists" name))
+  ;; FIXME: Rename tab/frame to have prefix.
   (let ((activity (make-activity :name name)))
     (activity--set activity)
     (activity-save activity :defaultp t :lastp t)
@@ -301,7 +302,10 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   "Discard ACTIVITY and its state.
 It will not be recoverable."
   (interactive (list (activity-completing-read :prompt "Discard activity: ")))
-  (map-delete activity-activities (activity-name activity)))
+  (ignore-errors
+    ;; FIXME: After fixing all the bugs, remove ignore-errors.
+    (activity-close activity))
+  (setf activity-activities (map-delete activity-activities (activity-name activity))))
 
 ;;;; Activity mode
 
