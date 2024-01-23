@@ -56,21 +56,20 @@ When active, activities are opened in new tabs and named
 accordingly."
   :global t
   :group 'activity
-  (if activity-tabs-mode
-      (progn
-        (tab-bar-mode 1)
-        (advice-add #'activity-resume :before #'activity-tabs-before-resume)
-        (advice-add #'activity-active-p :override #'activity-tabs-activity-active-p)
-        (advice-add #'activity--set :override #'activity-tabs-activity--set)
-        (advice-add #'activity-switch :override #'activity-tabs-switch)
-        (advice-add #'activity-current :override #'activity-tabs-current)
-        (advice-add #'activity-close :override #'activity-tabs-close))
-    (advice-remove #'activity-resume #'activity-tabs-before-resume)
-    (advice-remove #'activity-active-p #'activity-tabs-activity-active-p)
-    (advice-remove #'activity--set #'activity-tabs-activity--set)
-    (advice-remove #'activity-switch #'activity-tabs-switch)
-    (advice-remove #'activity-current #'activity-tabs-current)
-    (advice-remove #'activity-close #'activity-tabs-close)))
+  (let ((override-map '((activity-active-p . activity-tabs-activity-active-p)
+                        (activity--set . activity-tabs-activity--set)
+                        (activity-switch . activity-tabs-switch)
+                        (activity-current . activity-tabs-current)
+                        (activity-close . activity-tabs-close))))
+    (if activity-tabs-mode
+        (progn
+          (tab-bar-mode 1)
+          (advice-add #'activity-resume :before #'activity-tabs-before-resume)
+          (pcase-dolist (`(,symbol . ,function) override-map)
+            (advice-add symbol :override function)))
+      (advice-remove #'activity-resume #'activity-tabs-before-resume)
+      (pcase-dolist (`(,symbol . ,function) override-map)
+        (advice-remove symbol function)))))
 
 ;;;; Functions
 
