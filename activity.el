@@ -447,11 +447,7 @@ activity's name is NAME."
                              ((map parameters ('buffer `(,buffer-or-buffer-name . ,_buffer-attrs))) attrs))
                   (setf (map-elt parameters 'activity-buffer)
                         ;; HACK: Set buffer props parameter (maybe not the "right" place).
-                        (activity--serialize (get-buffer (car (map-elt attrs 'buffer))))
-                        ;; HACK: Replace unserializable buffer (though `window-state-get'
-                        ;; should be filtering that out...).  NOTE: We must include the
-                        ;; "buffr-attrs" as-is.
-                        (car (map-elt attrs 'buffer)) (buffer-name (get-buffer buffer-or-buffer-name)))
+                        (activity--serialize (get-buffer (car (map-elt attrs 'buffer)))))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
@@ -466,7 +462,9 @@ activity's name is NAME."
   (setf window-persistent-parameters (copy-sequence activity-window-persistent-parameters))
   (pcase-let* ((window-persistent-parameters (append activity-window-persistent-parameters
                                                      window-persistent-parameters))
-               (state (activity--bufferize-window-state state)))
+               (state
+                ;; NOTE: We copy the state so as not to mutate the one in storage.
+                (activity--bufferize-window-state (copy-sequence state))))
     ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
     ;; function after handling the bookmark, we use an immediate timer to
     ;; set the window configuration.
@@ -489,7 +487,6 @@ activity's name is NAME."
                              ((map activity-buffer) parameters)
                              (`(,_buffer-name . ,buffer-attrs) buffer)
                              (new-buffer (activity--deserialize activity-buffer)))
-                  (activity-debug activity-buffer new-buffer)
                   (setf (map-elt attrs 'buffer) (cons new-buffer buffer-attrs))
                   (cons 'leaf attrs)))
               (translate-leaf (leaf)
