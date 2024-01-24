@@ -60,14 +60,17 @@ If you choose to install it otherwise, you'll need to load both the ~activity~ a
 
 ** Workflow
 
+An example of a workflow using activities:
+
 1. Arrange windows in a tab according to an activity you're performing.
 2. Call ~activity-new~ (~C-x C-a n~) to save the activity under a name.
 3. Perform the activity for a while.
 4. Change window configuration, change tab, close the tab, or even restart Emacs.
 5. Call ~activity-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
 6. Return to the original activity state with ~activity-revert~ (~C-x C-a g~).
-7. Call ~activity-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
-8. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
+7. Rearrange windows and buffers.
+8. Call ~activity-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
+9. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
 ** Bookmarks
 
@@ -86,3 +89,33 @@ When option ~activity-bookmark-store~ is enabled, an Emacs bookmark is stored wh
 + Why did a buffer not restore correctly? :: Most likely because that buffer's major mode does not support Emacs bookmarks (which ~activity~ uses internally to save and restore buffer state).  But many, if not most, major modes do; and for those that don't, implementing such support is usually trivial (and thereby benefits Emacs as a whole, not just ~activity~).  So contact the major mode's maintainer and ask that ~bookmark~ support be implemented.
 
 + Why did I get an error? :: Because ~activity~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
+
+* COMMENT Export setup                                             :noexport:
+:PROPERTIES:
+:TOC:      :ignore this
+:END:
+
+# Copied from org-super-agenda's readme, in which much was borrowed from Org's =org-manual.org=.
+
+#+OPTIONS: broken-links:t *:t
+
+** Info export options
+
+#+TEXINFO_DIR_CATEGORY: Emacs
+#+TEXINFO_DIR_TITLE: Activity: (activity)
+#+TEXINFO_DIR_DESC: Suspend/resume activities (sets of windows, frames, and buffers)
+
+# NOTE: We could use these, but that causes a pointless error, "org-compile-file: File "..README.info" wasn't produced...", so we just rename the files in the after-save-hook instead.
+# #+TEXINFO_FILENAME: org-ql.info
+# #+EXPORT_FILE_NAME: org-ql.texi
+
+** File-local variables
+
+# NOTE: Setting org-comment-string buffer-locally is a nasty hack to work around GitHub's org-ruby's HTML rendering, which does not respect noexport tags.  The only way to hide this tree from its output is to use the COMMENT keyword, but that prevents Org from processing the export options declared in it.  So since these file-local variables don't affect org-ruby, wet set org-comment-string to an unused keyword, which prevents Org from deleting this tree from the export buffer, which allows it to find the export options in it.  And since org-export does respect the noexport tag, the tree is excluded from the info page.
+
+# Local Variables:
+# before-save-hook: org-make-toc
+# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activity.info" t)))
+# org-export-initial-scope: buffer
+# org-comment-string: "NOTCOMMENT"
+# End:
