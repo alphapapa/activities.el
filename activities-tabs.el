@@ -1,4 +1,4 @@
-;;; activity-tabs.el --- Integrate activities with tabs  -*- lexical-binding: t; -*-
+;;; activities-tabs.el --- Integrate activities with tabs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  Free Software Foundation, Inc.
 
@@ -28,98 +28,98 @@
 
 ;;;; Requirements
 
-(require 'activity)
+(require 'activities)
 
 (require 'tab-bar)
 
 ;;;; Customization
 
-(defgroup activity-tabs nil
+(defgroup activities-tabs nil
   "Integrates activities and tabs."
-  :group 'activity)
+  :group 'activities)
 
-(defcustom activity-tabs-before-resume-functions nil
+(defcustom activities-tabs-before-resume-functions nil
   "Functions called before resuming an activity.
 Each is called with one argument, the activity."
   :type 'hook)
 
-(defcustom activity-tabs-prefix "α:"
+(defcustom activities-tabs-prefix "α:"
   "Prepended to activity names in tabs."
   :type 'string)
 
 ;;;; Mode
 
 ;;;###autoload
-(define-minor-mode activity-tabs-mode
-  "Integrate Activity with `tab-bar-mode'.
+(define-minor-mode activities-tabs-mode
+  "Integrate Activities with `tab-bar-mode'.
 When active, activities are opened in new tabs and named
 accordingly."
   :global t
-  :group 'activity
-  (let ((override-map '((activity-active-p . activity-tabs-activity-active-p)
-                        (activity--set . activity-tabs-activity--set)
-                        (activity--switch . activity-tabs--switch)
-                        (activity-current . activity-tabs-current)
-                        (activity-close . activity-tabs-close))))
-    (if activity-tabs-mode
+  :group 'activities
+  (let ((override-map '((activities-active-p . activities-tabs-activities-active-p)
+                        (activities--set . activities-tabs-activities--set)
+                        (activities--switch . activities-tabs--switch)
+                        (activities-current . activities-tabs-current)
+                        (activities-close . activities-tabs-close))))
+    (if activities-tabs-mode
         (progn
           (tab-bar-mode 1)
-          (advice-add #'activity-resume :before #'activity-tabs-before-resume)
+          (advice-add #'activities-resume :before #'activities-tabs-before-resume)
           (pcase-dolist (`(,symbol . ,function) override-map)
             (advice-add symbol :override function)))
-      (advice-remove #'activity-resume #'activity-tabs-before-resume)
+      (advice-remove #'activities-resume #'activities-tabs-before-resume)
       (pcase-dolist (`(,symbol . ,function) override-map)
         (advice-remove symbol function)))))
 
 ;;;; Functions
 
-(cl-defun activity-tabs-close (activity)
+(cl-defun activities-tabs-close (activity)
   "Close ACTIVITY.
 Its state is not saved, and its frames, windows, and tabs are
 closed."
-  (activity--switch activity)
+  (activities--switch activity)
   (tab-bar-close-tab))
 
-(defun activity-tabs--switch (activity)
+(defun activities-tabs--switch (activity)
   "Switch to ACTIVITY.
 Selects its tab, making one if needed.  Its state is not changed."
-  (if-let ((tab (activity-tabs--tab activity)))
+  (if-let ((tab (activities-tabs--tab activity)))
       (tab-bar-switch-to-tab (alist-get 'name tab))
     (tab-bar-new-tab))
-  (tab-bar-rename-tab (activity-name-for activity)))
+  (tab-bar-rename-tab (activities-name-for activity)))
 
-(defun activity-tabs--tab (activity)
+(defun activities-tabs--tab (activity)
   "Return ACTIVITY's tab."
-  (pcase-let (((cl-struct activity name) activity))
+  (pcase-let (((cl-struct activities-activity name) activity))
     (cl-find-if (lambda (tab)
                   (when-let ((tab-activity (alist-get 'activity (cdr tab))))
-                    (equal name (activity-name tab-activity))))
+                    (equal name (activities-activity-name tab-activity))))
                 (funcall tab-bar-tabs-function))))
 
-(defun activity-tabs-current ()
+(defun activities-tabs-current ()
   "Return current activity."
-  (activity-tabs--tab-parameter 'activity (tab-bar--current-tab-find)))
+  (activities-tabs--tab-parameter 'activity (tab-bar--current-tab-find)))
 
-(defun activity-tabs--tab-parameter (parameter tab)
+(defun activities-tabs--tab-parameter (parameter tab)
   "Return TAB's PARAMETER."
   ;; TODO: Make this a gv.
   (alist-get parameter (cdr tab)))
 
-(defun activity-tabs-activity--set (activity)
+(defun activities-tabs-activity--set (activity)
   "Set the current activity.
 Sets the current tab's `activity' parameter to ACTIVITY."
   (let ((tab (tab-bar--current-tab-find)))
     (setf (alist-get 'activity (cdr tab)) activity)))
 
-(defun activity-tabs-activity-active-p (activity)
+(defun activities-tabs-activity-active-p (activity)
   "Return non-nil if ACTIVITY is active.
 That is, if any tabs have an `activity' parameter whose
 activity's name is NAME."
-  (activity-tabs--tab activity))
+  (activities-tabs--tab activity))
 
-(defun activity-tabs-before-resume (activity &rest _)
+(defun activities-tabs-before-resume (activity &rest _)
   "Called before resuming ACTIVITY."
-  (run-hook-with-args 'activity-tabs-before-resume-functions activity))
+  (run-hook-with-args 'activities-tabs-before-resume-functions activity))
 
 ;; (defun activity-tabs-switch-to-tab (activity)
 ;;   "Switch to a tab for ACTIVITY."
@@ -136,6 +136,6 @@ activity's name is NAME."
 
 ;;;; Footer
 
-(provide 'activity-tabs)
+(provide 'activities-tabs)
 
-;;; activity-tabs.el ends here
+;;; activities-tabs.el ends here

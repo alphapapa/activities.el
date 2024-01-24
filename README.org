@@ -1,4 +1,4 @@
-#+TITLE: activity.el
+#+TITLE: activities.el
 
 Inspired by Genera's and KDE's concepts of "activities", this library allows the user to select an "activity", the loading of which restores a window configuration and/or frameset, along with the buffers shown in each window.  Saving an activity saves the state for later restoration.  Switching away from an activity saves the last-used state for later switching back to, while still allowing the activity's initial or default state to be restored on demand.  Resuming an activity loads the last-used state, or the initial/default state when a universal argument is provided.
 
@@ -26,69 +26,69 @@ Until this library is available from a package archive, it's recommended to inst
 2.  Add this form to your init file (which includes a recommended configuration):
 
 #+BEGIN_SRC elisp
-  (use-package activity
-    :quelpa (activity :fetcher github :repo "alphapapa/activity.el")
+  (use-package activities
+    :quelpa (activities :fetcher github :repo "alphapapa/activities.el")
 
     :bind
-    (("C-x C-a a" . activity-resume)
-     ;; For convenience, we also bind `activity-resume' to "C-a", so the
+    (("C-x C-a a" . activities-resume)
+     ;; For convenience, we also bind `activities-resume' to "C-a", so the
      ;; user need not lift the Control key.  This makes it easier to
      ;; quickly switch between activities.
-     ("C-x C-a C-a" . activity-resume)
-     ("C-x C-a RET" . activity-switch)
-     ("C-x C-a g" . activity-revert)
-     ("C-x C-a n" . activity-new)
-     ("C-x C-a s" . activity-suspend))
+     ("C-x C-a C-a" . activities-resume)
+     ("C-x C-a RET" . activities-switch)
+     ("C-x C-a g" . activities-revert)
+     ("C-x C-a n" . activities-new)
+     ("C-x C-a s" . activities-suspend))
 
     :config
     ;; Automatically save activities' states when Emacs is idle and upon
     ;; exit.
-    (activity-mode)
+    (activities-mode)
     ;; Open activities in `tab-bar' tabs (otherwise frames are used, but
     ;; the author doesn't test that as much).
-    (activity-tabs-mode))
+    (activities-tabs-mode))
 #+END_SRC
 
-If you choose to install it otherwise, you'll need to load both the ~activity~ and ~activity-tabs~ libraries, or ensure that the autoloads are generated properly.
+If you choose to install it otherwise, you'll need to load both the ~activities~ and ~activities-tabs~ libraries, or ensure that the autoloads are generated properly.
 
 * Usage
 
 ** Modes
 
-+ ~activity-mode~ :: Automatically saves activities' states when Emacs is idle.  Should be enabled while using this package (otherwise you would have to manually call ~activity-save-all~, which would defeat much of the purpose of this library).
-+ ~activity-tabs-mode~ :: Causes activities to be managed as ~tab-bar~ tabs rather than frames (the default).  (/This is what the author uses; bugs present when this mode is not enabled are less likely to be found, so please report them./)
++ ~activities-mode~ :: Automatically saves activities' states when Emacs is idle.  Should be enabled while using this package (otherwise you would have to manually call ~activities-save-all~, which would defeat much of the purpose of this library).
++ ~activities-tabs-mode~ :: Causes activities to be managed as ~tab-bar~ tabs rather than frames (the default).  (/This is what the author uses; bugs present when this mode is not enabled are less likely to be found, so please report them./)
 
 ** Workflow
 
 An example of a workflow using activities:
 
 1. Arrange windows in a tab according to an activity you're performing.
-2. Call ~activity-new~ (~C-x C-a n~) to save the activity under a name.
+2. Call ~activities-new~ (~C-x C-a n~) to save the activity under a name.
 3. Perform the activity for a while.
 4. Change window configuration, change tab, close the tab, or even restart Emacs.
-5. Call ~activity-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
-6. Return to the original activity state with ~activity-revert~ (~C-x C-a g~).
+5. Call ~activities-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
+6. Return to the original activity state with ~activities-revert~ (~C-x C-a g~).
 7. Rearrange windows and buffers.
-8. Call ~activity-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
-9. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
+8. Call ~activities-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
+9. Suspend the activity with ~activities-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
 ** Bookmarks
 
-When option ~activity-bookmark-store~ is enabled, an Emacs bookmark is stored when a new activity is made.  This allows the command ~bookmark-jump~ (~C-x r b~) to be used to resume an activity (helping to universalize the bookmark system).
+When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored when a new activity is made.  This allows the command ~bookmark-jump~ (~C-x r b~) to be used to resume an activity (helping to universalize the bookmark system).
 
 * FAQ
 
-+ How is this different from [[https://github.com/alphapapa/burly.el][Burly.el]] or [[https://github.com/alphapapa/bufler.el/][Bufler.el]]? :: Burly is a well-polished tool for restoring window and frame configurations, which could be considered an incubator for some of the ideas furthered here.  Bufler's ~bufler-workspace~ library uses Burly to provide some similar functionality, which is at an exploratory stage.  ~activity~ hopes to provide a longer-term solution more suitable for integration into Emacs.
++ How is this different from [[https://github.com/alphapapa/burly.el][Burly.el]] or [[https://github.com/alphapapa/bufler.el/][Bufler.el]]? :: Burly is a well-polished tool for restoring window and frame configurations, which could be considered an incubator for some of the ideas furthered here.  Bufler's ~bufler-workspace~ library uses Burly to provide some similar functionality, which is at an exploratory stage.  ~activities~ hopes to provide a longer-term solution more suitable for integration into Emacs.
 
-+ How does this differ from "workspace" packages? :: Yes, there are many Emacs packages that provide "workspace"-like features in one way or another.  To date, only Burly and Bufler seem to offer the ability to restore one across Emacs sessions.  As mentioned, ~activity~ is intended to be more refined and easier to use (e.g. automatically saving activities' states when ~activity-mode~ is enabled).  Comparisons to other packages are left to the reader; suffice to say that ~activity~ is intended to provide what other tools haven't, in an idiomatic, intuitive way.  (Feedback is welcome.)
++ How does this differ from "workspace" packages? :: Yes, there are many Emacs packages that provide "workspace"-like features in one way or another.  To date, only Burly and Bufler seem to offer the ability to restore one across Emacs sessions.  As mentioned, ~activities~ is intended to be more refined and easier to use (e.g. automatically saving activities' states when ~activities-mode~ is enabled).  Comparisons to other packages are left to the reader; suffice to say that ~activities~ is intended to provide what other tools haven't, in an idiomatic, intuitive way.  (Feedback is welcome.)
 
 + How does this differ from the built-in ~desktop-mode~? :: As best this author can tell, ~desktop-mode~ saves and restores one set of buffers, with various options to control its behavior.  It does not use ~bookmark~ internally, which prevents it from restoring non-file-backed buffers.  As well, it is not intended to be used on-demand to switch between sets of buffers, windows, or frames (i.e. "activities").
 
 + "Activities" haven't seemed to pan out for KDE.  Why would they in Emacs? :: KDE Plasma's Activities system requires applications that can save and restore their state through Plasma, which only (or mostly only?) KDE apps can do, limiting the usefulness of the system.  However, Emacs offers a coherent environment, similar to Lisp machines of yore, and its ~bookmark~ library offers a way for any buffer's major mode to save and restore state, if implemented (which many already are).
 
-+ Why did a buffer not restore correctly? :: Most likely because that buffer's major mode does not support Emacs bookmarks (which ~activity~ uses internally to save and restore buffer state).  But many, if not most, major modes do; and for those that don't, implementing such support is usually trivial (and thereby benefits Emacs as a whole, not just ~activity~).  So contact the major mode's maintainer and ask that ~bookmark~ support be implemented.
++ Why did a buffer not restore correctly? :: Most likely because that buffer's major mode does not support Emacs bookmarks (which ~activities~ uses internally to save and restore buffer state).  But many, if not most, major modes do; and for those that don't, implementing such support is usually trivial (and thereby benefits Emacs as a whole, not just ~activities~).  So contact the major mode's maintainer and ask that ~bookmark~ support be implemented.
 
-+ Why did I get an error? :: Because ~activity~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
++ Why did I get an error? :: Because ~activities~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
 
 * COMMENT Export setup                                             :noexport:
 :PROPERTIES:
@@ -102,7 +102,7 @@ When option ~activity-bookmark-store~ is enabled, an Emacs bookmark is stored wh
 ** Info export options
 
 #+TEXINFO_DIR_CATEGORY: Emacs
-#+TEXINFO_DIR_TITLE: Activity: (activity)
+#+TEXINFO_DIR_TITLE: Activities: (activities)
 #+TEXINFO_DIR_DESC: Suspend/resume activities (sets of windows, frames, and buffers)
 
 # NOTE: We could use these, but that causes a pointless error, "org-compile-file: File "..README.info" wasn't produced...", so we just rename the files in the after-save-hook instead.
@@ -115,7 +115,7 @@ When option ~activity-bookmark-store~ is enabled, an Emacs bookmark is stored wh
 
 # Local Variables:
 # before-save-hook: org-make-toc
-# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activity.info" t)))
+# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activities.info" t)))
 # org-export-initial-scope: buffer
 # org-comment-string: "NOTCOMMENT"
 # End:
