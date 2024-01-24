@@ -578,25 +578,10 @@ activity's name is NAME."
                               (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
       (current-buffer))))
 
-(defcustom activity-major-mode-alist
-  (list (cons 'org-mode
-              (list (cons 'make-record-fn #'activity--org-mode-buffer-url)
-                    (cons 'open-record-fn #'activity-follow-url-org-mode))))
-  "Alist mapping major modes to the appropriate Activity functions."
-  :type '(alist :key-type symbol
-                :value-type (set (cons (const make-record-fn)
-                                       (function :tag "Make-record function"))
-                                 (cons (const open-record-fn)
-                                       (function :tag "Follow-record function")))))
-
 (defun activity--filename-buffer (activity-buffer)
   "Return buffer for ACTIVITY-BUFFER having `filename' set."
-  (pcase-let* (((cl-struct activity-buffer filename) activity-buffer)
-               (buffer (find-file-noselect filename))
-               (major-mode (buffer-local-value 'major-mode buffer))
-               (follow-fn (map-nested-elt activity-major-mode-alist (list major-mode 'open-record-fn))))
-    (cl-assert follow-fn nil "Major mode not in `activity-major-mode-alist': %s" major-mode)
-    (funcall follow-fn :buffer buffer :record activity-buffer)))
+  (pcase-let (((cl-struct activity-buffer filename) activity-buffer))
+    (find-file-noselect filename)))
 
 (defun activity--name-buffer (activity-buffer)
   "Return buffer for ACTIVITY-BUFFER having `name' set."
