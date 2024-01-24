@@ -464,7 +464,7 @@ activity's name is NAME."
                                                      window-persistent-parameters))
                (state
                 ;; NOTE: We copy the state so as not to mutate the one in storage.
-                (activity--bufferize-window-state (copy-sequence state))))
+                (activity--bufferize-window-state (copy-tree state))))
     ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
     ;; function after handling the bookmark, we use an immediate timer to
     ;; set the window configuration.
