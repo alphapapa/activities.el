@@ -460,8 +460,7 @@ activity's name is NAME."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters ('buffer `(,buffer-or-buffer-name . ,_buffer-attrs))) attrs))
                   (setf (map-elt parameters 'activity-buffer)
-                        ;; HACK: Set buffer props parameter (maybe not the "right" place).
-                        (activity--serialize (get-buffer (car (map-elt attrs 'buffer)))))
+                        (activity--serialize (get-buffer buffer-or-buffer-name)))
                   (pcase-dolist (`(,parameter . ,(map serialize))
                                  activity-window-parameters-translators)
                     (when (map-elt parameters parameter)
