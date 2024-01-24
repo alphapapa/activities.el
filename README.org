@@ -1,7 +1,5 @@
 #+TITLE: activity.el
 
-*NOTE:* This is currently broken.  Don't use it yet.  (It's only a day old.)
-
 Inspired by Genera's and KDE's concepts of "activities", this library allows the user to select an "activity", the loading of which restores a window configuration and/or frameset, along with the buffers shown in each window.  Saving an activity saves the state for later restoration.  Switching away from an activity saves the last-used state for later switching back to, while still allowing the activity's initial or default state to be restored on demand.  Restoring an activity loads the last-used state, or the initial/default state when a universal argument is provided.
 
 The implementation uses the bookmark system to save buffers' states--that is, any major mode that supports the bookmark system is compatible.  A buffer whose major mode does not support the bookmark system (or does not support it well enough to restore useful state) is not compatible and can't be fully restored, or perhaps not at all; but solving that is as simple as implementing bookmark support for the mode, which is usually trivial.
@@ -21,6 +19,16 @@ Until this library is available from a package archive, it's recommended to inst
   (use-package activity
     :quelpa (activity :fetcher github :repo "alphapapa/activity.el")
 
+    :bind
+    (("C-x C-a a" . activity-resume)
+     ;; For convenience, we also bind `activity-resume' to "C-a", so the
+     ;; user need not lift the Control key.  This makes it easier to
+     ;; quickly switch between activities.
+     ("C-x C-a C-a" . activity-resume)
+     ("C-x C-a g" . activity-revert)
+     ("C-x C-a n" . activity-new)
+     ("C-x C-a s" . activity-suspend))
+
     :config
     ;; Automatically save activities' states when Emacs is idle and upon
     ;; exit.
@@ -37,12 +45,12 @@ If you choose to install it otherwise, you'll need to load both the ~activity~ a
 ** Workflow
 
 1. Arrange windows in a tab according to an activity you're performing.
-2. Call ~activity-save~ to save the activity under a name.
+2. Call ~activity-new~ (~C-x C-a n~) to save the activity under a name.
 3. Perform the activity for a while.
 4. Change window configuration, change tab, close the tab, or even restart Emacs.
-5. Call ~activity-resume~ to resume the activity where you left off.
-6. Return to the original activity state with ~activity-reset~ (or ~C-u M-x activity-resume RET~).
-7. Suspend the activity with ~activity-suspend~ (which saves its last state and closes its frame/tab).
+5. Call ~activity-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
+6. Return to the original activity state with ~activity-revert~ (~C-x C-a g~).
+7. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
 * FAQ
 

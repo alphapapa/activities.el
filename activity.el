@@ -298,6 +298,8 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
     (user-error "No active activity"))
   (activity-set activity :state 'default))
 
+(defalias 'activity-revert #'activity-reset)
+
 (defun activity-discard (activity)
   "Discard ACTIVITY and its state.
 It will not be recoverable."
