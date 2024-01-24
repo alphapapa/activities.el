@@ -208,6 +208,22 @@ persisted."
   "Prefix applied to activity names in frames/tabs."
   :type 'string)
 
+(defcustom activity-bookmark-store t
+  "Store a bookmark when making a new activity.
+This is merely for convenience, offering a way to help unify the
+`bookmark' and `activity' interfaces (i.e. allowing
+`bookmark-jump' to open an activity rather than requiring the use
+of `activity-resume').
+
+Such bookmarks merely point to an activity name; they do not
+contain the actual activity metadata, so if an activity is
+discarded, such a bookmark could become stale."
+  :type 'boolean)
+
+(defcustom activity-bookmark-name-prefix "Activity: "
+  "Prefix for activity bookmark names."
+  :type 'string)
+
 (defcustom activity-window-persistent-parameters
   (list (cons 'header-line-format 'writable)
         (cons 'mode-line-format 'writable)
@@ -253,6 +269,8 @@ Called with one argument, the activity."
   (let ((activity (make-activity :name name)))
     (activity--set activity)
     (activity-save activity :defaultp t :lastp t)
+    (when activity-bookmark-store
+      (activity-bookmark-store activity))
     (activity--switch activity)
     activity))
 
@@ -308,6 +326,7 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
 (defun activity-discard (activity)
   "Discard ACTIVITY and its state.
 It will not be recoverable."
+  ;; TODO: Discard relevant bookmarks when `activity-bookmark-store' is enabled.
   (interactive (list (activity-completing-read :prompt "Discard activity: ")))
   (ignore-errors
     ;; FIXME: After fixing all the bugs, remove ignore-errors.
@@ -602,22 +621,25 @@ PROMPT is passed to `completing-read', which see."
     (or (map-elt activity-activities name)
         (make-activity :name name))))
 
-;; (defun activity--bookmarks ()
-;;   "Return list of activity bookmarks."
-;;   (bookmark-maybe-load-default-file)
-;;   (mapcar (lambda (bookmark)
-;;             (bookmark-prop-get bookmark 'activity))
-;;           (cl-remove-if-not (pcase-lambda (`(,_name . ,(map handler)))
-;;                               (equal #'activity-bookmark-handler handler))
-;;                             bookmark-alist)))
-
 (cl-defun activity-names (&optional (activities activity-activities))
   "Return list of names of ACTIVITIES."
   (map-keys activities))
 
+;;;; Bookmark support
+
+(require 'bookmark)
+
+(defun activity-bookmark-store (activity)
+  "Store a `bookmark' record for ACTIVITY."
+  (bookmark-maybe-load-default-file)
+  (let* ((activity-name (activity-name activity))
+         (bookmark-name (concat activity-bookmark-name-prefix activity-name))
+         (props `((activity-name . ,activity-name))))
+    (bookmark-store bookmark-name props nil)))
+
 (defun activity-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
-  (activity--switch (map-elt activity-activities (car bookmark))))
+  (activity-resume (map-elt activity-activities (bookmark-prop-get bookmark 'activity-name))))
 
 (defun activity--buffer-local-variables (variables)
   "Return alist of buffer-local VARIABLES for current buffer.

@@ -68,6 +68,10 @@ If you choose to install it otherwise, you'll need to load both the ~activity~ a
 6. Return to the original activity state with ~activity-revert~ (~C-x C-a g~).
 7. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
+** Bookmarks
+
+When option ~activity-bookmark-store~ is enabled, an Emacs bookmark is stored when a new activity is made.  This allows the command ~bookmark-jump~ (~C-x r b~) to be used to resume an activity (helping to universalize the bookmark system).
+
 * FAQ
 
 + How is this different from [[https://github.com/alphapapa/burly.el][Burly.el]] or [[https://github.com/alphapapa/bufler.el/][Bufler.el]]? :: Burly is a well-polished tool for restoring window and frame configurations, which could be considered an incubator for some of the ideas furthered here.  Bufler's ~bufler-workspace~ library uses Burly to provide some similar functionality, which is at an exploratory stage.  ~activity~ hopes to provide a longer-term solution more suitable for integration into Emacs.
