@@ -65,6 +65,16 @@
 (require 'persist)
 (require 'subr-x)
 
+;;;; Types
+
+(cl-defstruct activities-activity
+  "FIXME: Docstring."
+  name default last etc)
+
+(cl-defstruct activities-activity-state
+  "FIXME: Docstring."
+  window-state etc)
+
 ;;;; Debugging
 
 (require 'warnings)
@@ -249,14 +259,6 @@ Called with one argument, the activity."
   "Functions called before resuming an activity.
 Called with one argument, the activity."
   :type 'hook)
-
-(cl-defstruct activities-activity
-  "FIXME: Docstring."
-  name default last etc)
-
-(cl-defstruct activities-activity-state
-  "FIXME: Docstring."
-  window-state etc)
 
 ;;;; Commands
 
