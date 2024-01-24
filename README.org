@@ -8,6 +8,16 @@ Integration with Emacs's ~tab-bar-mode~ is provided: a window configuration or f
 
 Various hooks are (or will be--feedback is welcome) provided, both globally and per-activity, so that the user can define functions to be called when an activity is saved, restored, or switched from/to.  For example, this could be used to limit the set of buffers offered for switching to within an activity, or to track the time spent in an activity.
 
+* Contents
+:PROPERTIES:
+:TOC:      :include siblings :depth 0 :force (nothing) :ignore (this) :local (nothing)
+:END:
+:CONTENTS:
+- [[#installation][Installation]]
+- [[#usage][Usage]]
+- [[#faq][FAQ]]
+:END:
+
 * Installation
 
 Until this library is available from a package archive, it's recommended to install it using [[https://framagit.org/steckerhalter/quelpa][Quelpa]]:
@@ -41,6 +51,11 @@ Until this library is available from a package archive, it's recommended to inst
 If you choose to install it otherwise, you'll need to load both the ~activity~ and ~activity-tabs~ libraries, or ensure that the autoloads are generated properly.
 
 * Usage
+
+** Modes
+
++ ~activity-mode~ :: Automatically saves activities' states when Emacs is idle.  Should be enabled while using this package (otherwise you would have to manually call ~activity-save-all~, which would defeat much of the purpose of this library).
++ ~activity-tabs-mode~ :: Causes activities to be managed as ~tab-bar~ tabs rather than frames (the default).  (/This is what the author uses; bugs present when this mode is not enabled are less likely to be found, so please report them./)
 
 ** Workflow
 

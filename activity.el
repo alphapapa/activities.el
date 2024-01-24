@@ -20,6 +20,11 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+;;; Acknowledgments:
+
+;; Thanks to Pat Metheny, whose music aided the initial
+;; implementation.
+
 ;;; Commentary:
 
 ;; Inspired by Genera's and KDE's concepts of "activities", this
