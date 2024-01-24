@@ -15,3 +15,10 @@ For example, if I have an activity that has some Ement rooms displayed, and then
 :END:
 
 e.g. useful for having a ~deffy-project~ buffer available for jumping while not being displayed.
+
+** TODO Multiple named states
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 17:05]
+:END:
+
+Could be helpful.  The default and last state should just be entries in an activity's states map.
