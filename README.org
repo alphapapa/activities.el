@@ -62,4 +62,6 @@ If you choose to install it otherwise, you'll need to load both the ~activity~ a
 
 + "Activities" haven't seemed to pan out for KDE.  Why would they in Emacs? :: KDE Plasma's Activities system requires applications that can save and restore their state through Plasma, which only (or mostly only?) KDE apps can do, limiting the usefulness of the system.  However, Emacs offers a coherent environment, similar to Lisp machines of yore, and its ~bookmark~ library offers a way for any buffer's major mode to save and restore state, if implemented (which many already are).
 
++ Why did a buffer not restore correctly? :: Most likely because that buffer's major mode does not support Emacs bookmarks (which ~activity~ uses internally to save and restore buffer state).  But many, if not most, major modes do; and for those that don't, implementing such support is usually trivial (and thereby benefits Emacs as a whole, not just ~activity~).  So contact the major mode's maintainer and ask that ~bookmark~ support be implemented.
+
 + Why did I get an error? :: Because ~activity~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
