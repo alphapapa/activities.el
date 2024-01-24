@@ -152,7 +152,7 @@ Selects ACTIVITY's frame/tab and then switches back."
          (error "Activity %S not active" (activity-name ,activity)))
        (unwind-protect
            (progn
-             (activity-switch ,activity)
+             (activity--switch ,activity)
              ,@body)
          (pcase-let (((map :frame :window :tab-index) ,original-state-var))
            (when frame
@@ -253,7 +253,7 @@ Called with one argument, the activity."
   (let ((activity (make-activity :name name)))
     (activity--set activity)
     (activity-save activity :defaultp t :lastp t)
-    (activity-switch activity)
+    (activity--switch activity)
     activity))
 
 (cl-defun activity-resume (activity &key resetp)
@@ -262,7 +262,7 @@ If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
   (interactive (list (activity-completing-read) :resetp current-prefix-arg))
-  (activity-switch activity)
+  (activity--switch activity)
   (activity-set activity :state (if resetp 'default 'last)))
 
 (defun activity-suspend (activity)
@@ -384,7 +384,7 @@ See option `activity-always-persist'."
   "Close ACTIVITY.
 Its state is not saved, and its frames, windows, and tabs are
 closed."
-  (activity-switch activity)
+  (activity--switch activity)
   ;; TODO: Set frame parameter when resuming.
   (delete-frame))
 
@@ -393,6 +393,15 @@ closed."
   (map-elt activity-activities name))
 
 (defun activity-switch (activity)
+  "Switch to ACTIVITY.
+Interactively, offers active activities."
+  (interactive
+   (list (activity-completing-read
+          :activities (cl-remove-if-not #'activity-active-p activity-activities :key #'cdr)
+          :prompt "Switch to: ")))
+  (activity--switch activity))
+
+(defun activity--switch (activity)
   "Switch to ACTIVITY.
 Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
@@ -624,7 +633,7 @@ PROMPT is passed to `completing-read', which see."
 
 (defun activity-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
-  (activity-switch (map-elt activity-activities (car bookmark))))
+  (activity--switch (map-elt activity-activities (car bookmark))))
 
 (defun activity--buffer-local-variables (variables)
   "Return alist of buffer-local VARIABLES for current buffer.

@@ -58,7 +58,7 @@ accordingly."
   :group 'activity
   (let ((override-map '((activity-active-p . activity-tabs-activity-active-p)
                         (activity--set . activity-tabs-activity--set)
-                        (activity-switch . activity-tabs-switch)
+                        (activity--switch . activity-tabs--switch)
                         (activity-current . activity-tabs-current)
                         (activity-close . activity-tabs-close))))
     (if activity-tabs-mode
@@ -77,10 +77,10 @@ accordingly."
   "Close ACTIVITY.
 Its state is not saved, and its frames, windows, and tabs are
 closed."
-  (activity-switch activity)
+  (activity--switch activity)
   (tab-bar-close-tab))
 
-(defun activity-tabs-switch (activity)
+(defun activity-tabs--switch (activity)
   "Switch to ACTIVITY.
 Selects its tab, making one if needed.  Its state is not changed."
   (if-let ((tab (activity-tabs--tab activity)))

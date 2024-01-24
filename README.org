@@ -35,6 +35,7 @@ Until this library is available from a package archive, it's recommended to inst
      ;; user need not lift the Control key.  This makes it easier to
      ;; quickly switch between activities.
      ("C-x C-a C-a" . activity-resume)
+     ("C-x C-a RET" . activity-switch)
      ("C-x C-a g" . activity-revert)
      ("C-x C-a n" . activity-new)
      ("C-x C-a s" . activity-suspend))
