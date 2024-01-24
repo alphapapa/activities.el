@@ -260,11 +260,14 @@ Called with one argument, the activity."
 
 ;;;; Commands
 
-(defun activity-new (name)
-  "Save current state as a new activity with NAME."
+(cl-defun activity-new (name &key forcep)
+  "Save current state as a new activity with NAME.
+If FORCEP (interactively, with prefix), overwrite existing
+activity."
   ;; Not sure if this is needed, but let's experiment.
-  (interactive (list (read-string "New activity name: ")))
-  (when (member name (activity-names))
+  (interactive
+   (list (read-string "New activity name: ") :forcep current-prefix-arg))
+  (when (and (not forcep) (member name (activity-names)))
     (user-error "Activity named %S already exists" name))
   (let ((activity (make-activity :name name)))
     (activity--set activity)

@@ -66,7 +66,8 @@ If you choose to install it otherwise, you'll need to load both the ~activity~ a
 4. Change window configuration, change tab, close the tab, or even restart Emacs.
 5. Call ~activity-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
 6. Return to the original activity state with ~activity-revert~ (~C-x C-a g~).
-7. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
+7. Call ~activity-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
+8. Suspend the activity with ~activity-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
 ** Bookmarks
 
