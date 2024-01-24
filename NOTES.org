@@ -1,4 +1,4 @@
-#+TITLE: activity.el Notes
+#+TITLE: activities.el Notes
 
 * Issues
 

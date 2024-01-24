@@ -1,4 +1,4 @@
-;;; activity.el --- Suspend/resume sets of windows, frames, and buffers  -*- lexical-binding: t; -*-
+;;; activities.el --- Suspend/resume sets of windows, frames, and buffers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  Free Software Foundation, Inc.
 
@@ -19,11 +19,6 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-;;; Acknowledgments:
-
-;; Thanks to Pat Metheny, whose music aided the initial
-;; implementation.
 
 ;;; Commentary:
 
@@ -55,6 +50,11 @@
 ;; used to limit the set of buffers offered for switching to within an
 ;; activity, or to track the time spent in an activity.
 
+;;; Acknowledgments:
+
+;; Thanks to Pat Metheny, whose music aided the initial
+;; implementation.
+
 ;;; Code:
 
 ;;;; Requirements
@@ -65,12 +65,22 @@
 (require 'persist)
 (require 'subr-x)
 
+;;;; Types
+
+(cl-defstruct activities-activity
+  "FIXME: Docstring."
+  name default last etc)
+
+(cl-defstruct activities-activity-state
+  "FIXME: Docstring."
+  window-state etc)
+
 ;;;; Debugging
 
 (require 'warnings)
 
 ;; NOTE: Uncomment this form and `emacs-lisp-byte-compile-and-load'
-;; the file to enable `activity-debug' messages.  This is commented
+;; the file to enable `activities-debug' messages.  This is commented
 ;; out by default because, even though the messages are only displayed
 ;; when `warning-minimum-log-level' is `:debug' at runtime, if that is
 ;; so at expansion time, the expanded macro calls format the message
@@ -78,7 +88,7 @@
 
 ;; (eval-and-compile (setq-local warning-minimum-log-level nil) (setq-local warning-minimum-log-level :debug))
 
-(cl-defmacro activity-debug (&rest args)
+(cl-defmacro activities-debug (&rest args)
   "Display a debug warning showing the runtime value of ARGS.
 The warning automatically includes the name of the containing
 function, and it is only displayed if `warning-minimum-log-level'
@@ -139,7 +149,7 @@ keywords are supported:
 
 ;;;; Macros
 
-(defmacro activity-with (activity &rest body)
+(defmacro activities-with (activity &rest body)
   "Evaluate BODY with ACTIVITY active.
 Selects ACTIVITY's frame/tab and then switches back."
   (declare (indent defun) (debug (sexp body)))
@@ -148,11 +158,11 @@ Selects ACTIVITY's frame/tab and then switches back."
                                    :window ,(selected-window)
                                    :tab-index ,(when (bound-and-true-p tab-bar-mode)
                                                  (tab-bar--current-tab-index)))))
-       (unless (activity-active-p ,activity)
-         (error "Activity %S not active" (activity-name ,activity)))
+       (unless (activities-activity-active-p ,activity)
+         (error "Activity %S not active" (activities-activity-name ,activity)))
        (unwind-protect
            (progn
-             (activity--switch ,activity)
+             (activities--switch ,activity)
              ,@body)
          (pcase-let (((map :frame :window :tab-index) ,original-state-var))
            (when frame
@@ -164,17 +174,17 @@ Selects ACTIVITY's frame/tab and then switches back."
 
 ;;;; Variables
 
-(with-demoted-errors "activity: Variable `activity-activities' failed to load persisted data: %S"
-  (persist-defvar activity-activities nil "FIXME: Docstring."))
+(with-demoted-errors "activities: Variable `activities-activities' failed to load persisted data: %S"
+  (persist-defvar activities-activities nil "FIXME: Docstring."))
 
-(defvar activity-buffer-local-variables nil
+(defvar activities-buffer-local-variables nil
   "Variables whose value are saved and restored by activities.
-Intended to be bound around code calling `activity-' commands.")
+Intended to be bound around code calling `activities-' commands.")
 
-(defvar activity-completing-read-history nil
-  "History for `activity-completing-read'.")
+(defvar activities-completing-read-history nil
+  "History for `activities-completing-read'.")
 
-(defvar activity-window-parameters-translators
+(defvar activities-window-parameters-translators
   `((window-preserved-size
      (serialize . ,(pcase-lambda (`(,buffer ,direction ,size))
                      `(,(buffer-name buffer) ,direction ,size)))
@@ -187,16 +197,16 @@ deserialized back to the buffer after it is reincarnated.")
 
 ;;;; Customization
 
-(defgroup activity nil
+(defgroup activities nil
   "Activities."
-  :link '(emacs-commentary-link "activity")
-  :link '(url-link "https://github.com/alphapapa/activity.el")
+  :link '(emacs-commentary-link "activities")
+  :link '(url-link "https://github.com/alphapapa/activities.el")
   :group 'convenience)
 
-(defcustom activity-always-persist t
+(defcustom activities-always-persist t
   "Always persist activity states to disk when saving.
 When disabled, only persist them when exiting Emacs or disabling
-`activity-mode'.
+`activities-mode'.
 
 Generally, leaving this enabled should be fine.  However, in case
 of unusual bugs, it could be helpful to only save upon exiting
@@ -204,27 +214,27 @@ Emacs, so that any unusual state that caused a crash would not be
 persisted."
   :type 'boolean)
 
-(defcustom activity-name-prefix "α: "
+(defcustom activities-name-prefix "α: "
   "Prefix applied to activity names in frames/tabs."
   :type 'string)
 
-(defcustom activity-bookmark-store t
+(defcustom activities-bookmark-store t
   "Store a bookmark when making a new activity.
 This is merely for convenience, offering a way to help unify the
-`bookmark' and `activity' interfaces (i.e. allowing
+`bookmark' and `activities' interfaces (i.e. allowing
 `bookmark-jump' to open an activity rather than requiring the use
-of `activity-resume').
+of `activities-resume').
 
 Such bookmarks merely point to an activity name; they do not
 contain the actual activity metadata, so if an activity is
 discarded, such a bookmark could become stale."
   :type 'boolean)
 
-(defcustom activity-bookmark-name-prefix "Activity: "
+(defcustom activities-bookmark-name-prefix "Activity: "
   "Prefix for activity bookmark names."
   :type 'string)
 
-(defcustom activity-window-persistent-parameters
+(defcustom activities-window-persistent-parameters
   (list (cons 'header-line-format 'writable)
         (cons 'mode-line-format 'writable)
         (cons 'tab-line-format 'writable)
@@ -235,240 +245,232 @@ discarded, such a bookmark could become stale."
         (cons 'window-slot 'writable))
   "Additional window parameters to persist.
 See Info node `(elisp)Window Parameters'.  See also option
-`activity-set-window-persistent-parameters'."
+`activities-set-window-persistent-parameters'."
   :type '(alist :key-type (symbol :tag "Window parameter")
                 :value-type (choice (const :tag "Not saved" nil)
                                     (const :tag "Saved" writable))))
 
-(defcustom activity-after-resume-functions nil
+(defcustom activities-after-resume-functions nil
   "Functions called after resuming an activity.
 Called with one argument, the activity."
   :type 'hook)
 
-(defcustom activity-before-resume-functions nil
+(defcustom activities-before-resume-functions nil
   "Functions called before resuming an activity.
 Called with one argument, the activity."
   :type 'hook)
 
-(cl-defstruct activity
-  "FIXME: Docstring."
-  name default last etc)
-
-(cl-defstruct activity-state
-  "FIXME: Docstring."
-  window-state etc)
-
 ;;;; Commands
 
-(cl-defun activity-new (name &key forcep)
+(cl-defun activities-new (name &key forcep)
   "Save current state as a new activity with NAME.
 If FORCEP (interactively, with prefix), overwrite existing
 activity."
   ;; Not sure if this is needed, but let's experiment.
   (interactive
    (list (read-string "New activity name: ") :forcep current-prefix-arg))
-  (when (and (not forcep) (member name (activity-names)))
+  (when (and (not forcep) (member name (activities-names)))
     (user-error "Activity named %S already exists" name))
-  (let ((activity (make-activity :name name)))
-    (activity--set activity)
-    (activity-save activity :defaultp t :lastp t)
-    (when activity-bookmark-store
-      (activity-bookmark-store activity))
-    (activity--switch activity)
+  (let ((activity (make-activities-activity :name name)))
+    (activities--set activity)
+    (activities-save activity :defaultp t :lastp t)
+    (when activities-bookmark-store
+      (activities-bookmark-store activity))
+    (activities--switch activity)
     activity))
 
-(cl-defun activity-resume (activity &key resetp)
+(cl-defun activities-resume (activity &key resetp)
   "Resume ACTIVITY.
 If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
-  (interactive (list (activity-completing-read) :resetp current-prefix-arg))
-  (activity--switch activity)
-  (activity-set activity :state (if resetp 'default 'last)))
+  (interactive (list (activities-completing-read) :resetp current-prefix-arg))
+  (activities--switch activity)
+  (activities-set activity :state (if resetp 'default 'last)))
 
-(defun activity-suspend (activity)
+(defun activities-suspend (activity)
   "Suspend ACTIVITY.
 Its last is saved, and its frames, windows, and tabs are
 closed."
-  (interactive (list (activity-completing-read :prompt "Suspend activity: ")))
-  (activity-save activity :lastp t)
-  (activity-close activity))
+  (interactive (list (activities-completing-read :prompt "Suspend activity: ")))
+  (activities-save activity :lastp t)
+  (activities-close activity))
 
-(cl-defun activity-save (activity &key defaultp lastp persistp)
+(cl-defun activities-save (activity &key defaultp lastp persistp)
   "Save states of ACTIVITY.
 If DEFAULTP, save its default state; if LASTP, its last.  If
 PERSISTP, force persisting of data (otherwise, data is persisted
-according to option `activity-always-persist', which see)."
+according to option `activities-always-persist', which see)."
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
-  (activity-with activity
-    (pcase-let* (((cl-struct activity name default last) activity)
-                 (new-state (activity-state)))
-      (setf (activity-default activity) (if (or defaultp (not default)) new-state default)
-            (activity-last activity) (if (or lastp (not last)) new-state last)
-            (map-elt activity-activities name) activity)))
-  (activity--persist persistp))
+  (activities-with activity
+                   (pcase-let* (((cl-struct activities-activity name default last) activity)
+                                (new-state (activities-state)))
+                     (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+                           (activities-activity-last activity) (if (or lastp (not last)) new-state last)
+                           (map-elt activities-activities name) activity)))
+  (activities--persist persistp))
 
-(defun activity-save-all ()
+(defun activities-save-all ()
   "Save all active activities' last states.
 In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
-  (with-demoted-errors "activity-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activity-active-p (map-values activity-activities)))
-      (activity-save activity :lastp t))))
+  (with-demoted-errors "activities-save-all: ERROR: %S"
+    (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
+      (activities-save activity :lastp t))))
 
-(defun activity-reset (activity)
+(defun activities-reset (activity)
   "Reset ACTIVITY to its default state."
-  (interactive (list (activity-current)))
+  (interactive (list (activities-current)))
   (unless activity
     (user-error "No active activity"))
-  (activity-set activity :state 'default))
+  (activities-set activity :state 'default))
 
-(defalias 'activity-revert #'activity-reset)
+(defalias 'activities-revert #'activities-reset)
 
-(defun activity-discard (activity)
+(defun activities-discard (activity)
   "Discard ACTIVITY and its state.
 It will not be recoverable."
-  ;; TODO: Discard relevant bookmarks when `activity-bookmark-store' is enabled.
-  (interactive (list (activity-completing-read :prompt "Discard activity: ")))
+  ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
+  (interactive (list (activities-completing-read :prompt "Discard activity: ")))
   (ignore-errors
     ;; FIXME: After fixing all the bugs, remove ignore-errors.
-    (activity-close activity))
-  (setf activity-activities (map-delete activity-activities (activity-name activity))))
+    (activities-close activity))
+  (setf activities-activities (map-delete activities-activities (activities-activity-name activity))))
 
 ;;;; Activity mode
 
 ;; This mode automatically saves active activities.
 
-(defvar activity-mode-timer nil
-  "Automatically saves activities according to `activity-mode-idle-frequency'.")
+(defvar activities-mode-timer nil
+  "Automatically saves activities according to `activities-mode-idle-frequency'.")
 
-(defgroup activity-mode nil
+(defgroup activities-mode nil
   "Automatically save activities."
   :group 'activity)
 
-(defcustom activity-mode-idle-frequency 5
+(defcustom activities-mode-idle-frequency 5
   "Automatically save activities when Emacs has been idle this many seconds."
   :type 'natnum)
 
 ;;;###autoload
-(define-minor-mode activity-mode
+(define-minor-mode activities-mode
   "Automatically remember activities' state.
 accordingly."
   :global t
-  :group 'activity
-  (if activity-mode
+  :group 'activities
+  (if activities-mode
       (progn
-        (setf activity-mode-timer
-              (run-with-idle-timer activity-mode-idle-frequency t #'activity-save-all))
-        (add-hook 'kill-emacs-hook #'activity-mode--killing-emacs))
-    (when (timerp activity-mode-timer)
-      (cancel-timer activity-mode-timer)
-      (setf activity-mode-timer nil))
-    (remove-hook 'kill-emacs-hook #'activity-mode--killing-emacs)))
+        (setf activities-mode-timer
+              (run-with-idle-timer activities-mode-idle-frequency t #'activities-save-all))
+        (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs))
+    (when (timerp activities-mode-timer)
+      (cancel-timer activities-mode-timer)
+      (setf activities-mode-timer nil))
+    (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)))
 
-(defun activity-mode--killing-emacs ()
+(defun activities-mode--killing-emacs ()
   "Persist all activities' states.
 To be called from `kill-emacs-hook'."
-  (let ((activity-always-persist t))
-    (activity-save-all)))
+  (let ((activities-always-persist t))
+    (activities-save-all)))
 
 ;;;; Functions
 
-(cl-defun activity-set (activity &key (state 'last))
+(cl-defun activities-set (activity &key (state 'last))
   "Set ACTIVITY as the current one.
 Its STATE (`last' or `default') is loaded into the current frame."
-  (activity--set activity)
-  (activity-with activity
-    (pcase-let (((cl-struct activity name default last) activity))
-      (pcase state
-        ('default (activity--windows-set (activity-state-window-state default)))
-        ('last (if last
-                   (activity--windows-set (activity-state-window-state last))
-                 (activity--windows-set (activity-state-window-state default))
-                 (message "Activity %S has no last state.  Resuming default." name)))))))
+  (activities--set activity)
+  (activities-with activity
+                   (pcase-let (((cl-struct activities-activity name default last) activity))
+                     (pcase state
+                       ('default (activities--windows-set (activities-activity-state-window-state default)))
+                       ('last (if last
+                                  (activities--windows-set (activities-activity-state-window-state last))
+                                (activities--windows-set (activities-activity-state-window-state default))
+                                (message "Activity %S has no last state.  Resuming default." name)))))))
 
-(defun activity--set (activity)
+(defun activities--set (activity)
   "Set current frame's activity parameter to ACTIVITY."
   (set-frame-parameter nil 'activity activity))
 
-(defun activity--persist (&optional forcep)
-  "Persist `activity-activities' to disk if enabled or FORCEP.
-See option `activity-always-persist'."
-  (when (or forcep activity-always-persist)
-    (persist-save 'activity-activities)))
+(defun activities--persist (&optional forcep)
+  "Persist `activities-activities' to disk if enabled or FORCEP.
+See option `activities-always-persist'."
+  (when (or forcep activities-always-persist)
+    (persist-save 'activities-activities)))
 
-(defun activity-current ()
+(defun activities-current ()
   "Return the current activity."
   (frame-parameter nil 'activity))
 
-(cl-defun activity-close (activity)
+(cl-defun activities-close (activity)
   "Close ACTIVITY.
 Its state is not saved, and its frames, windows, and tabs are
 closed."
-  (activity--switch activity)
+  (activities--switch activity)
   ;; TODO: Set frame parameter when resuming.
   (delete-frame))
 
-(defun activity-named (name)
+(defun activities-named (name)
   "Return activity having NAME."
-  (map-elt activity-activities name))
+  (map-elt activities-activities name))
 
-(defun activity-switch (activity)
+(defun activities-switch (activity)
   "Switch to ACTIVITY.
 Interactively, offers active activities."
   (interactive
-   (list (activity-completing-read
-          :activities (cl-remove-if-not #'activity-active-p activity-activities :key #'cdr)
+   (list (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
           :prompt "Switch to: ")))
-  (activity--switch activity))
+  (activities--switch activity))
 
-(defun activity--switch (activity)
+(defun activities--switch (activity)
   "Switch to ACTIVITY.
 Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
-  (select-frame (or (activity--frame activity)
+  (select-frame (or (activities--frame activity)
                     (make-frame `((activity . ,activity)))))
-  (set-frame-name (activity-name-for activity)))
+  (set-frame-name (activities-name-for activity)))
 
-(defun activity--frame (activity)
+(defun activities--frame (activity)
   "Return ACTIVITY's frame."
-  (pcase-let (((cl-struct activity name) activity))
+  (pcase-let (((cl-struct activities-activity name) activity))
     (cl-find-if (lambda (frame)
                   (when-let ((frame-activity (frame-parameter frame 'activity)))
-                    (equal name (activity-name frame-activity))))
+                    (equal name (activities-activity-name frame-activity))))
                 (frame-list))))
 
-(defun activity-state ()
+(defun activities-state ()
   "Return an activity state for the current frame."
-  (make-activity-state
-   :window-state (activity--window-state (selected-frame))))
+  (make-activities-activity-state
+   :window-state (activities--window-state (selected-frame))))
 
-(defun activity-active-p (activity)
+(defun activities-activity-active-p (activity)
   "Return non-nil if ACTIVITY is active.
 That is, if any frames have an `activity' parameter whose
 activity's name is NAME."
-  (activity--frame activity))
+  (activities--frame activity))
 
-(defun activity--window-state (frame)
+(defun activities--window-state (frame)
   "Return FRAME's window state."
   (with-selected-frame frame
     ;; Set window parameter.
     ;; (mapc (lambda (window)
     ;;         (let ((value (activity--serialize (window-buffer window))))
-    ;;           (set-window-parameter window 'activity-buffer value)))
+    ;;           (set-window-parameter window 'activities-buffer value)))
     ;;       (window-list))
-    (let* ((window-persistent-parameters (append activity-window-persistent-parameters
+    (let* ((window-persistent-parameters (append activities-window-persistent-parameters
                                                  window-persistent-parameters))
            (window-state (window-state-get nil 'writable)))
       ;; Clear window parameters we set (because they aren't kept
       ;; current, so leaving them could be confusing).
       ;; (mapc (lambda (window)
-      ;;         (set-window-parameter window 'activity-buffer nil))
+      ;;         (set-window-parameter window 'activities-buffer nil))
       ;;       (window-list))
-      (activity--window-serialized window-state))))
+      (activities--window-serialized window-state))))
 
-(defun activity--window-serialized (state)
+(defun activities--window-serialized (state)
   "Return window STATE having serialized its parameters."
   (cl-labels ((translate-state (state)
                 "Set windows' buffers in STATE."
@@ -481,10 +483,10 @@ activity's name is NAME."
                 "Translate window parameters in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters ('buffer `(,buffer-or-buffer-name . ,_buffer-attrs))) attrs))
-                  (setf (map-elt parameters 'activity-buffer)
+                  (setf (map-elt parameters 'activities-buffer)
                         (activity--serialize (get-buffer buffer-or-buffer-name)))
                   (pcase-dolist (`(,parameter . ,(map serialize))
-                                 activity-window-parameters-translators)
+                                 activities-window-parameters-translators)
                     (when (map-elt parameters parameter)
                       (setf (map-elt parameters parameter)
                             (funcall serialize (map-elt parameters parameter)))))
@@ -492,21 +494,21 @@ activity's name is NAME."
                   (cons 'leaf attrs))))
     (translate-state state)))
 
-(defun activity--windows-set (state)
+(defun activities--windows-set (state)
   "Set window configuration according to STATE."
-  (setf window-persistent-parameters (copy-sequence activity-window-persistent-parameters))
-  (pcase-let* ((window-persistent-parameters (append activity-window-persistent-parameters
+  (setf window-persistent-parameters (copy-sequence activities-window-persistent-parameters))
+  (pcase-let* ((window-persistent-parameters (append activities-window-persistent-parameters
                                                      window-persistent-parameters))
                (state
                 ;; NOTE: We copy the state so as not to mutate the one in storage.
-                (activity--bufferize-window-state (copy-tree state))))
+                (activities--bufferize-window-state (copy-tree state))))
     ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
     ;; function after handling the bookmark, we use an immediate timer to
     ;; set the window configuration.
     (run-at-time nil nil (lambda ()
                            (window-state-put state (frame-root-window))))))
 
-(defun activity--bufferize-window-state (state)
+(defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
   (cl-labels ((bufferize-state (state)
                 "Set windows' buffers in STATE."
@@ -519,9 +521,9 @@ activity's name is NAME."
                 "Recreate buffers in LEAF."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters buffer) attrs)
-                             ((map activity-buffer) parameters)
+                             ((map activities-buffer) parameters)
                              (`(,_buffer-name . ,buffer-attrs) buffer)
-                             (new-buffer (activity--deserialize activity-buffer)))
+                             (new-buffer (activities--deserialize activities-buffer)))
                   (setf (map-elt attrs 'buffer) (cons new-buffer buffer-attrs))
                   (cons 'leaf attrs)))
               (translate-leaf (leaf)
@@ -529,7 +531,7 @@ activity's name is NAME."
                 (pcase-let* ((`(leaf . ,attrs) leaf)
                              ((map parameters) attrs))
                   (pcase-dolist (`(,parameter . ,(map deserialize))
-                                 activity-window-parameters-translators)
+                                 activities-window-parameters-translators)
                     (when (map-elt parameters parameter)
                       (setf (map-elt parameters parameter)
                             (funcall deserialize (map-elt parameters parameter)))))
@@ -542,7 +544,7 @@ activity's name is NAME."
       ;; Multi-window frame.
       (bufferize-state state))))
 
-(cl-defstruct activity-buffer
+(cl-defstruct activities-buffer
   "FIXME: Docstring."
   (bookmark nil :documentation "Bookmark props")
   (filename nil :documentation "Filename, if file-backed")
@@ -551,9 +553,9 @@ activity's name is NAME."
   (etc nil :documentation "Alist for other data."))
 
 (cl-defmethod activity--serialize ((buffer buffer))
-  "Return `activity-buffer' struct for BUFFER."
+  "Return `activities-buffer' struct for BUFFER."
   (with-current-buffer buffer
-    (make-activity-buffer :bookmark (ignore-errors
+    (make-activities-buffer :bookmark (ignore-errors
                                       (bookmark-make-record))
                           :filename (buffer-file-name buffer)
                           :name (buffer-name buffer)
@@ -561,70 +563,70 @@ activity's name is NAME."
                           :etc `((indirectp . ,(not (not (buffer-base-buffer buffer))))
                                  (narrowedp . ,(buffer-narrowed-p)))
                           :local-variables
-                          (when activity-buffer-local-variables
+                          (when activities-buffer-local-variables
                             (cl-loop
-                             for variable in activity-buffer-local-variables
+                             for variable in activities-buffer-local-variables
                              when (buffer-local-boundp variable (current-buffer))
                              collect (cons variable
                                            (buffer-local-value variable (current-buffer))))))))
 
-(cl-defmethod activity--deserialize ((struct activity-buffer))
-  "Return buffer for `activity-buffer' STRUCT."
-  (pcase-let (((cl-struct activity-buffer bookmark filename name) struct))
-    (let ((buffer (cond (bookmark (activity--bookmark-buffer struct))
-                        (filename (activity--filename-buffer struct))
-                        (name (activity--name-buffer struct))
+(cl-defmethod activities--deserialize ((struct activities-buffer))
+  "Return buffer for `activities-buffer' STRUCT."
+  (pcase-let (((cl-struct activities-buffer bookmark filename name) struct))
+    (let ((buffer (cond (bookmark (activities--bookmark-buffer struct))
+                        (filename (activities--filename-buffer struct))
+                        (name (activities--name-buffer struct))
                         (t (error "Activity struct is invalid: %S" struct)))))
       (cl-assert (buffer-live-p buffer))
-      (activity-debug struct buffer)
+      (activities-debug struct buffer)
       buffer)))
 
-(defun activity--bookmark-buffer (struct)
-  "Return buffer for `activity-buffer' STRUCT."
+(defun activities--bookmark-buffer (struct)
+  "Return buffer for `activities-buffer' STRUCT."
   ;; NOTE: Be aware of the following note from burly.el:
   ;; NOTE: Due to changes in help-mode.el which serialize natively
   ;; compiled subrs in the bookmark props, which cannot be read
   ;; back (which actually break the entire bookmark system when
   ;; such a props is saved in the bookmarks file), we have to
   ;; workaround a failure to read here.  See bug#56643.
-  (pcase-let* (((cl-struct activity-buffer bookmark) struct))
+  (pcase-let* (((cl-struct activities-buffer bookmark) struct))
     (save-window-excursion
       (condition-case err
           (progn
             (bookmark-jump bookmark)
             (when-let ((local-variable-map
-                        (bookmark-prop-get bookmark 'activity-buffer-local-variables)))
+                        (bookmark-prop-get bookmark 'activities-buffer-local-variables)))
               (cl-loop for (variable . value) in local-variable-map
                        do (setf (buffer-local-value variable (current-buffer)) value))))
         (error (delay-warning 'activity
                               (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
       (current-buffer))))
 
-(defun activity--filename-buffer (activity-buffer)
+(defun activities--filename-buffer (activities-buffer)
   "Return buffer for ACTIVITY-BUFFER having `filename' set."
-  (pcase-let (((cl-struct activity-buffer filename) activity-buffer))
+  (pcase-let (((cl-struct activities-buffer filename) activities-buffer))
     (find-file-noselect filename)))
 
-(defun activity--name-buffer (activity-buffer)
+(defun activities--name-buffer (activities-buffer)
   "Return buffer for ACTIVITY-BUFFER having `name' set."
-  (pcase-let (((cl-struct activity-buffer name) activity-buffer))
+  (pcase-let (((cl-struct activities-buffer name) activities-buffer))
     (or (get-buffer name)
-        (with-current-buffer (get-buffer-create (concat "*Activity (error): " name "*"))
+        (with-current-buffer (get-buffer-create (concat "*Activities (error): " name "*"))
           (insert "Activity was unable to get a buffer named: " name "\n"
-                  "activity-buffer: " (format "%S" activity-buffer) "\n"
+                  "activity-buffer: " (format "%S" activities-buffer) "\n"
                   "Please report this error to the developer\n\n")
           (current-buffer)))))
 
-(cl-defun activity-completing-read
-    (&key (activities activity-activities) (prompt "Open activity: "))
+(cl-defun activities-completing-read
+    (&key (activities activities-activities) (prompt "Open activity: "))
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
-  (let* ((names (activity-names activities))
-         (name (completing-read prompt names nil nil nil activity-completing-read-history)))
-    (or (map-elt activity-activities name)
-        (make-activity :name name))))
+  (let* ((names (activities-names activities))
+         (name (completing-read prompt names nil nil nil activities-completing-read-history)))
+    (or (map-elt activities-activities name)
+        (make-activities-activity :name name))))
 
-(cl-defun activity-names (&optional (activities activity-activities))
+(cl-defun activities-names (&optional (activities activities-activities))
   "Return list of names of ACTIVITIES."
   (map-keys activities))
 
@@ -632,19 +634,20 @@ PROMPT is passed to `completing-read', which see."
 
 (require 'bookmark)
 
-(defun activity-bookmark-store (activity)
+(defun activities-bookmark-store (activity)
   "Store a `bookmark' record for ACTIVITY."
   (bookmark-maybe-load-default-file)
-  (let* ((activity-name (activity-name activity))
-         (bookmark-name (concat activity-bookmark-name-prefix activity-name))
-         (props `((activity-name . ,activity-name))))
+  (let* ((activities-name (activities-activity-name activity))
+         (bookmark-name (concat activities-bookmark-name-prefix activities-name))
+         (props `((activities-name . ,activities-name)
+                  (handler . activities-bookmark-handler))))
     (bookmark-store bookmark-name props nil)))
 
-(defun activity-bookmark-handler (bookmark)
+(defun activities-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
-  (activity-resume (map-elt activity-activities (bookmark-prop-get bookmark 'activity-name))))
+  (activities-resume (map-elt activities-activities (bookmark-prop-get bookmark 'activities-name))))
 
-(defun activity--buffer-local-variables (variables)
+(defun activities--buffer-local-variables (variables)
   "Return alist of buffer-local VARIABLES for current buffer.
 Variables without buffer-local bindings in the current buffer are
 ignored."
@@ -652,13 +655,13 @@ ignored."
            when (buffer-local-boundp variable (current-buffer))
            collect (cons variable (buffer-local-value variable (current-buffer)))))
 
-(defun activity-name-for (activity)
+(defun activities-name-for (activity)
   "Return frame/tab name for ACTIVITY.
-Adds `activity-name-prefix'."
-  (concat activity-name-prefix (activity-name activity)))
+Adds `activities-name-prefix'."
+  (concat activities-name-prefix (activities-activity-name activity)))
 
 ;;;; Footer
 
-(provide 'activity)
+(provide 'activities)
 
-;;; activity.el ends here
+;;; activities.el ends here
