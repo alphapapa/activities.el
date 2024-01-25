@@ -56,8 +56,8 @@ When active, activities are opened in new tabs and named
 accordingly."
   :global t
   :group 'activities
-  (let ((override-map '((activities-active-p . activities-tabs-activities-active-p)
-                        (activities--set . activities-tabs-activities--set)
+  (let ((override-map '((activities-activity-active-p . activities-tabs-activity-active-p)
+                        (activities--set . activities-tabs-activity--set)
                         (activities--switch . activities-tabs--switch)
                         (activities-current . activities-tabs-current)
                         (activities-close . activities-tabs-close))))
