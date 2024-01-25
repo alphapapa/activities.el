@@ -304,11 +304,11 @@ according to option `activities-always-persist', which see)."
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
   (activities-with activity
-                   (pcase-let* (((cl-struct activities-activity name default last) activity)
-                                (new-state (activities-state)))
-                     (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-                           (activities-activity-last activity) (if (or lastp (not last)) new-state last)
-                           (map-elt activities-activities name) activity)))
+    (pcase-let* (((cl-struct activities-activity name default last) activity)
+                 (new-state (activities-state)))
+      (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+            (activities-activity-last activity) (if (or lastp (not last)) new-state last)
+            (map-elt activities-activities name) activity)))
   (activities--persist persistp))
 
 (defun activities-save-all ()
@@ -382,13 +382,13 @@ To be called from `kill-emacs-hook'."
 Its STATE (`last' or `default') is loaded into the current frame."
   (activities--set activity)
   (activities-with activity
-                   (pcase-let (((cl-struct activities-activity name default last) activity))
-                     (pcase state
-                       ('default (activities--windows-set (activities-activity-state-window-state default)))
-                       ('last (if last
-                                  (activities--windows-set (activities-activity-state-window-state last))
-                                (activities--windows-set (activities-activity-state-window-state default))
-                                (message "Activity %S has no last state.  Resuming default." name)))))))
+    (pcase-let (((cl-struct activities-activity name default last) activity))
+      (pcase state
+        ('default (activities--windows-set (activities-activity-state-window-state default)))
+        ('last (if last
+                   (activities--windows-set (activities-activity-state-window-state last))
+                 (activities--windows-set (activities-activity-state-window-state default))
+                 (message "Activity %S has no last state.  Resuming default." name)))))))
 
 (defun activities--set (activity)
   "Set current frame's activity parameter to ACTIVITY."
@@ -556,19 +556,19 @@ activity's name is NAME."
   "Return `activities-buffer' struct for BUFFER."
   (with-current-buffer buffer
     (make-activities-buffer :bookmark (ignore-errors
-                                      (bookmark-make-record))
-                          :filename (buffer-file-name buffer)
-                          :name (buffer-name buffer)
-                          ;; TODO: Handle indirect buffers, narrowing.
-                          :etc `((indirectp . ,(not (not (buffer-base-buffer buffer))))
-                                 (narrowedp . ,(buffer-narrowed-p)))
-                          :local-variables
-                          (when activities-buffer-local-variables
-                            (cl-loop
-                             for variable in activities-buffer-local-variables
-                             when (buffer-local-boundp variable (current-buffer))
-                             collect (cons variable
-                                           (buffer-local-value variable (current-buffer))))))))
+                                        (bookmark-make-record))
+                            :filename (buffer-file-name buffer)
+                            :name (buffer-name buffer)
+                            ;; TODO: Handle indirect buffers, narrowing.
+                            :etc `((indirectp . ,(not (not (buffer-base-buffer buffer))))
+                                   (narrowedp . ,(buffer-narrowed-p)))
+                            :local-variables
+                            (when activities-buffer-local-variables
+                              (cl-loop
+                               for variable in activities-buffer-local-variables
+                               when (buffer-local-boundp variable (current-buffer))
+                               collect (cons variable
+                                             (buffer-local-value variable (current-buffer))))))))
 
 (cl-defmethod activities--deserialize ((struct activities-buffer))
   "Return buffer for `activities-buffer' STRUCT."
