@@ -32,6 +32,12 @@
 
 (require 'tab-bar)
 
+;;;; Variables
+
+(defvar activities-tabs-tab-bar-tab-face-function-original nil
+  "Records the original value of `tab-bar-tab-face-function'.
+When `activities-tabs-mode' is enabled.")
+
 ;;;; Customization
 
 (defgroup activities-tabs nil
@@ -46,6 +52,10 @@ Each is called with one argument, the activity."
 (defcustom activities-tabs-prefix "α:"
   "Prepended to activity names in tabs."
   :type 'string)
+
+(defface activities-tabs-face
+  `((t :foreground ,(face-foreground 'font-lock-string-face nil 'default)))
+  "Applied to tab-bar faces for tabs representing activities.")
 
 ;;;; Mode
 
@@ -66,10 +76,14 @@ accordingly."
           (tab-bar-mode 1)
           (advice-add #'activities-resume :before #'activities-tabs-before-resume)
           (pcase-dolist (`(,symbol . ,function) override-map)
-            (advice-add symbol :override function)))
+            (advice-add symbol :override function))
+          (setf activities-tabs-tab-bar-tab-face-function-original tab-bar-tab-face-function
+                tab-bar-tab-face-function #'activities-tabs--tab-bar-tab-face-function))
       (advice-remove #'activities-resume #'activities-tabs-before-resume)
       (pcase-dolist (`(,symbol . ,function) override-map)
-        (advice-remove symbol function)))))
+        (advice-remove symbol function))
+      (setf tab-bar-tab-face-function activities-tabs-tab-bar-tab-face-function-original
+            activities-tabs-tab-bar-tab-face-function-original nil))))
 
 ;;;; Functions
 
@@ -104,6 +118,15 @@ Selects its tab, making one if needed.  Its state is not changed."
   "Return TAB's PARAMETER."
   ;; TODO: Make this a gv.
   (alist-get parameter (cdr tab)))
+
+(defun activities-tabs--tab-bar-tab-face-function (tab)
+  "Return a face for TAB.
+If TAB represents an activity, `activities-tabs-face' is added."
+  ;; TODO: Propose a tab-bar equivalent of `tab-line-tab-face-functions'.
+  (let ((face (funcall activities-tabs-tab-bar-tab-face-function-original tab)))
+    (if (activities-tabs--tab-parameter 'activity tab)
+        `(:inherit (activities-tabs-face ,face))
+      face)))
 
 (defun activities-tabs-activity--set (activity)
   "Set the current activity.
