@@ -614,9 +614,10 @@ activity's name is NAME."
   (pcase-let (((cl-struct activities-buffer name) activities-buffer))
     (or (get-buffer name)
         (with-current-buffer (get-buffer-create (concat "*Activities (error): " name "*"))
-          (insert "Activities was unable to get a buffer named: " name "\n"
-                  "activities-buffer: " (format "%S" activities-buffer) "\n"
-                  "Please report this error to the developer\n\n")
+          (insert "Activities was unable to get a buffer named: " name "\n\n"
+                  "It is likely that this buffer's major mode does not support the `bookmark' system, so it can't be restored properly.  Please ask the major mode's maintainer to add bookmark support.\n\n"
+                  "If this is not the case, please report this error to the `activities' maintainer.\n\n"
+                  "In the meantime, it's recommended to not use buffers of this major mode in an activity's layout; or you may simply ignore this error and use the other buffers in the activity.")
           (current-buffer)))))
 
 (cl-defun activities-completing-read
