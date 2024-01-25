@@ -555,20 +555,22 @@ activity's name is NAME."
 (cl-defmethod activity--serialize ((buffer buffer))
   "Return `activities-buffer' struct for BUFFER."
   (with-current-buffer buffer
-    (make-activities-buffer :bookmark (ignore-errors
-                                        (bookmark-make-record))
-                            :filename (buffer-file-name buffer)
-                            :name (buffer-name buffer)
-                            ;; TODO: Handle indirect buffers, narrowing.
-                            :etc `((indirectp . ,(not (not (buffer-base-buffer buffer))))
-                                   (narrowedp . ,(buffer-narrowed-p)))
-                            :local-variables
-                            (when activities-buffer-local-variables
-                              (cl-loop
-                               for variable in activities-buffer-local-variables
-                               when (buffer-local-boundp variable (current-buffer))
-                               collect (cons variable
-                                             (buffer-local-value variable (current-buffer))))))))
+    (make-activities-buffer
+     :bookmark (with-demoted-errors
+                   (format "Activities: Error while making bookmark for buffer %S: %%S" buffer)
+                 (bookmark-make-record))
+     :filename (buffer-file-name buffer)
+     :name (buffer-name buffer)
+     ;; TODO: Handle indirect buffers, narrowing.
+     :etc `((indirectp . ,(not (not (buffer-base-buffer buffer))))
+            (narrowedp . ,(buffer-narrowed-p)))
+     :local-variables
+     (when activities-buffer-local-variables
+       (cl-loop
+        for variable in activities-buffer-local-variables
+        when (buffer-local-boundp variable (current-buffer))
+        collect (cons variable
+                      (buffer-local-value variable (current-buffer))))))))
 
 (cl-defmethod activities--deserialize ((struct activities-buffer))
   "Return buffer for `activities-buffer' STRUCT."
