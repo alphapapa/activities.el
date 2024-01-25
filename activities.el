@@ -632,8 +632,6 @@ PROMPT is passed to `completing-read', which see."
 
 ;;;; Bookmark support
 
-(require 'bookmark)
-
 (defun activities-bookmark-store (activity)
   "Store a `bookmark' record for ACTIVITY."
   (bookmark-maybe-load-default-file)
