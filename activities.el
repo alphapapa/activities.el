@@ -603,17 +603,17 @@ activity's name is NAME."
       (current-buffer))))
 
 (defun activities--filename-buffer (activities-buffer)
-  "Return buffer for ACTIVITY-BUFFER having `filename' set."
+  "Return buffer for ACTIVITIES-BUFFER having `filename' set."
   (pcase-let (((cl-struct activities-buffer filename) activities-buffer))
     (find-file-noselect filename)))
 
 (defun activities--name-buffer (activities-buffer)
-  "Return buffer for ACTIVITY-BUFFER having `name' set."
+  "Return buffer for ACTIVITIES-BUFFER having `name' set."
   (pcase-let (((cl-struct activities-buffer name) activities-buffer))
     (or (get-buffer name)
         (with-current-buffer (get-buffer-create (concat "*Activities (error): " name "*"))
-          (insert "Activity was unable to get a buffer named: " name "\n"
-                  "activity-buffer: " (format "%S" activities-buffer) "\n"
+          (insert "Activities was unable to get a buffer named: " name "\n"
+                  "activities-buffer: " (format "%S" activities-buffer) "\n"
                   "Please report this error to the developer\n\n")
           (current-buffer)))))
 
