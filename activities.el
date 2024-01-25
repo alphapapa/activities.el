@@ -556,9 +556,10 @@ activity's name is NAME."
   "Return `activities-buffer' struct for BUFFER."
   (with-current-buffer buffer
     (make-activities-buffer
-     :bookmark (with-demoted-errors
-                   (format "Activities: Error while making bookmark for buffer %S: %%S" buffer)
-                 (bookmark-make-record))
+     :bookmark (condition-case-unless-debug err
+                   (bookmark-make-record)
+                 (error (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err)
+                        nil))
      :filename (buffer-file-name buffer)
      :name (buffer-name buffer)
      ;; TODO: Handle indirect buffers, narrowing.
