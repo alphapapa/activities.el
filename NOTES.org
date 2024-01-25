@@ -22,3 +22,10 @@ e.g. useful for having a ~deffy-project~ buffer available for jumping while not 
 :END:
 
 Could be helpful.  The default and last state should just be entries in an activity's states map.
+
+** TODO Consider having project-specific activities
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 21:31]
+:END:
+
+e.g. pressing ~C-x p a~ could open a default activity for a project (perhaps with some of the metadata stored in the project directory?).  The idea would be to save the user from having to manually make an activity for a project.  Various hooks could probably solve this integration.  (Thanks to Joseph Turner for the idea.)
