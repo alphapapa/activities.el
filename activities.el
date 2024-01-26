@@ -262,6 +262,7 @@ Called with one argument, the activity."
 
 ;;;; Commands
 
+;;;###autoload
 (cl-defun activities-new (name &key forcep)
   "Save current state as a new activity with NAME.
 If FORCEP (interactively, with prefix), overwrite existing
@@ -279,6 +280,7 @@ activity."
     (activities--switch activity)
     activity))
 
+;;;###autoload
 (cl-defun activities-resume (activity &key resetp)
   "Resume ACTIVITY.
 If RESETP (interactively, with universal prefix), reset to
