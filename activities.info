@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: README.info,  Node: Top,  Next: Contents,  Up: (dir)
+File: README.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 activities.el
 *************
@@ -42,7 +42,6 @@ activity.
 
 * Menu:
 
-* Contents::
 * Installation::
 * Usage::
 * FAQ::
@@ -51,6 +50,8 @@ activity.
 
 Usage
 
+* Activities::
+* Compatibility::
 * Modes::
 * Workflow::
 * Commands::
@@ -58,16 +59,9 @@ Usage
 
 
 
-File: README.info,  Node: Contents,  Next: Installation,  Prev: Top,  Up: Top
+File: README.info,  Node: Installation,  Next: Usage,  Prev: Top,  Up: Top
 
-1 Contents
-**********
-
-   • • • 
-
-File: README.info,  Node: Installation,  Next: Usage,  Prev: Contents,  Up: Top
-
-2 Installation
+1 Installation
 **************
 
 Until this library is available from a package archive, it’s recommended
@@ -110,20 +104,57 @@ autoloads are generated properly.
 
 File: README.info,  Node: Usage,  Next: FAQ,  Prev: Installation,  Up: Top
 
-3 Usage
+2 Usage
 *******
 
 * Menu:
 
+* Activities::
+* Compatibility::
 * Modes::
 * Workflow::
 * Commands::
 * Bookmarks::
 
 
-File: README.info,  Node: Modes,  Next: Workflow,  Up: Usage
+File: README.info,  Node: Activities,  Next: Compatibility,  Up: Usage
 
-3.1 Modes
+2.1 Activities
+==============
+
+For the purposes of this library, an "activity" is a window
+configuration and its associated buffers.  When an activity is
+"resumed," its buffers are recreated and loaded into the window
+configuration, which is loaded into a frame or tab.
+
+   From the user’s perspective, an "activity" should be thought of as
+something like, "reading my email," "working on my Emacs library,"
+"writing my book," "working for this client," etc.  One arranges a set
+of windows and buffers according to what’s needed, then saves it as a
+new activity.  Later, when the user wants to return to doing that
+activity, the activity is "resumed," which restores the activity’s
+last-seen state, allowing the user to pick up where the activity was
+left off; but the user may also revert the activity to its default
+state, which may be used as a kind of entry point to doing the activity
+in general.
+
+
+File: README.info,  Node: Compatibility,  Next: Modes,  Prev: Activities,  Up: Usage
+
+2.2 Compatibility
+=================
+
+This library is designed to not interfere with other workflows and
+tools; it is intended to coexist and allow integration with them.  For
+example, when ‘activities-tabs-mode’ is enabled, non-activity-related
+tabs are not affected by it; and the user may close any tab using
+existing tab commands, regardless of whether it is associated with an
+activity.
+
+
+File: README.info,  Node: Modes,  Next: Workflow,  Prev: Compatibility,  Up: Usage
+
+2.3 Modes
 =========
 
 ‘activities-mode’
@@ -140,7 +171,7 @@ File: README.info,  Node: Modes,  Next: Workflow,  Up: Usage
 
 File: README.info,  Node: Workflow,  Next: Commands,  Prev: Modes,  Up: Usage
 
-3.2 Workflow
+2.4 Workflow
 ============
 
 An example of a workflow using activities:
@@ -165,7 +196,7 @@ An example of a workflow using activities:
 
 File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usage
 
-3.3 Commands
+2.5 Commands
 ============
 
 ‘activities-new’ (‘C-x C-a n’)
@@ -194,7 +225,7 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usag
 
 File: README.info,  Node: Bookmarks,  Prev: Commands,  Up: Usage
 
-3.4 Bookmarks
+2.6 Bookmarks
 =============
 
 When option ‘activities-bookmark-store’ is enabled, an Emacs bookmark is
@@ -205,7 +236,7 @@ universalize the bookmark system).
 
 File: README.info,  Node: FAQ,  Prev: Usage,  Up: Top
 
-4 FAQ
+3 FAQ
 *****
 
 How is this different from Burly.el (https://github.com/alphapapa/burly.el) or Bufler.el (https://github.com/alphapapa/bufler.el/)?
@@ -263,14 +294,15 @@ Why did I get an error?
 
 Tag Table:
 Node: Top231
-Node: Contents2035
-Node: Installation2155
-Node: Usage3789
-Node: Modes3944
-Node: Workflow4569
-Node: Commands5522
-Node: Bookmarks6735
-Node: FAQ7087
+Node: Installation2059
+Node: Usage3688
+Node: Activities3876
+Node: Compatibility4859
+Node: Modes5343
+Node: Workflow5990
+Node: Commands6943
+Node: Bookmarks8156
+Node: FAQ8508
 
 End Tag Table
 

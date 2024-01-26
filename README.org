@@ -8,7 +8,7 @@ Integration with Emacs's ~tab-bar-mode~ is provided: a window configuration or f
 
 Various hooks are (or will be--feedback is welcome) provided, both globally and per-activity, so that the user can define functions to be called when an activity is saved, restored, or switched from/to.  For example, this could be used to limit the set of buffers offered for switching to within an activity, or to track the time spent in an activity.
 
-* Contents
+* Contents                                                         :noexport:
 :PROPERTIES:
 :TOC:      :include siblings :depth 0 :force (nothing) :ignore (this) :local (nothing)
 :END:
@@ -54,6 +54,16 @@ Until this library is available from a package archive, it's recommended to inst
 If you choose to install it otherwise, you'll need to load both the ~activities~ and ~activities-tabs~ libraries, or ensure that the autoloads are generated properly.
 
 * Usage
+
+** Activities
+
+For the purposes of this library, an "activity" is a window configuration and its associated buffers.  When an activity is "resumed," its buffers are recreated and loaded into the window configuration, which is loaded into a frame or tab.
+
+From the user's perspective, an "activity" should be thought of as something like, "reading my email," "working on my Emacs library," "writing my book," "working for this client," etc.  One arranges a set of windows and buffers according to what's needed, then saves it as a new activity.  Later, when the user wants to return to doing that activity, the activity is "resumed," which restores the activity's last-seen state, allowing the user to pick up where the activity was left off; but the user may also revert the activity to its default state, which may be used as a kind of entry point to doing the activity in general.
+
+** Compatibility
+
+This library is designed to not interfere with other workflows and tools; it is intended to coexist and allow integration with them.  For example, when ~activities-tabs-mode~ is enabled, non-activity-related tabs are not affected by it; and the user may close any tab using existing tab commands, regardless of whether it is associated with an activity.
 
 ** Modes
 
