@@ -120,6 +120,11 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 Nothing new yet.
 
+** v0.1.2
+
+*Fixes*
++ Some single-window configurations were not restored properly.
+
 ** v0.1.1
 
 *Fixes*

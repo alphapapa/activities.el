@@ -61,6 +61,7 @@ Usage
 Changelog
 
 * v0.2-pre: v02-pre.
+* v0.1.2: v012.
 * v0.1.1: v011.
 * v0.1: v01.
 
@@ -306,11 +307,12 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 * Menu:
 
 * v0.2-pre: v02-pre.
+* v0.1.2: v012.
 * v0.1.1: v011.
 * v0.1: v01.
 
 
-File: README.info,  Node: v02-pre,  Next: v011,  Up: Changelog
+File: README.info,  Node: v02-pre,  Next: v012,  Up: Changelog
 
 4.1 v0.2-pre
 ============
@@ -318,9 +320,18 @@ File: README.info,  Node: v02-pre,  Next: v011,  Up: Changelog
 Nothing new yet.
 
 
-File: README.info,  Node: v011,  Next: v01,  Prev: v02-pre,  Up: Changelog
+File: README.info,  Node: v012,  Next: v011,  Prev: v02-pre,  Up: Changelog
 
-4.2 v0.1.1
+4.2 v0.1.2
+==========
+
+*Fixes*
+   • Some single-window configurations were not restored properly.
+
+
+File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
+
+4.3 v0.1.1
 ==========
 
 *Fixes*
@@ -329,7 +340,7 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v02-pre,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-4.3 v0.1
+4.4 v0.1
 ========
 
 Initial release.
@@ -338,19 +349,20 @@ Initial release.
 
 Tag Table:
 Node: Top231
-Node: Installation2135
-Node: Usage3764
-Node: Activities3952
-Node: Compatibility4940
-Node: Modes5424
-Node: Workflow6092
-Node: Commands7045
-Node: Bookmarks8258
-Node: FAQ8610
-Node: Changelog11686
-Node: v02-pre11832
-Node: v01111943
-Node: v0112109
+Node: Installation2151
+Node: Usage3780
+Node: Activities3968
+Node: Compatibility4956
+Node: Modes5440
+Node: Workflow6108
+Node: Commands7061
+Node: Bookmarks8274
+Node: FAQ8626
+Node: Changelog11702
+Node: v02-pre11864
+Node: v01211975
+Node: v01112155
+Node: v0112318
 
 End Tag Table
 
