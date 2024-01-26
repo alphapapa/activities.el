@@ -60,6 +60,7 @@ Usage
 
 Changelog
 
+* v0.1.1: v011.
 * v0.1: v01.
 
 
@@ -303,12 +304,22 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 
 * Menu:
 
+* v0.1.1: v011.
 * v0.1: v01.
 
 
-File: README.info,  Node: v01,  Up: Changelog
+File: README.info,  Node: v011,  Next: v01,  Up: Changelog
 
-4.1 v0.1
+4.1 v0.1.1
+==========
+
+*Fixes*
+   • Silence message about non-file-visiting buffers.
+
+
+File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
+
+4.2 v0.1
 ========
 
 Initial release.
@@ -317,17 +328,18 @@ Initial release.
 
 Tag Table:
 Node: Top231
-Node: Installation2098
-Node: Usage3727
-Node: Activities3915
-Node: Compatibility4898
-Node: Modes5382
-Node: Workflow6029
-Node: Commands6982
-Node: Bookmarks8195
-Node: FAQ8547
-Node: Changelog11623
-Node: v0111732
+Node: Installation2114
+Node: Usage3743
+Node: Activities3931
+Node: Compatibility4914
+Node: Modes5398
+Node: Workflow6045
+Node: Commands6998
+Node: Bookmarks8211
+Node: FAQ8563
+Node: Changelog11639
+Node: v01111764
+Node: v0111914
 
 End Tag Table
 
