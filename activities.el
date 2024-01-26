@@ -285,8 +285,10 @@ If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
   (interactive (list (activities-completing-read) :resetp current-prefix-arg))
-  (activities--switch activity)
-  (activities-set activity :state (if resetp 'default 'last)))
+  (let ((already-active-p (activities-activity-active-p activity)))
+    (activities--switch activity)
+    (unless (or resetp already-active-p)
+      (activities-set activity :state (if resetp 'default 'last)))))
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
