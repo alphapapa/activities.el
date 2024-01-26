@@ -38,7 +38,9 @@ Until this library is available from a package archive, it's recommended to inst
      ("C-x C-a RET" . activities-switch)
      ("C-x C-a g" . activities-revert)
      ("C-x C-a n" . activities-new)
-     ("C-x C-a s" . activities-suspend))
+     ("C-x C-a s" . activities-suspend)
+     ;; Alias for `activities-suspend'.
+     ("C-x C-a C-k" . activities-kill))
 
     :config
     ;; Automatically save activities' states when Emacs is idle and upon
@@ -71,6 +73,17 @@ An example of a workflow using activities:
 7. Rearrange windows and buffers.
 8. Call ~activities-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
 9. Suspend the activity with ~activities-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
+
+** Commands
+
++ ~activities-new~ (~C-x C-a n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
++ ~activities-suspend~ (~C-x C-a s~) :: Save an activity's state and close its frame or tab.
++ ~activities-kill~ (~C-x C-a C-k~) :: Alias for ~activities-suspend~.
++ ~activities-resume~ (~C-x C-a C-a~) :: Resume an activity, switching to a new frame or tab for its window configuration, and restoring its buffers.  With prefix argument, restore its default state rather than its last.
++ ~activities-revert~ (~C-x C-a g~) :: Revert an activity to its default state.
++ ~activities-switch~ (~C-x C-a RET~) :: Switch to an already-active activity.
++ ~activities-discard~ :: Discard an activity permanently.
++ ~activities-save-all~ :: Save all active activities' states.  (~activities-mode~ does this automatically, so this command should rarely be needed.)
 
 ** Bookmarks
 

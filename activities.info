@@ -53,6 +53,7 @@ Usage
 
 * Modes::
 * Workflow::
+* Commands::
 * Bookmarks::
 
 
@@ -90,7 +91,9 @@ to install it using Quelpa (https://framagit.org/steckerhalter/quelpa):
         ("C-x C-a RET" . activities-switch)
         ("C-x C-a g" . activities-revert)
         ("C-x C-a n" . activities-new)
-        ("C-x C-a s" . activities-suspend))
+        ("C-x C-a s" . activities-suspend)
+        ;; Alias for `activities-suspend'.
+        ("C-x C-a C-k" . activities-kill))
 
        :config
        ;; Automatically save activities' states when Emacs is idle and upon
@@ -114,6 +117,7 @@ File: README.info,  Node: Usage,  Next: FAQ,  Prev: Installation,  Up: Top
 
 * Modes::
 * Workflow::
+* Commands::
 * Bookmarks::
 
 
@@ -134,7 +138,7 @@ File: README.info,  Node: Modes,  Next: Workflow,  Up: Usage
      please report them._)
 
 
-File: README.info,  Node: Workflow,  Next: Bookmarks,  Prev: Modes,  Up: Usage
+File: README.info,  Node: Workflow,  Next: Commands,  Prev: Modes,  Up: Usage
 
 3.2 Workflow
 ============
@@ -159,9 +163,38 @@ An example of a workflow using activities:
      saves its last state and closes its frame/tab).
 
 
-File: README.info,  Node: Bookmarks,  Prev: Workflow,  Up: Usage
+File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usage
 
-3.3 Bookmarks
+3.3 Commands
+============
+
+‘activities-new’ (‘C-x C-a n’)
+     Define a new activity whose default state is the current frame’s or
+     tab’s window configuration.  With prefix argument, overwrite an
+     existing activity (thereby updating its default state to the
+     current state).
+‘activities-suspend’ (‘C-x C-a s’)
+     Save an activity’s state and close its frame or tab.
+‘activities-kill’ (‘C-x C-a C-k’)
+     Alias for ‘activities-suspend’.
+‘activities-resume’ (‘C-x C-a C-a’)
+     Resume an activity, switching to a new frame or tab for its window
+     configuration, and restoring its buffers.  With prefix argument,
+     restore its default state rather than its last.
+‘activities-revert’ (‘C-x C-a g’)
+     Revert an activity to its default state.
+‘activities-switch’ (‘C-x C-a RET’)
+     Switch to an already-active activity.
+‘activities-discard’
+     Discard an activity permanently.
+‘activities-save-all’
+     Save all active activities’ states.  (‘activities-mode’ does this
+     automatically, so this command should rarely be needed.)
+
+
+File: README.info,  Node: Bookmarks,  Prev: Commands,  Up: Usage
+
+3.4 Bookmarks
 =============
 
 When option ‘activities-bookmark-store’ is enabled, an Emacs bookmark is
@@ -230,13 +263,14 @@ Why did I get an error?
 
 Tag Table:
 Node: Top231
-Node: Contents2022
-Node: Installation2142
-Node: Usage3691
-Node: Modes3833
-Node: Workflow4458
-Node: Bookmarks5412
-Node: FAQ5764
+Node: Contents2035
+Node: Installation2155
+Node: Usage3789
+Node: Modes3944
+Node: Workflow4569
+Node: Commands5522
+Node: Bookmarks6735
+Node: FAQ7087
 
 End Tag Table
 
