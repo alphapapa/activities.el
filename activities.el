@@ -201,6 +201,7 @@ deserialized back to the buffer after it is reincarnated.")
   "Activities."
   :link '(emacs-commentary-link "activities")
   :link '(url-link "https://github.com/alphapapa/activities.el")
+  ;; TODO: Add info manual link.
   :group 'convenience)
 
 (defcustom activities-always-persist t
