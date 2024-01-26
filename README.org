@@ -16,6 +16,7 @@ Various hooks are (or will be--feedback is welcome) provided, both globally and 
 - [[#installation][Installation]]
 - [[#usage][Usage]]
 - [[#faq][FAQ]]
+- [[#changelog][Changelog]]
 :END:
 
 * Installation
@@ -112,6 +113,12 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 + Why did a buffer not restore correctly? :: Most likely because that buffer's major mode does not support Emacs bookmarks (which ~activities~ uses internally to save and restore buffer state).  But many, if not most, major modes do; and for those that don't, implementing such support is usually trivial (and thereby benefits Emacs as a whole, not just ~activities~).  So contact the major mode's maintainer and ask that ~bookmark~ support be implemented.
 
 + Why did I get an error? :: Because ~activities~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
+
+* Changelog
+
+** v0.1
+
+Initial release.
 
 * COMMENT Export setup                                             :noexport:
 :PROPERTIES:

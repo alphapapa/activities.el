@@ -4,7 +4,7 @@
 
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; Keywords: convenience
-;; Version: 0.1-pre
+;; Version: 0.1
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
