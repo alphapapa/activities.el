@@ -4,7 +4,7 @@
 
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; Keywords: convenience
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -560,8 +560,11 @@ activity's name is NAME."
     (make-activities-buffer
      :bookmark (condition-case-unless-debug err
                    (bookmark-make-record)
-                 (error (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err)
-                        nil))
+                 (error
+                  (pcase (error-message-string err)
+                    ("Buffer not visiting a file or directory")
+                    (_ (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err)))
+                  nil))
      :filename (buffer-file-name buffer)
      :name (buffer-name buffer)
      ;; TODO: Handle indirect buffers, narrowing.
