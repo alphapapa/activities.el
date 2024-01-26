@@ -1,0 +1,8 @@
+.elpaignore
+Makefile
+makem.sh
+NOTES.org
+.github/
+images/
+tests/
+activities.info
