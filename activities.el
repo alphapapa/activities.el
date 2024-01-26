@@ -290,6 +290,15 @@ available."
     (unless (or resetp already-active-p)
       (activities-set activity :state (if resetp 'default 'last)))))
 
+(defun activities-switch (activity)
+  "Switch to ACTIVITY.
+Interactively, offers active activities."
+  (interactive
+   (list (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
+          :prompt "Switch to: ")))
+  (activities--switch activity))
+
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
 Its last is saved, and its frames, windows, and tabs are
@@ -298,20 +307,7 @@ closed."
   (activities-save activity :lastp t)
   (activities-close activity))
 
-(cl-defun activities-save (activity &key defaultp lastp persistp)
-  "Save states of ACTIVITY.
-If DEFAULTP, save its default state; if LASTP, its last.  If
-PERSISTP, force persisting of data (otherwise, data is persisted
-according to option `activities-always-persist', which see)."
-  (unless (or defaultp lastp)
-    (user-error "Neither DEFAULTP nor LASTP specified"))
-  (activities-with activity
-    (pcase-let* (((cl-struct activities-activity name default last) activity)
-                 (new-state (activities-state)))
-      (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-            (activities-activity-last activity) (if (or lastp (not last)) new-state last)
-            (map-elt activities-activities name) activity)))
-  (activities--persist persistp))
+(defalias #'activities-suspend 'activities-kill)
 
 (defun activities-save-all ()
   "Save all active activities' last states.
@@ -321,14 +317,12 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
     (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
       (activities-save activity :lastp t))))
 
-(defun activities-reset (activity)
+(defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
   (interactive (list (activities-current)))
   (unless activity
     (user-error "No active activity"))
   (activities-set activity :state 'default))
-
-(defalias 'activities-revert #'activities-reset)
 
 (defun activities-discard (activity)
   "Discard ACTIVITY and its state.
@@ -379,6 +373,21 @@ To be called from `kill-emacs-hook'."
 
 ;;;; Functions
 
+(cl-defun activities-save (activity &key defaultp lastp persistp)
+  "Save states of ACTIVITY.
+If DEFAULTP, save its default state; if LASTP, its last.  If
+PERSISTP, force persisting of data (otherwise, data is persisted
+according to option `activities-always-persist', which see)."
+  (unless (or defaultp lastp)
+    (user-error "Neither DEFAULTP nor LASTP specified"))
+  (activities-with activity
+    (pcase-let* (((cl-struct activities-activity name default last) activity)
+                 (new-state (activities-state)))
+      (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+            (activities-activity-last activity) (if (or lastp (not last)) new-state last)
+            (map-elt activities-activities name) activity)))
+  (activities--persist persistp))
+
 (cl-defun activities-set (activity &key (state 'last))
   "Set ACTIVITY as the current one.
 Its STATE (`last' or `default') is loaded into the current frame."
@@ -417,15 +426,6 @@ closed."
 (defun activities-named (name)
   "Return activity having NAME."
   (map-elt activities-activities name))
-
-(defun activities-switch (activity)
-  "Switch to ACTIVITY.
-Interactively, offers active activities."
-  (interactive
-   (list (activities-completing-read
-          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-          :prompt "Switch to: ")))
-  (activities--switch activity))
 
 (defun activities--switch (activity)
   "Switch to ACTIVITY.
