@@ -4,7 +4,7 @@
 
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; Keywords: convenience
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -494,7 +494,12 @@ activity's name is NAME."
                             (funcall serialize (map-elt parameters parameter)))))
                   (setf (map-elt attrs 'parameters) parameters)
                   (cons 'leaf attrs))))
-    (translate-state state)))
+    (if-let ((leaf-pos (cl-position 'leaf state)))
+        ;; A one-window frame: the elements following `leaf' are that window's params.
+        (append (cl-subseq state 0 leaf-pos)
+                (translate-leaf (cl-subseq state leaf-pos)))
+      ;; Multi-window frame.
+      (translate-state state))))
 
 (defun activities--windows-set (state)
   "Set window configuration according to STATE."
