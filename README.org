@@ -60,7 +60,7 @@ If you choose to install it otherwise, you'll need to load both the ~activities~
 
 For the purposes of this library, an "activity" is a window configuration and its associated buffers.  When an activity is "resumed," its buffers are recreated and loaded into the window configuration, which is loaded into a frame or tab.
 
-From the user's perspective, an "activity" should be thought of as something like, "reading my email," "working on my Emacs library," "writing my book," "working for this client," etc.  One arranges a set of windows and buffers according to what's needed, then saves it as a new activity.  Later, when the user wants to return to doing that activity, the activity is "resumed," which restores the activity's last-seen state, allowing the user to pick up where the activity was left off; but the user may also revert the activity to its default state, which may be used as a kind of entry point to doing the activity in general.
+From the user's perspective, an "activity" should be thought of as something like, "reading my email," "working on my Emacs library," "writing my book," "working for this client," etc.  The user arranges a set of windows and buffers according to what's needed, then saves it as a new activity.  Later, when the user wants to return to doing that activity, the activity is "resumed," which restores the activity's last-seen state, allowing the user to pick up where the activity was left off; but the user may also revert the activity to its default state, which may be used as a kind of entry point to doing the activity in general.
 
 ** Compatibility
 
@@ -68,7 +68,7 @@ This library is designed to not interfere with other workflows and tools; it is 
 
 ** Modes
 
-+ ~activities-mode~ :: Automatically saves activities' states when Emacs is idle.  Should be enabled while using this package (otherwise you would have to manually call ~activities-save-all~, which would defeat much of the purpose of this library).
++ ~activities-mode~ :: Automatically saves activities' states when Emacs is idle and when Emacs exits.  Should be enabled while using this package (otherwise you would have to manually call ~activities-save-all~, which would defeat much of the purpose of this library).
 + ~activities-tabs-mode~ :: Causes activities to be managed as ~tab-bar~ tabs rather than frames (the default).  (/This is what the author uses; bugs present when this mode is not enabled are less likely to be found, so please report them./)
 
 ** Workflow
