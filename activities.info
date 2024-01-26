@@ -60,7 +60,7 @@ Usage
 
 Changelog
 
-* v0.1.3-pre: v013-pre.
+* v0.1.3: v013.
 * v0.1.2: v012.
 * v0.1.1: v011.
 * v0.1: v01.
@@ -306,23 +306,23 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.1.3-pre: v013-pre.
+* v0.1.3: v013.
 * v0.1.2: v012.
 * v0.1.1: v011.
 * v0.1: v01.
 
 
-File: README.info,  Node: v013-pre,  Next: v012,  Up: Changelog
+File: README.info,  Node: v013,  Next: v012,  Up: Changelog
 
-4.1 v0.1.3-pre
-==============
+4.1 v0.1.3
+==========
 
 *Fixes*
    • Autoloads.
    • Command aliases.
 
 
-File: README.info,  Node: v012,  Next: v011,  Prev: v013-pre,  Up: Changelog
+File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 4.2 v0.1.2
 ==========
@@ -351,20 +351,20 @@ Initial release.
 
 Tag Table:
 Node: Top231
-Node: Installation2154
-Node: Usage3783
-Node: Activities3971
-Node: Compatibility4954
-Node: Modes5438
-Node: Workflow6085
-Node: Commands7038
-Node: Bookmarks8251
-Node: FAQ8603
-Node: Changelog11679
-Node: v013-pre11844
-Node: v01211993
-Node: v01112174
-Node: v0112337
+Node: Installation2146
+Node: Usage3775
+Node: Activities3963
+Node: Compatibility4946
+Node: Modes5430
+Node: Workflow6077
+Node: Commands7030
+Node: Bookmarks8243
+Node: FAQ8595
+Node: Changelog11671
+Node: v01311828
+Node: v01211965
+Node: v01112142
+Node: v0112305
 
 End Tag Table
 
