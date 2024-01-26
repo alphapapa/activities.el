@@ -319,6 +319,7 @@ File: README.info,  Node: v013-pre,  Next: v012,  Up: Changelog
 
 *Fixes*
    • Autoloads.
+   • Command aliases.
 
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013-pre,  Up: Changelog
@@ -361,9 +362,9 @@ Node: Bookmarks8251
 Node: FAQ8603
 Node: Changelog11679
 Node: v013-pre11844
-Node: v01211969
-Node: v01112150
-Node: v0112313
+Node: v01211993
+Node: v01112174
+Node: v0112337
 
 End Tag Table
 

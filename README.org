@@ -120,6 +120,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 *Fixes*
 + Autoloads.
++ Command aliases.
 
 ** v0.1.2
 

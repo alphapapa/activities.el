@@ -309,7 +309,7 @@ closed."
   (activities-save activity :lastp t)
   (activities-close activity))
 
-(defalias #'activities-suspend 'activities-kill)
+(defalias 'activities-kill #'activities-suspend)
 
 (defun activities-save-all ()
   "Save all active activities' last states.
