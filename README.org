@@ -43,7 +43,7 @@ Until this library is available from a package archive, it's recommended to inst
      ;; Alias for `activities-suspend'.
      ("C-x C-a C-k" . activities-kill))
 
-    :config
+    :init
     ;; Automatically save activities' states when Emacs is idle and upon
     ;; exit.
     (activities-mode)

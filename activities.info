@@ -98,7 +98,7 @@ to install it using Quelpa (https://framagit.org/steckerhalter/quelpa):
         ;; Alias for `activities-suspend'.
         ("C-x C-a C-k" . activities-kill))
 
-       :config
+       :init
        ;; Automatically save activities' states when Emacs is idle and upon
        ;; exit.
        (activities-mode)
@@ -362,20 +362,20 @@ Initial release.
 Tag Table:
 Node: Top231
 Node: Installation2167
-Node: Usage3796
-Node: Activities3984
-Node: Compatibility4972
-Node: Modes5456
-Node: Workflow6124
-Node: Commands7077
-Node: Bookmarks8290
-Node: FAQ8642
-Node: Changelog11718
-Node: v02-pre11896
-Node: v01312007
-Node: v01212160
-Node: v01112337
-Node: v0112500
+Node: Usage3794
+Node: Activities3982
+Node: Compatibility4970
+Node: Modes5454
+Node: Workflow6122
+Node: Commands7075
+Node: Bookmarks8288
+Node: FAQ8640
+Node: Changelog11716
+Node: v02-pre11894
+Node: v01312005
+Node: v01212158
+Node: v01112335
+Node: v0112498
 
 End Tag Table
 
