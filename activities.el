@@ -205,8 +205,7 @@ deserialized back to the buffer after it is reincarnated.")
 
 (defcustom activities-always-persist t
   "Always persist activity states to disk when saving.
-When disabled, only persist them when exiting Emacs or disabling
-`activities-mode'.
+When disabled, only persist them when exiting Emacs.
 
 Generally, leaving this enabled should be fine.  However, in case
 of unusual bugs, it could be helpful to only save upon exiting
@@ -267,7 +266,6 @@ Called with one argument, the activity."
   "Save current state as a new activity with NAME.
 If FORCEP (interactively, with prefix), overwrite existing
 activity."
-  ;; Not sure if this is needed, but let's experiment.
   (interactive
    (list (read-string "New activity name: ") :forcep current-prefix-arg))
   (when (and (not forcep) (member name (activities-names)))
@@ -459,19 +457,9 @@ activity's name is NAME."
 (defun activities--window-state (frame)
   "Return FRAME's window state."
   (with-selected-frame frame
-    ;; Set window parameter.
-    ;; (mapc (lambda (window)
-    ;;         (let ((value (activity--serialize (window-buffer window))))
-    ;;           (set-window-parameter window 'activities-buffer value)))
-    ;;       (window-list))
     (let* ((window-persistent-parameters (append activities-window-persistent-parameters
                                                  window-persistent-parameters))
            (window-state (window-state-get nil 'writable)))
-      ;; Clear window parameters we set (because they aren't kept
-      ;; current, so leaving them could be confusing).
-      ;; (mapc (lambda (window)
-      ;;         (set-window-parameter window 'activities-buffer nil))
-      ;;       (window-list))
       (activities--window-serialized window-state))))
 
 (defun activities--window-serialized (state)
@@ -646,6 +634,11 @@ PROMPT is passed to `completing-read', which see."
   "Return list of names of ACTIVITIES."
   (map-keys activities))
 
+(defun activities-name-for (activity)
+  "Return frame/tab name for ACTIVITY.
+Adds `activities-name-prefix'."
+  (concat activities-name-prefix (activities-activity-name activity)))
+
 ;;;; Bookmark support
 
 (defun activities-bookmark-store (activity)
@@ -668,11 +661,6 @@ ignored."
   (cl-loop for variable in variables
            when (buffer-local-boundp variable (current-buffer))
            collect (cons variable (buffer-local-value variable (current-buffer)))))
-
-(defun activities-name-for (activity)
-  "Return frame/tab name for ACTIVITY.
-Adds `activities-name-prefix'."
-  (concat activities-name-prefix (activities-activity-name activity)))
 
 ;;;; Footer
 
