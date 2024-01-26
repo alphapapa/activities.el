@@ -638,7 +638,7 @@ activity's name is NAME."
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read', which see."
   (let* ((names (activities-names activities))
-         (name (completing-read prompt names nil nil nil activities-completing-read-history)))
+         (name (completing-read prompt names nil t nil 'activities-completing-read-history)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
