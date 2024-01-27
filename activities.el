@@ -354,7 +354,7 @@ It will not be recoverable."
 
 (defgroup activities-mode nil
   "Automatically save activities."
-  :group 'activity)
+  :group 'activities)
 
 (defcustom activities-mode-idle-frequency 5
   "Automatically save activities when Emacs has been idle this many seconds."
