@@ -266,9 +266,13 @@ Called with one argument, the activity."
 (cl-defun activities-new (name &key forcep)
   "Save current state as a new activity with NAME.
 If FORCEP (interactively, with prefix), overwrite existing
-activity."
+activity.  Interactively, NAME defaults to the current
+`project.el' project's name, if any."
   (interactive
-   (list (read-string "New activity name: ") :forcep current-prefix-arg))
+   (let ((default (when-let ((proj (project-current)))
+                    (project-name proj))))
+     (list (read-string (format-prompt "New activity name" default) nil nil default)
+           :forcep current-prefix-arg)))
   (when (and (not forcep) (member name (activities-names)))
     (user-error "Activity named %S already exists" name))
   (let ((activity (make-activities-activity :name name)))
