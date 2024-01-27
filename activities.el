@@ -633,11 +633,11 @@ activity's name is NAME."
           (current-buffer)))))
 
 (cl-defun activities-completing-read
-    (&key (activities activities-activities) (prompt "Open activity: "))
+    (&key (activities activities-activities) (prompt "Open activity: ") default)
   "Return an activity read with completion from ACTIVITIES.
-PROMPT is passed to `completing-read', which see."
+PROMPT and DEFAULT are passed to `completing-read', which see."
   (let* ((names (activities-names activities))
-         (name (completing-read prompt names nil t nil 'activities-completing-read-history)))
+         (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
