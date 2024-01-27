@@ -312,9 +312,12 @@ Interactively, offers active activities."
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
-Its last is saved, and its frames, windows, and tabs are
-closed."
-  (interactive (list (activities-completing-read :prompt "Suspend activity: ")))
+Its last is saved, and its frames, windows, and tabs are closed."
+  (interactive
+   (let ((default (when (activities-current)
+                    (activities-activity-name (activities-current)))))
+     (list (activities-completing-read :prompt (format-prompt "Suspend activity" default)
+                                       :default default))))
   (activities-save activity :lastp t)
   (activities-close activity))
 
