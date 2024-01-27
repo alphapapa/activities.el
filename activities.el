@@ -342,7 +342,11 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   "Discard ACTIVITY and its state.
 It will not be recoverable."
   ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
-  (interactive (list (activities-completing-read :prompt "Discard activity: ")))
+  (interactive
+   (let ((default (when (activities-current)
+                    (activities-activity-name (activities-current)))))
+     (list (activities-completing-read :prompt (format-prompt "Discard activity" default)
+                                       :default default))))
   (ignore-errors
     ;; FIXME: After fixing all the bugs, remove ignore-errors.
     (activities-close activity))
