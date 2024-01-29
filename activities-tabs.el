@@ -54,7 +54,7 @@ Each is called with one argument, the activity."
   :type 'string)
 
 (defface activities-tabs-face
-  `((t :foreground ,(face-foreground 'font-lock-string-face nil 'default)))
+  `((t :foreground ,(face-foreground 'font-lock-function-name-face nil 'default)))
   "Applied to tab-bar faces for tabs representing activities.")
 
 ;;;; Mode
