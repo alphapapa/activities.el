@@ -319,7 +319,9 @@ File: README.info,  Node: v02-pre,  Next: v013,  Up: Changelog
 4.1 v0.2-pre
 ============
 
-Nothing new yet.
+*Additions*
+   • Offer current ‘project’ name by default for new activities.
+     (Thanks to Joseph Turner (https://github.com/josephmturner).)
 
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02-pre,  Up: Changelog
@@ -372,10 +374,10 @@ Node: Bookmarks8288
 Node: FAQ8640
 Node: Changelog11716
 Node: v02-pre11894
-Node: v01312005
-Node: v01212158
-Node: v01112335
-Node: v0112498
+Node: v01312138
+Node: v01212291
+Node: v01112468
+Node: v0112631
 
 End Tag Table
 
