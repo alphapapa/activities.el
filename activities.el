@@ -312,9 +312,12 @@ Interactively, offers active activities."
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
-Its last is saved, and its frames, windows, and tabs are
-closed."
-  (interactive (list (activities-completing-read :prompt "Suspend activity: ")))
+Its last is saved, and its frames, windows, and tabs are closed."
+  (interactive
+   (let ((default (when (activities-current)
+                    (activities-activity-name (activities-current)))))
+     (list (activities-completing-read :prompt (format-prompt "Suspend activity" default)
+                                       :default default))))
   (activities-save activity :lastp t)
   (activities-close activity))
 
@@ -339,7 +342,11 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   "Discard ACTIVITY and its state.
 It will not be recoverable."
   ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
-  (interactive (list (activities-completing-read :prompt "Discard activity: ")))
+  (interactive
+   (let ((default (when (activities-current)
+                    (activities-activity-name (activities-current)))))
+     (list (activities-completing-read :prompt (format-prompt "Discard activity" default)
+                                       :default default))))
   (ignore-errors
     ;; FIXME: After fixing all the bugs, remove ignore-errors.
     (activities-close activity))
@@ -633,11 +640,11 @@ activity's name is NAME."
           (current-buffer)))))
 
 (cl-defun activities-completing-read
-    (&key (activities activities-activities) (prompt "Open activity: "))
+    (&key (activities activities-activities) (prompt "Open activity: ") default)
   "Return an activity read with completion from ACTIVITIES.
-PROMPT is passed to `completing-read', which see."
+PROMPT and DEFAULT are passed to `completing-read', which see."
   (let* ((names (activities-names activities))
-         (name (completing-read prompt names nil t nil 'activities-completing-read-history)))
+         (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
