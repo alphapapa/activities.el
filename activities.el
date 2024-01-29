@@ -260,6 +260,14 @@ Called with one argument, the activity."
 Called with one argument, the activity."
   :type 'hook)
 
+(defcustom activities-default-name-fn 'activities--project-name
+  "Function that returns the default name for a new activity.
+The string should not be prefixed by, e.g. \"Activity\" because
+prefixes will be added automatically."
+  :type '(choice (const :tag "No default name" (lambda (&rest _) nil))
+                 (const :tag "Current project's name" activities--project-name)
+                 (function-item :tag "Other function")))
+
 ;;;; Commands
 
 ;;;###autoload
@@ -268,7 +276,9 @@ Called with one argument, the activity."
 If FORCEP (interactively, with prefix), overwrite existing
 activity."
   (interactive
-   (list (read-string "New activity name: ") :forcep current-prefix-arg))
+   (let ((default (funcall activities-default-name-fn)))
+     (list (read-string (format-prompt "New activity name" default) nil nil default)
+           :forcep current-prefix-arg)))
   (when (and (not forcep) (member name (activities-names)))
     (user-error "Activity named %S already exists" name))
   (let ((activity (make-activities-activity :name name)))
@@ -639,6 +649,15 @@ PROMPT is passed to `completing-read', which see."
   "Return frame/tab name for ACTIVITY.
 Adds `activities-name-prefix'."
   (concat activities-name-prefix (activities-activity-name activity)))
+
+;;;; Project support
+
+(declare-function project-name "project")
+(defun activities--project-name ()
+  "Return the name of the current project, if any."
+  (require 'project)
+  (when-let ((project (project-current)))
+    (project-name project)))
 
 ;;;; Bookmark support
 
