@@ -391,7 +391,7 @@ according to option `activities-always-persist', which see)."
 
 (cl-defun activities-set (activity &key (state 'last))
   "Set ACTIVITY as the current one.
-Its STATE (`last' or `default') is loaded into the current frame."
+Its STATE (\\+`last' or \\+`default') is loaded into the current frame."
   (activities--set activity)
   (activities-with activity
     (pcase-let (((cl-struct activities-activity name default last) activity))
