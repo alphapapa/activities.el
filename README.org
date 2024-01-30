@@ -116,7 +116,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 * Changelog
 
-** v0.2-pre
+** v0.2
 
 *Additions*
 + Offer current ~project~ name by default for new activities.  (Thanks to [[https://breatheoutbreathe.in][Joseph Turner]].)
