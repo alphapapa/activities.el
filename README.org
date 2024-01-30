@@ -119,6 +119,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 ** v0.3-pre
 
 *Additions*
++ Command ~activities-list~ lists activities in a ~vtable~ buffer in which they can be managed.
 + Offer current activity name by default when redefining an activity with ~activities-new~.
 + Record times at which activities' states were updated.
 

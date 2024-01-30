@@ -322,6 +322,8 @@ File: README.info,  Node: v03-pre,  Next: v02,  Up: Changelog
 ============
 
 *Additions*
+   • Command ‘activities-list’ lists activities in a ‘vtable’ buffer in
+     which they can be managed.
    • Offer current activity name by default when redefining an activity
      with ‘activities-new’.
    • Record times at which activities’ states were updated.
@@ -393,11 +395,11 @@ Node: Bookmarks8301
 Node: FAQ8653
 Node: Changelog11729
 Node: v03-pre11920
-Node: v0212195
-Node: v01312691
-Node: v01212840
-Node: v01113017
-Node: v0113180
+Node: v0212309
+Node: v01312805
+Node: v01212954
+Node: v01113131
+Node: v0113294
 
 End Tag Table
 
