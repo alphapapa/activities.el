@@ -60,6 +60,7 @@ Usage
 
 Changelog
 
+* v0.3-pre: v03-pre.
 * v0.2: v02.
 * v0.1.3: v013.
 * v0.1.2: v012.
@@ -307,6 +308,7 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 
 * Menu:
 
+* v0.3-pre: v03-pre.
 * v0.2: v02.
 * v0.1.3: v013.
 * v0.1.2: v012.
@@ -314,9 +316,17 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v02,  Next: v013,  Up: Changelog
+File: README.info,  Node: v03-pre,  Next: v02,  Up: Changelog
 
-4.1 v0.2
+4.1 v0.3-pre
+============
+
+Nothing new yet.
+
+
+File: README.info,  Node: v02,  Next: v013,  Prev: v03-pre,  Up: Changelog
+
+4.2 v0.2
 ========
 
 *Additions*
@@ -332,7 +342,7 @@ File: README.info,  Node: v02,  Next: v013,  Up: Changelog
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
-4.2 v0.1.3
+4.3 v0.1.3
 ==========
 
 *Fixes*
@@ -342,7 +352,7 @@ File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
-4.3 v0.1.2
+4.4 v0.1.2
 ==========
 
 *Fixes*
@@ -351,7 +361,7 @@ File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
-4.4 v0.1.1
+4.5 v0.1.1
 ==========
 
 *Fixes*
@@ -360,7 +370,7 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-4.5 v0.1
+4.6 v0.1
 ========
 
 Initial release.
@@ -369,21 +379,22 @@ Initial release.
 
 Tag Table:
 Node: Top231
-Node: Installation2159
-Node: Usage3786
-Node: Activities3974
-Node: Compatibility4962
-Node: Modes5446
-Node: Workflow6114
-Node: Commands7067
-Node: Bookmarks8280
-Node: FAQ8632
-Node: Changelog11708
-Node: v0211878
-Node: v01312358
-Node: v01212507
-Node: v01112684
-Node: v0112847
+Node: Installation2180
+Node: Usage3807
+Node: Activities3995
+Node: Compatibility4983
+Node: Modes5467
+Node: Workflow6135
+Node: Commands7088
+Node: Bookmarks8301
+Node: FAQ8653
+Node: Changelog11729
+Node: v03-pre11920
+Node: v0212030
+Node: v01312526
+Node: v01212675
+Node: v01112852
+Node: v0113015
 
 End Tag Table
 
