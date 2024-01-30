@@ -60,7 +60,7 @@ Usage
 
 Changelog
 
-* v0.3-pre: v03-pre.
+* v0.3: v03.
 * v0.2: v02.
 * v0.1.3: v013.
 * v0.1.2: v012.
@@ -312,7 +312,7 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.3-pre: v03-pre.
+* v0.3: v03.
 * v0.2: v02.
 * v0.1.3: v013.
 * v0.1.2: v012.
@@ -320,10 +320,10 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v03-pre,  Next: v02,  Up: Changelog
+File: README.info,  Node: v03,  Next: v02,  Up: Changelog
 
-4.1 v0.3-pre
-============
+4.1 v0.3
+========
 
 *Additions*
    • Command ‘activities-list’ lists activities in a ‘vtable’ buffer in
@@ -333,7 +333,7 @@ File: README.info,  Node: v03-pre,  Next: v02,  Up: Changelog
    • Record times at which activities’ states were updated.
 
 
-File: README.info,  Node: v02,  Next: v013,  Prev: v03-pre,  Up: Changelog
+File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
 4.2 v0.2
 ========
@@ -388,22 +388,22 @@ Initial release.
 
 Tag Table:
 Node: Top231
-Node: Installation2180
-Node: Usage3847
-Node: Activities4035
-Node: Compatibility5023
-Node: Modes5507
-Node: Workflow6175
-Node: Commands7128
-Node: Bookmarks8484
-Node: FAQ8836
-Node: Changelog11912
-Node: v03-pre12103
-Node: v0212492
-Node: v01312988
-Node: v01213137
-Node: v01113314
-Node: v0113477
+Node: Installation2172
+Node: Usage3839
+Node: Activities4027
+Node: Compatibility5015
+Node: Modes5499
+Node: Workflow6167
+Node: Commands7120
+Node: Bookmarks8476
+Node: FAQ8828
+Node: Changelog11904
+Node: v0312087
+Node: v0212464
+Node: v01312956
+Node: v01213105
+Node: v01113282
+Node: v0113445
 
 End Tag Table
 
