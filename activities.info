@@ -87,7 +87,8 @@ to install it using Quelpa (https://framagit.org/steckerhalter/quelpa):
        :quelpa (activities :fetcher github :repo "alphapapa/activities.el")
 
        :bind
-       (("C-x C-a a" . activities-resume)
+       (("C-x C-a l" . activities-list)
+        ("C-x C-a a" . activities-resume)
         ;; For convenience, we also bind `activities-resume' to "C-a", so the
         ;; user need not lift the Control key.  This makes it easier to
         ;; quickly switch between activities.
@@ -209,6 +210,9 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usag
 2.5 Commands
 ============
 
+‘activities-list’ (‘C-x C-a l’)
+     List activities in a ‘vtable’ buffer in which they can be managed
+     with various commands.
 ‘activities-new’ (‘C-x C-a n’)
      Define a new activity whose default state is the current frame’s or
      tab’s window configuration.  With prefix argument, overwrite an
@@ -385,21 +389,21 @@ Initial release.
 Tag Table:
 Node: Top231
 Node: Installation2180
-Node: Usage3807
-Node: Activities3995
-Node: Compatibility4983
-Node: Modes5467
-Node: Workflow6135
-Node: Commands7088
-Node: Bookmarks8301
-Node: FAQ8653
-Node: Changelog11729
-Node: v03-pre11920
-Node: v0212309
-Node: v01312805
-Node: v01212954
-Node: v01113131
-Node: v0113294
+Node: Usage3847
+Node: Activities4035
+Node: Compatibility5023
+Node: Modes5507
+Node: Workflow6175
+Node: Commands7128
+Node: Bookmarks8484
+Node: FAQ8836
+Node: Changelog11912
+Node: v03-pre12103
+Node: v0212492
+Node: v01312988
+Node: v01213137
+Node: v01113314
+Node: v0113477
 
 End Tag Table
 

@@ -31,7 +31,8 @@ Until this library is available from a package archive, it's recommended to inst
     :quelpa (activities :fetcher github :repo "alphapapa/activities.el")
 
     :bind
-    (("C-x C-a a" . activities-resume)
+    (("C-x C-a l" . activities-list)
+     ("C-x C-a a" . activities-resume)
      ;; For convenience, we also bind `activities-resume' to "C-a", so the
      ;; user need not lift the Control key.  This makes it easier to
      ;; quickly switch between activities.
@@ -87,6 +88,7 @@ An example of a workflow using activities:
 
 ** Commands
 
++ ~activities-list~ (~C-x C-a l~) :: List activities in a ~vtable~ buffer in which they can be managed with various commands.
 + ~activities-new~ (~C-x C-a n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
 + ~activities-suspend~ (~C-x C-a s~) :: Save an activity's state and close its frame or tab.
 + ~activities-kill~ (~C-x C-a C-k~) :: Alias for ~activities-suspend~.
