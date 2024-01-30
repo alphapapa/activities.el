@@ -324,6 +324,7 @@ File: README.info,  Node: v03-pre,  Next: v02,  Up: Changelog
 *Additions*
    • Offer current activity name by default when redefining an activity
      with ‘activities-new’.
+   • Record times at which activities’ states were updated.
 
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03-pre,  Up: Changelog
@@ -392,11 +393,11 @@ Node: Bookmarks8301
 Node: FAQ8653
 Node: Changelog11729
 Node: v03-pre11920
-Node: v0212131
-Node: v01312627
-Node: v01212776
-Node: v01112953
-Node: v0113116
+Node: v0212195
+Node: v01312691
+Node: v01212840
+Node: v01113017
+Node: v0113180
 
 End Tag Table
 

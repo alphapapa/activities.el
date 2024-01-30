@@ -73,7 +73,8 @@
 
 (cl-defstruct activities-activity-state
   "FIXME: Docstring."
-  window-state etc)
+  (window-state nil :documentation "Window state (see `window-state-get').")
+  (etc nil :documentation "Map for miscellaneous data."))
 
 ;;;; Debugging
 
@@ -468,7 +469,8 @@ is not changed."
 (defun activities-state ()
   "Return an activity state for the current frame."
   (make-activities-activity-state
-   :window-state (activities--window-state (selected-frame))))
+   :window-state (activities--window-state (selected-frame))
+   :etc (map-insert nil 'time (current-time))))
 
 (defun activities-activity-active-p (activity)
   "Return non-nil if ACTIVITY is active.
