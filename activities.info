@@ -321,9 +321,9 @@ File: README.info,  Node: v02-pre,  Next: v013,  Up: Changelog
 
 *Additions*
    • Offer current ‘project’ name by default for new activities.
-     (Thanks to Joseph Turner (https://github.com/josephmturner).)
+     (Thanks to Joseph Turner (https://breatheoutbreathe.in).)
    • Use current activity as default for various completions.  (Thanks
-     to Joseph Turner (https://github.com/josephmturner).)
+     to Joseph Turner (https://breatheoutbreathe.in).)
 
    *Fixes*
    • Raise frame after selecting it.  (Thanks to JD Smith
@@ -380,10 +380,10 @@ Node: Bookmarks8288
 Node: FAQ8640
 Node: Changelog11716
 Node: v02-pre11894
-Node: v01312394
-Node: v01212547
-Node: v01112724
-Node: v0112887
+Node: v01312386
+Node: v01212539
+Node: v01112716
+Node: v0112879
 
 End Tag Table
 
