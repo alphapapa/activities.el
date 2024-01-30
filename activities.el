@@ -451,6 +451,7 @@ Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
   (select-frame (or (activities--frame activity)
                     (make-frame `((activity . ,activity)))))
+  (raise-frame)
   (set-frame-name (activities-name-for activity)))
 
 (defun activities--frame (activity)
