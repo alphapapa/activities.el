@@ -73,7 +73,8 @@
 
 (cl-defstruct activities-activity-state
   "FIXME: Docstring."
-  window-state etc)
+  (window-state nil :documentation "Window state (see `window-state-get').")
+  (etc nil :documentation "Map for miscellaneous data."))
 
 ;;;; Debugging
 
