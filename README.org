@@ -118,7 +118,8 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.3-pre
 
-Nothing new yet.
+*Additions*
++ Offer current activity name by default when redefining an activity with ~activities-new~.
 
 ** v0.2
 

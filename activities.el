@@ -276,7 +276,10 @@ prefixes will be added automatically."
 If FORCEP (interactively, with prefix), overwrite existing
 activity."
   (interactive
-   (let ((default (funcall activities-default-name-fn)))
+   (let* ((current-activity-name
+           (when-let ((current-activity (activities-current)))
+             (activities-activity-name current-activity)))
+          (default (or current-activity-name (funcall activities-default-name-fn))))
      (list (read-string (format-prompt "New activity name" default) nil nil default)
            :forcep current-prefix-arg)))
   (when (and (not forcep) (member name (activities-names)))

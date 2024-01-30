@@ -321,7 +321,9 @@ File: README.info,  Node: v03-pre,  Next: v02,  Up: Changelog
 4.1 v0.3-pre
 ============
 
-Nothing new yet.
+*Additions*
+   • Offer current activity name by default when redefining an activity
+     with ‘activities-new’.
 
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03-pre,  Up: Changelog
@@ -390,11 +392,11 @@ Node: Bookmarks8301
 Node: FAQ8653
 Node: Changelog11729
 Node: v03-pre11920
-Node: v0212030
-Node: v01312526
-Node: v01212675
-Node: v01112852
-Node: v0113015
+Node: v0212131
+Node: v01312627
+Node: v01212776
+Node: v01112953
+Node: v0113116
 
 End Tag Table
 
