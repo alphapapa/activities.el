@@ -469,7 +469,8 @@ is not changed."
 (defun activities-state ()
   "Return an activity state for the current frame."
   (make-activities-activity-state
-   :window-state (activities--window-state (selected-frame))))
+   :window-state (activities--window-state (selected-frame))
+   :etc (map-insert nil 'time (current-time))))
 
 (defun activities-activity-active-p (activity)
   "Return non-nil if ACTIVITY is active.
