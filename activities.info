@@ -374,6 +374,8 @@ File: README.info,  Node: v033-pre,  Next: v032,  Up: Changelog
      are defined.  (#11
      (https://github.com/alphapapa/activities.el/issues/11).  Thanks to
      fuzy112 (https://github.com/fuzy112) for reporting.)
+   • Link in documentation (which works locally but not on GNU ELPA at
+     the moment).
 
 
 File: README.info,  Node: v032,  Next: v031,  Prev: v033-pre,  Up: Changelog
@@ -506,16 +508,16 @@ Node: Bookmarks9153
 Node: FAQ9505
 Node: Changelog12581
 Node: v033-pre12840
-Node: v03213179
-Node: v03113311
-Node: v0313641
-Node: v0214031
-Node: v01314523
-Node: v01214672
-Node: v01114849
-Node: v0115012
-Node: Development15111
-Node: Copyright assignment15383
+Node: v03213270
+Node: v03113402
+Node: v0313732
+Node: v0214122
+Node: v01314614
+Node: v01214763
+Node: v01114940
+Node: v0115103
+Node: Development15202
+Node: Copyright assignment15474
 
 End Tag Table
 
