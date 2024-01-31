@@ -1,10 +1,12 @@
 #+TITLE: activities.el
 
-Inspired by Genera's and KDE's concepts of "activities", this library allows the user to select an "activity", the loading of which restores a window configuration and/or frameset, along with the buffers shown in each window.  Saving an activity saves the state for later restoration.  Switching away from an activity saves the last-used state for later switching back to, while still allowing the activity's initial or default state to be restored on demand.  Resuming an activity loads the last-used state, or the initial/default state when a universal argument is provided.
+[[https://elpa.gnu.org/packages/activities.html][file:https://elpa.gnu.org/packages/activities.svg]]
+
+Inspired by Genera's and KDE's concepts of "activities", this library allows the user to select an "activity", the loading of which restores a window configuration into a ~tab-bar~ tab or frame, along with the buffers shown in each window.  Saving an activity saves the state for later restoration.  Switching away from an activity saves the last-used state for later switching back to, while still allowing the activity's initial or default state to be restored on demand.  Resuming an activity loads the last-used state, or the initial/default state when a universal argument is provided.
 
 The implementation uses the bookmark system to save buffers' states--that is, any major mode that supports the bookmark system is compatible.  A buffer whose major mode does not support the bookmark system (or does not support it well enough to restore useful state) is not compatible and can't be fully restored, or perhaps not at all; but solving that is as simple as implementing bookmark support for the mode, which is usually trivial.
 
-Integration with Emacs's ~tab-bar-mode~ is provided: a window configuration or frameset can be restored to a window or set of frames, or to a tab or set of tabs.
+Integration with Emacs's ~tab-bar-mode~ is provided: a window configuration or can be restored to a ~tab-bar~ tab or to a frame.
 
 Various hooks are (or will be--feedback is welcome) provided, both globally and per-activity, so that the user can define functions to be called when an activity is saved, restored, or switched from/to.  For example, this could be used to limit the set of buffers offered for switching to within an activity, or to track the time spent in an activity.
 
@@ -14,46 +16,58 @@ Various hooks are (or will be--feedback is welcome) provided, both globally and 
 :END:
 :CONTENTS:
 - [[#installation][Installation]]
+- [[#configuration][Configuration]]
 - [[#usage][Usage]]
 - [[#faq][FAQ]]
 - [[#changelog][Changelog]]
+- [[#development][Development]]
 :END:
 
 * Installation
 
-Until this library is available from a package archive, it's recommended to install it using [[https://framagit.org/steckerhalter/quelpa][Quelpa]]:
+** GNU ELPA
+
+~activities~ may be installed into Emacs versions 29.1 or later from [[https://elpa.gnu.org/packages/activities.html][GNU ELPA]] by using the command ~M-x package-install RET activities RET~.  This will install the latest stable release, which is recommended.
+
+** Quelpa
+
+To install directly from git (e.g. to test a pre-release version), it's recommended to use [[https://framagit.org/steckerhalter/quelpa][Quelpa]]:
 
 1.  Install [[https://framagit.org/steckerhalter/quelpa-use-package#installation][quelpa-use-package]] (which can be installed directly from MELPA).
-2.  Add this form to your init file (which includes a recommended configuration):
+2.  Add this form to your init file (see [[id:d901811a-bbec-4e72-b497-2f79728da597][Configuration]] for more details):
 
 #+BEGIN_SRC elisp
   (use-package activities
-    :quelpa (activities :fetcher github :repo "alphapapa/activities.el")
-
-    :bind
-    (("C-x C-a l" . activities-list)
-     ("C-x C-a a" . activities-resume)
-     ;; For convenience, we also bind `activities-resume' to "C-a", so the
-     ;; user need not lift the Control key.  This makes it easier to
-     ;; quickly switch between activities.
-     ("C-x C-a C-a" . activities-resume)
-     ("C-x C-a RET" . activities-switch)
-     ("C-x C-a g" . activities-revert)
-     ("C-x C-a n" . activities-new)
-     ("C-x C-a s" . activities-suspend)
-     ;; Alias for `activities-suspend'.
-     ("C-x C-a C-k" . activities-kill))
-
-    :init
-    ;; Automatically save activities' states when Emacs is idle and upon
-    ;; exit.
-    (activities-mode)
-    ;; Open activities in `tab-bar' tabs (otherwise frames are used, but
-    ;; the author doesn't test that as much).
-    (activities-tabs-mode))
+    :quelpa (activities :fetcher github :repo "alphapapa/activities.el"))
 #+END_SRC
 
-If you choose to install it otherwise, you'll need to load both the ~activities~ and ~activities-tabs~ libraries, or ensure that the autoloads are generated properly.
+If you choose to install it otherwise, please note that the author can't offer help with manual installation problems.
+
+* Configuration
+:PROPERTIES:
+:ID:       d901811a-bbec-4e72-b497-2f79728da597
+:END:
+
+This is the recommended configuration, in terms of a ~use-package~ form to be placed in the user's init file:
+
+#+BEGIN_SRC elisp
+  (use-package activities
+    :init
+    (activities-mode)
+    (activities-tabs-mode)
+
+    :bind
+    (("C-x C-a n" . activities-new)
+     ("C-x C-a g" . activities-revert)
+     ("C-x C-a s" . activities-suspend)
+     ("C-x C-a C-k" . activities-kill)    ; Alias for `-suspend'
+     ("C-x C-a a" . activities-resume)
+     ;; For convenience, we also bind `activities-resume' to "C-x C-a
+     ;; C-a", so the user need not lift the Control key.
+     ("C-x C-a C-a" . activities-resume)
+     ("C-x C-a RET" . activities-switch)
+     ("C-x C-a l" . activities-list)))
+#+END_SRC
 
 * Usage
 
@@ -120,7 +134,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.3.2-pre
 
-Nothing new yet.
+Updated documentation, etc.
 
 ** v0.3.1
 
@@ -162,6 +176,14 @@ Nothing new yet.
 ** v0.1
 
 Initial release.
+
+* Development
+
+~activities~ is developed on [[https://github.com/alphapapa/activities.el][GitHub]].  Suggestions, bug reports, and patches are welcome.
+
+** Copyright assignment
+
+This package is part of [[https://www.gnu.org/software/emacs/][GNU Emacs]], being distributed in [[https://elpa.gnu.org/][GNU ELPA]].  Contributions to this project must follow GNU guidelines, which means that, as with other parts of Emacs, patches of more than a few lines must be accompanied by having assigned copyright for the contribution to the FSF.  Contributors who wish to do so may contact [[mailto:emacs-devel@gnu.org][emacs-devel@gnu.org]] to request the assignment form.
 
 * COMMENT Export setup                                             :noexport:
 :PROPERTIES:
