@@ -69,6 +69,7 @@ Usage
 
 Changelog
 
+* v0.3.3-pre: v033-pre.
 * v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
@@ -352,6 +353,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
+* v0.3.3-pre: v033-pre.
 * v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
@@ -362,9 +364,17 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v032,  Next: v031,  Up: Changelog
+File: README.info,  Node: v033-pre,  Next: v032,  Up: Changelog
 
-5.1 v0.3.2
+5.1 v0.3.3-pre
+==============
+
+Nothing new yet.
+
+
+File: README.info,  Node: v032,  Next: v031,  Prev: v033-pre,  Up: Changelog
+
+5.2 v0.3.2
 ==========
 
 Updated documentation, etc.
@@ -372,7 +382,7 @@ Updated documentation, etc.
 
 File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
-5.2 v0.3.1
+5.3 v0.3.1
 ==========
 
 *Fixes*
@@ -384,7 +394,7 @@ File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
 File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
-5.3 v0.3
+5.4 v0.3
 ========
 
 *Additions*
@@ -397,7 +407,7 @@ File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
-5.4 v0.2
+5.5 v0.2
 ========
 
 *Additions*
@@ -413,7 +423,7 @@ File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
-5.5 v0.1.3
+5.6 v0.1.3
 ==========
 
 *Fixes*
@@ -423,7 +433,7 @@ File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
-5.6 v0.1.2
+5.7 v0.1.2
 ==========
 
 *Fixes*
@@ -432,7 +442,7 @@ File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
-5.7 v0.1.1
+5.8 v0.1.1
 ==========
 
 *Fixes*
@@ -441,7 +451,7 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-5.8 v0.1
+5.9 v0.1
 ========
 
 Initial release.
@@ -478,29 +488,30 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2408
-Node: GNU ELPA2559
-Node: Quelpa2924
-Node: Configuration3644
-Node: Usage4491
-Node: Activities4680
-Node: Compatibility5668
-Node: Modes6152
-Node: Workflow6820
-Node: Commands7773
-Node: Bookmarks9129
-Node: FAQ9481
-Node: Changelog12557
-Node: v03212792
-Node: v03112907
-Node: v0313237
-Node: v0213627
-Node: v01314119
-Node: v01214268
-Node: v01114445
-Node: v0114608
-Node: Development14707
-Node: Copyright assignment14979
+Node: Installation2432
+Node: GNU ELPA2583
+Node: Quelpa2948
+Node: Configuration3668
+Node: Usage4515
+Node: Activities4704
+Node: Compatibility5692
+Node: Modes6176
+Node: Workflow6844
+Node: Commands7797
+Node: Bookmarks9153
+Node: FAQ9505
+Node: Changelog12581
+Node: v033-pre12840
+Node: v03212956
+Node: v03113088
+Node: v0313418
+Node: v0213808
+Node: v01314300
+Node: v01214449
+Node: v01114626
+Node: v0114789
+Node: Development14888
+Node: Copyright assignment15160
 
 End Tag Table
 
