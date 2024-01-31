@@ -327,7 +327,11 @@ File: README.info,  Node: v031-pre,  Next: v03,  Up: Changelog
 4.1 v0.3.1-pre
 ==============
 
-Nothing new yet.
+*Fixes*
+   • Handle case in which ‘activities-tabs-mode’ is enabled again
+     without having been disabled (which caused an error in
+     ‘tab-bar-mode’).  (#7
+     (https://github.com/alphapapa/activities.el/issues/7))
 
 
 File: README.info,  Node: v03,  Next: v02,  Prev: v031-pre,  Up: Changelog
@@ -409,12 +413,12 @@ Node: Bookmarks8500
 Node: FAQ8852
 Node: Changelog11928
 Node: v031-pre12135
-Node: v0312250
-Node: v0212644
-Node: v01313136
-Node: v01213285
-Node: v01113462
-Node: v0113625
+Node: v0312464
+Node: v0212858
+Node: v01313350
+Node: v01213499
+Node: v01113676
+Node: v0113839
 
 End Tag Table
 
