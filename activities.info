@@ -69,7 +69,7 @@ Usage
 
 Changelog
 
-* v0.3.3-pre: v033-pre.
+* v0.3.3: v033.
 * v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
@@ -353,7 +353,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.3.3-pre: v033-pre.
+* v0.3.3: v033.
 * v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
@@ -364,10 +364,10 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v033-pre,  Next: v032,  Up: Changelog
+File: README.info,  Node: v033,  Next: v032,  Up: Changelog
 
-5.1 v0.3.3-pre
-==============
+5.1 v0.3.3
+==========
 
 *Fixes*
    • Command ‘activities-list’ shows a helpful message if no activities
@@ -378,7 +378,7 @@ File: README.info,  Node: v033-pre,  Next: v032,  Up: Changelog
      the moment).
 
 
-File: README.info,  Node: v032,  Next: v031,  Prev: v033-pre,  Up: Changelog
+File: README.info,  Node: v032,  Next: v031,  Prev: v033,  Up: Changelog
 
 5.2 v0.3.2
 ==========
@@ -494,30 +494,30 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2432
-Node: GNU ELPA2583
-Node: Quelpa2948
-Node: Configuration3668
-Node: Usage4515
-Node: Activities4704
-Node: Compatibility5692
-Node: Modes6176
-Node: Workflow6844
-Node: Commands7797
-Node: Bookmarks9153
-Node: FAQ9505
-Node: Changelog12581
-Node: v033-pre12840
-Node: v03213270
-Node: v03113402
-Node: v0313732
-Node: v0214122
-Node: v01314614
-Node: v01214763
-Node: v01114940
-Node: v0115103
-Node: Development15202
-Node: Copyright assignment15474
+Node: Installation2424
+Node: GNU ELPA2575
+Node: Quelpa2940
+Node: Configuration3660
+Node: Usage4507
+Node: Activities4696
+Node: Compatibility5684
+Node: Modes6168
+Node: Workflow6836
+Node: Commands7789
+Node: Bookmarks9145
+Node: FAQ9497
+Node: Changelog12573
+Node: v03312824
+Node: v03213242
+Node: v03113370
+Node: v0313700
+Node: v0214090
+Node: v01314582
+Node: v01214731
+Node: v01114908
+Node: v0115071
+Node: Development15170
+Node: Copyright assignment15442
 
 End Tag Table
 
