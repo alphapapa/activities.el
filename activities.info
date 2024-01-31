@@ -69,7 +69,7 @@ Usage
 
 Changelog
 
-* v0.3.2-pre: v032-pre.
+* v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
 * v0.2: v02.
@@ -352,7 +352,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.3.2-pre: v032-pre.
+* v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
 * v0.2: v02.
@@ -362,15 +362,15 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v032-pre,  Next: v031,  Up: Changelog
+File: README.info,  Node: v032,  Next: v031,  Up: Changelog
 
-5.1 v0.3.2-pre
-==============
+5.1 v0.3.2
+==========
 
-Updated documentation.
+Updated documentation, etc.
 
 
-File: README.info,  Node: v031,  Next: v03,  Prev: v032-pre,  Up: Changelog
+File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
 5.2 v0.3.1
 ==========
@@ -478,29 +478,29 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2416
-Node: GNU ELPA2567
-Node: Quelpa2932
-Node: Configuration3652
-Node: Usage4499
-Node: Activities4688
-Node: Compatibility5676
-Node: Modes6160
-Node: Workflow6828
-Node: Commands7781
-Node: Bookmarks9137
-Node: FAQ9489
-Node: Changelog12565
-Node: v032-pre12808
-Node: v03112930
-Node: v0313264
-Node: v0213654
-Node: v01314146
-Node: v01214295
-Node: v01114472
-Node: v0114635
-Node: Development14734
-Node: Copyright assignment15006
+Node: Installation2408
+Node: GNU ELPA2559
+Node: Quelpa2924
+Node: Configuration3644
+Node: Usage4491
+Node: Activities4680
+Node: Compatibility5668
+Node: Modes6152
+Node: Workflow6820
+Node: Commands7773
+Node: Bookmarks9129
+Node: FAQ9481
+Node: Changelog12557
+Node: v03212792
+Node: v03112907
+Node: v0313237
+Node: v0213627
+Node: v01314119
+Node: v01214268
+Node: v01114445
+Node: v0114608
+Node: Development14707
+Node: Copyright assignment14979
 
 End Tag Table
 
