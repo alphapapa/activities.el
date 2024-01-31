@@ -405,11 +405,14 @@ according to option `activities-always-persist', which see)."
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
   (activities-with activity
-    (pcase-let* (((cl-struct activities-activity name default last) activity)
-                 (new-state (activities-state)))
-      (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-            (activities-activity-last activity) (if (or lastp (not last)) new-state last)
-            (map-elt activities-activities name) activity)))
+    ;; Don't try to save if a minibuffer is active, because we
+    ;; wouldn't want to try to restore that layout.
+    (unless (active-minibuffer-window)
+      (pcase-let* (((cl-struct activities-activity name default last) activity)
+                   (new-state (activities-state)))
+        (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+              (activities-activity-last activity) (if (or lastp (not last)) new-state last)
+              (map-elt activities-activities name) activity))))
   (activities--persist persistp))
 
 (cl-defun activities-set (activity &key (state 'last))

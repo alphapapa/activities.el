@@ -371,7 +371,8 @@ File: README.info,  Node: v04-pre,  Next: v033,  Up: Changelog
 5.1 v0.4-pre
 ============
 
-Nothing new yet.
+*Fixes*
+   • Don’t save activity state if a minibuffer is active.
 
 
 File: README.info,  Node: v033,  Next: v032,  Prev: v04-pre,  Up: Changelog
@@ -518,17 +519,17 @@ Node: Bookmarks9166
 Node: FAQ9518
 Node: Changelog12594
 Node: v04-pre12866
-Node: v03312977
-Node: v03213411
-Node: v03113539
-Node: v0313869
-Node: v0214259
-Node: v01314751
-Node: v01214900
-Node: v01115077
-Node: v0115240
-Node: Development15341
-Node: Copyright assignment15613
+Node: v03313030
+Node: v03213464
+Node: v03113592
+Node: v0313922
+Node: v0214312
+Node: v01314804
+Node: v01214953
+Node: v01115130
+Node: v0115293
+Node: Development15394
+Node: Copyright assignment15666
 
 End Tag Table
 

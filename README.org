@@ -131,7 +131,8 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.4-pre
 
-Nothing new yet.
+*Fixes*
++ Don't save activity state if a minibuffer is active.
 
 ** v0.3.3
 
