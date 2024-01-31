@@ -60,7 +60,7 @@ Usage
 
 Changelog
 
-* v0.3.1-pre: v031-pre.
+* v0.3.1: v031.
 * v0.3: v03.
 * v0.2: v02.
 * v0.1.3: v013.
@@ -313,7 +313,7 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.3.1-pre: v031-pre.
+* v0.3.1: v031.
 * v0.3: v03.
 * v0.2: v02.
 * v0.1.3: v013.
@@ -322,10 +322,10 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v031-pre,  Next: v03,  Up: Changelog
+File: README.info,  Node: v031,  Next: v03,  Up: Changelog
 
-4.1 v0.3.1-pre
-==============
+4.1 v0.3.1
+==========
 
 *Fixes*
    • Handle case in which ‘activities-tabs-mode’ is enabled again
@@ -334,7 +334,7 @@ File: README.info,  Node: v031-pre,  Next: v03,  Up: Changelog
      (https://github.com/alphapapa/activities.el/issues/7))
 
 
-File: README.info,  Node: v03,  Next: v02,  Prev: v031-pre,  Up: Changelog
+File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
 4.2 v0.3
 ========
@@ -402,23 +402,23 @@ Initial release.
 
 Tag Table:
 Node: Top231
-Node: Installation2196
-Node: Usage3863
-Node: Activities4051
-Node: Compatibility5039
-Node: Modes5523
-Node: Workflow6191
-Node: Commands7144
-Node: Bookmarks8500
-Node: FAQ8852
-Node: Changelog11928
-Node: v031-pre12135
-Node: v0312464
-Node: v0212858
-Node: v01313350
-Node: v01213499
-Node: v01113676
-Node: v0113839
+Node: Installation2188
+Node: Usage3855
+Node: Activities4043
+Node: Compatibility5031
+Node: Modes5515
+Node: Workflow6183
+Node: Commands7136
+Node: Bookmarks8492
+Node: FAQ8844
+Node: Changelog11920
+Node: v03112119
+Node: v0312436
+Node: v0212826
+Node: v01313318
+Node: v01213467
+Node: v01113644
+Node: v0113807
 
 End Tag Table
 
