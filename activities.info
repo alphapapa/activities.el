@@ -11,15 +11,18 @@ File: README.info,  Node: Top,  Next: Installation,  Up: (dir)
 activities.el
 *************
 
-Inspired by Genera’s and KDE’s concepts of "activities", this library
+file:https://elpa.gnu.org/packages/activities.svg
+(https://elpa.gnu.org/packages/activities.html)
+
+   Inspired by Genera’s and KDE’s concepts of "activities", this library
 allows the user to select an "activity", the loading of which restores a
-window configuration and/or frameset, along with the buffers shown in
-each window.  Saving an activity saves the state for later restoration.
-Switching away from an activity saves the last-used state for later
-switching back to, while still allowing the activity’s initial or
-default state to be restored on demand.  Resuming an activity loads the
-last-used state, or the initial/default state when a universal argument
-is provided.
+window configuration into a ‘tab-bar’ tab or frame, along with the
+buffers shown in each window.  Saving an activity saves the state for
+later restoration.  Switching away from an activity saves the last-used
+state for later switching back to, while still allowing the activity’s
+initial or default state to be restored on demand.  Resuming an activity
+loads the last-used state, or the initial/default state when a universal
+argument is provided.
 
    The implementation uses the bookmark system to save buffers’
 states–that is, any major mode that supports the bookmark system is
@@ -30,8 +33,7 @@ solving that is as simple as implementing bookmark support for the mode,
 which is usually trivial.
 
    Integration with Emacs’s ‘tab-bar-mode’ is provided: a window
-configuration or frameset can be restored to a window or set of frames,
-or to a tab or set of tabs.
+configuration or can be restored to a ‘tab-bar’ tab or to a frame.
 
    Various hooks are (or will be–feedback is welcome) provided, both
 globally and per-activity, so that the user can define functions to be
@@ -43,11 +45,18 @@ activity.
 * Menu:
 
 * Installation::
+* Configuration::
 * Usage::
 * FAQ::
 * Changelog::
+* Development::
 
 — The Detailed Node Listing —
+
+Installation
+
+* GNU ELPA::
+* Quelpa::
 
 Usage
 
@@ -61,6 +70,7 @@ Usage
 Changelog
 
 * v0.4-pre: v04-pre.
+* v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
 * v0.2: v02.
@@ -69,55 +79,84 @@ Changelog
 * v0.1.1: v011.
 * v0.1: v01.
 
+Development
+
+* Copyright assignment::
+
 
 
-File: README.info,  Node: Installation,  Next: Usage,  Prev: Top,  Up: Top
+File: README.info,  Node: Installation,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Installation
 **************
 
-Until this library is available from a package archive, it’s recommended
-to install it using Quelpa (https://framagit.org/steckerhalter/quelpa):
+* Menu:
+
+* GNU ELPA::
+* Quelpa::
+
+
+File: README.info,  Node: GNU ELPA,  Next: Quelpa,  Up: Installation
+
+1.1 GNU ELPA
+============
+
+‘activities’ may be installed into Emacs versions 29.1 or later from GNU
+ELPA (https://elpa.gnu.org/packages/activities.html) by using the
+command ‘M-x package-install RET activities RET’.  This will install the
+latest stable release, which is recommended.
+
+
+File: README.info,  Node: Quelpa,  Prev: GNU ELPA,  Up: Installation
+
+1.2 Quelpa
+==========
+
+To install directly from git (e.g.  to test a pre-release version), it’s
+recommended to use Quelpa (https://framagit.org/steckerhalter/quelpa):
 
   1. Install quelpa-use-package
      (https://framagit.org/steckerhalter/quelpa-use-package#installation)
      (which can be installed directly from MELPA).
-  2. Add this form to your init file (which includes a recommended
-     configuration):
+  2. Add this form to your init file (see *note Configuration:: for more
+     details):
 
      (use-package activities
-       :quelpa (activities :fetcher github :repo "alphapapa/activities.el")
+       :quelpa (activities :fetcher github :repo "alphapapa/activities.el"))
 
-       :bind
-       (("C-x C-a l" . activities-list)
-        ("C-x C-a a" . activities-resume)
-        ;; For convenience, we also bind `activities-resume' to "C-a", so the
-        ;; user need not lift the Control key.  This makes it easier to
-        ;; quickly switch between activities.
-        ("C-x C-a C-a" . activities-resume)
-        ("C-x C-a RET" . activities-switch)
-        ("C-x C-a g" . activities-revert)
-        ("C-x C-a n" . activities-new)
-        ("C-x C-a s" . activities-suspend)
-        ;; Alias for `activities-suspend'.
-        ("C-x C-a C-k" . activities-kill))
-
-       :init
-       ;; Automatically save activities' states when Emacs is idle and upon
-       ;; exit.
-       (activities-mode)
-       ;; Open activities in `tab-bar' tabs (otherwise frames are used, but
-       ;; the author doesn't test that as much).
-       (activities-tabs-mode))
-
-   If you choose to install it otherwise, you’ll need to load both the
-‘activities’ and ‘activities-tabs’ libraries, or ensure that the
-autoloads are generated properly.
+   If you choose to install it otherwise, please note that the author
+can’t offer help with manual installation problems.
 
 
-File: README.info,  Node: Usage,  Next: FAQ,  Prev: Installation,  Up: Top
+File: README.info,  Node: Configuration,  Next: Usage,  Prev: Installation,  Up: Top
 
-2 Usage
+2 Configuration
+***************
+
+This is the recommended configuration, in terms of a ‘use-package’ form
+to be placed in the user’s init file:
+
+     (use-package activities
+       :init
+       (activities-mode)
+       (activities-tabs-mode)
+
+       :bind
+       (("C-x C-a n" . activities-new)
+        ("C-x C-a g" . activities-revert)
+        ("C-x C-a s" . activities-suspend)
+        ("C-x C-a C-k" . activities-kill)    ; Alias for `-suspend'
+        ("C-x C-a a" . activities-resume)
+        ;; For convenience, we also bind `activities-resume' to "C-x C-a
+        ;; C-a", so the user need not lift the Control key.
+        ("C-x C-a C-a" . activities-resume)
+        ("C-x C-a RET" . activities-switch)
+        ("C-x C-a l" . activities-list)))
+
+
+File: README.info,  Node: Usage,  Next: FAQ,  Prev: Configuration,  Up: Top
+
+3 Usage
 *******
 
 * Menu:
@@ -132,7 +171,7 @@ File: README.info,  Node: Usage,  Next: FAQ,  Prev: Installation,  Up: Top
 
 File: README.info,  Node: Activities,  Next: Compatibility,  Up: Usage
 
-2.1 Activities
+3.1 Activities
 ==============
 
 For the purposes of this library, an "activity" is a window
@@ -154,7 +193,7 @@ in general.
 
 File: README.info,  Node: Compatibility,  Next: Modes,  Prev: Activities,  Up: Usage
 
-2.2 Compatibility
+3.2 Compatibility
 =================
 
 This library is designed to not interfere with other workflows and
@@ -167,7 +206,7 @@ activity.
 
 File: README.info,  Node: Modes,  Next: Workflow,  Prev: Compatibility,  Up: Usage
 
-2.3 Modes
+3.3 Modes
 =========
 
 ‘activities-mode’
@@ -184,7 +223,7 @@ File: README.info,  Node: Modes,  Next: Workflow,  Prev: Compatibility,  Up: Usa
 
 File: README.info,  Node: Workflow,  Next: Commands,  Prev: Modes,  Up: Usage
 
-2.4 Workflow
+3.4 Workflow
 ============
 
 An example of a workflow using activities:
@@ -209,7 +248,7 @@ An example of a workflow using activities:
 
 File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usage
 
-2.5 Commands
+3.5 Commands
 ============
 
 ‘activities-list’ (‘C-x C-a l’)
@@ -241,7 +280,7 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usag
 
 File: README.info,  Node: Bookmarks,  Prev: Commands,  Up: Usage
 
-2.6 Bookmarks
+3.6 Bookmarks
 =============
 
 When option ‘activities-bookmark-store’ is enabled, an Emacs bookmark is
@@ -252,7 +291,7 @@ universalize the bookmark system).
 
 File: README.info,  Node: FAQ,  Next: Changelog,  Prev: Usage,  Up: Top
 
-3 FAQ
+4 FAQ
 *****
 
 How is this different from Burly.el (https://github.com/alphapapa/burly.el) or Bufler.el (https://github.com/alphapapa/bufler.el/)?
@@ -307,14 +346,15 @@ Why did I get an error?
      proceed smoothly.  Please report any bugs you find.
 
 
-File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
+File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
-4 Changelog
+5 Changelog
 ***********
 
 * Menu:
 
 * v0.4-pre: v04-pre.
+* v0.3.2: v032.
 * v0.3.1: v031.
 * v0.3: v03.
 * v0.2: v02.
@@ -324,17 +364,25 @@ File: README.info,  Node: Changelog,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v04-pre,  Next: v031,  Up: Changelog
+File: README.info,  Node: v04-pre,  Next: v032,  Up: Changelog
 
-4.1 v0.4-pre
+5.1 v0.4-pre
 ============
 
 Nothing new yet.
 
 
-File: README.info,  Node: v031,  Next: v03,  Prev: v04-pre,  Up: Changelog
+File: README.info,  Node: v032,  Next: v031,  Prev: v04-pre,  Up: Changelog
 
-4.2 v0.3.1
+5.2 v0.3.2
+==========
+
+Updated documentation, etc.
+
+
+File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
+
+5.3 v0.3.1
 ==========
 
 *Fixes*
@@ -346,7 +394,7 @@ File: README.info,  Node: v031,  Next: v03,  Prev: v04-pre,  Up: Changelog
 
 File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
-4.3 v0.3
+5.4 v0.3
 ========
 
 *Additions*
@@ -359,7 +407,7 @@ File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
-4.4 v0.2
+5.5 v0.2
 ========
 
 *Additions*
@@ -375,7 +423,7 @@ File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
-4.5 v0.1.3
+5.6 v0.1.3
 ==========
 
 *Fixes*
@@ -385,7 +433,7 @@ File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
-4.6 v0.1.2
+5.7 v0.1.2
 ==========
 
 *Fixes*
@@ -394,7 +442,7 @@ File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
-4.7 v0.1.1
+5.8 v0.1.1
 ==========
 
 *Fixes*
@@ -403,33 +451,67 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-4.8 v0.1
+5.9 v0.1
 ========
 
 Initial release.
+
+
+File: README.info,  Node: Development,  Prev: Changelog,  Up: Top
+
+6 Development
+*************
+
+‘activities’ is developed on GitHub
+(https://github.com/alphapapa/activities.el).  Suggestions, bug reports,
+and patches are welcome.
+
+* Menu:
+
+* Copyright assignment::
+
+
+File: README.info,  Node: Copyright assignment,  Up: Development
+
+6.1 Copyright assignment
+========================
+
+This package is part of GNU Emacs (https://www.gnu.org/software/emacs/),
+being distributed in GNU ELPA (https://elpa.gnu.org/).  Contributions to
+this project must follow GNU guidelines, which means that, as with other
+parts of Emacs, patches of more than a few lines must be accompanied by
+having assigned copyright for the contribution to the FSF.  Contributors
+who wish to do so may contact emacs-devel@gnu.org <emacs-devel@gnu.org>
+to request the assignment form.
 
 
 
 Tag Table:
 Node: Top231
-Node: Installation2209
-Node: Usage3876
-Node: Activities4064
-Node: Compatibility5052
-Node: Modes5536
-Node: Workflow6204
-Node: Commands7157
-Node: Bookmarks8513
-Node: FAQ8865
-Node: Changelog11941
-Node: v04-pre12161
-Node: v03112272
-Node: v0312605
-Node: v0212995
-Node: v01313487
-Node: v01213636
-Node: v01113813
-Node: v0113976
+Node: Installation2429
+Node: GNU ELPA2580
+Node: Quelpa2945
+Node: Configuration3665
+Node: Usage4512
+Node: Activities4701
+Node: Compatibility5689
+Node: Modes6173
+Node: Workflow6841
+Node: Commands7794
+Node: Bookmarks9150
+Node: FAQ9502
+Node: Changelog12578
+Node: v04-pre12834
+Node: v03212945
+Node: v03113076
+Node: v0313406
+Node: v0213796
+Node: v01314288
+Node: v01214437
+Node: v01114614
+Node: v0114777
+Node: Development14876
+Node: Copyright assignment15148
 
 End Tag Table
 

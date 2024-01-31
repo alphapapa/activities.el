@@ -1,8 +1,10 @@
-;;; activities.el --- Suspend/resume sets of windows, frames, and buffers  -*- lexical-binding: t; -*-
+;;; activities.el --- Save/restore sets of windows, tabs/frames, and their buffers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  Free Software Foundation, Inc.
 
 ;; Author: Adam Porter <adam@alphapapa.net>
+;; Maintainer: Adam Porter <adam@alphapapa.net>
+;; URL: https://github.com/alphapapa/activities.el
 ;; Keywords: convenience
 ;; Version: 0.4-pre
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
@@ -24,13 +26,14 @@
 
 ;; Inspired by Genera's and KDE's concepts of "activities", this
 ;; library allows the user to select an "activity", the loading of
-;; which restores a window configuration and/or frameset, along with
-;; the buffers shown in each window.  Saving an activity saves the
-;; state for later restoration.  Switching away from an activity saves
-;; the last-used state for later switching back to, while still
-;; allowing the activity's initial or default state to be restored on
-;; demand.  Restoring an activity loads the last-used state, or the
-;; initial/default state when a universal argument is provided.
+;; which restores a window configuration into a `tab-bar' tab or
+;; frame, along with the buffers shown in each window.  Saving an
+;; activity saves the state for later restoration.  Switching away
+;; from an activity saves the last-used state for later switching back
+;; to, while still allowing the activity's initial or default state to
+;; be restored on demand.  Resuming an activity loads the last-used
+;; state, or the initial/default state when a universal argument is
+;; provided.
 
 ;; The implementation uses the bookmark system to save buffers'
 ;; states--that is, any major mode that supports the bookmark system
@@ -41,8 +44,7 @@
 ;; bookmark support for the mode, which is usually trivial.
 
 ;; Integration with Emacs's `tab-bar-mode' is provided: a window
-;; configuration or frameset can be restored to a window or set of
-;; frames, or to a tab or set of tabs.
+;; configuration or can be restored to a `tab-bar' tab or to a frame.
 
 ;; Various hooks are provided, both globally and per-activity, so that
 ;; the user can define functions to be called when an activity is
@@ -202,7 +204,7 @@ deserialized back to the buffer after it is reincarnated.")
   "Activities."
   :link '(emacs-commentary-link "activities")
   :link '(url-link "https://github.com/alphapapa/activities.el")
-  ;; TODO: Add info manual link.
+  :link '(custom-manual "(activities)")
   :group 'convenience)
 
 (defcustom activities-always-persist t
