@@ -48,6 +48,8 @@
 (defun activities-list ()
   "List activities."
   (interactive)
+  (unless activities-activities
+    (user-error (substitute-command-keys "No activities defined (to define one, type \"\\[activities-new]\")")))
   (with-current-buffer (get-buffer-create "*Activities*")
     (let ((inhibit-read-only t))
       (read-only-mode)
