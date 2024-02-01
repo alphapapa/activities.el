@@ -332,8 +332,11 @@ Its last is saved, and its frames, windows, and tabs are closed."
   (interactive
    (let ((default (when (activities-current)
                     (activities-activity-name (activities-current)))))
-     (list (activities-completing-read :prompt (format-prompt "Suspend activity" default)
-                                       :default default))))
+     (list (activities-completing-read
+            :activities (cl-remove-if-not #'activities-activity-active-p
+                                          activities-activities :key #'cdr)
+            :prompt (format-prompt "Suspend activity" default)
+            :default default))))
   (activities-save activity :lastp t)
   (activities-close activity))
 

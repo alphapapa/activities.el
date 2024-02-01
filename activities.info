@@ -377,6 +377,7 @@ File: README.info,  Node: v04-pre,  Next: v033,  Up: Changelog
 
    *Fixes*
    • Don’t save activity state if a minibuffer is active.
+   • Offer only active activities for suspending.
 
 
 File: README.info,  Node: v033,  Next: v032,  Prev: v04-pre,  Up: Changelog
@@ -523,17 +524,17 @@ Node: Bookmarks9166
 Node: FAQ9518
 Node: Changelog12594
 Node: v04-pre12866
-Node: v03313159
-Node: v03213593
-Node: v03113721
-Node: v0314051
-Node: v0214441
-Node: v01314933
-Node: v01215082
-Node: v01115259
-Node: v0115422
-Node: Development15523
-Node: Copyright assignment15795
+Node: v03313211
+Node: v03213645
+Node: v03113773
+Node: v0314103
+Node: v0214493
+Node: v01314985
+Node: v01215134
+Node: v01115311
+Node: v0115474
+Node: Development15575
+Node: Copyright assignment15847
 
 End Tag Table
 
