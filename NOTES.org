@@ -1,6 +1,9 @@
 #+TITLE: activities.el Notes
 
 * Issues
+:PROPERTIES:
+:VISIBILITY: children
+:END:
 
 ** UNDERWAY [#A] An activity's last state might be saved at an undesirable moment
 :LOGBOOK:
@@ -18,7 +21,7 @@ For example, if I have an activity that has some Ement rooms displayed, and then
 
 + Solution :: List of "anti-save" predicates: if any return non-nil, activity is not saved.
 
-** TODO Optionally save/restore ~tab-line~ buffers
+** TODO [#B] Optionally save/restore ~tab-line~ buffers
 :LOGBOOK:
 - State "TODO"       from              [2024-01-24 Wed 16:58]
 :END:
