@@ -1,0 +1,38 @@
+#+TITLE: activities.el Notes
+
+* Issues
+
+** TODO [#A] An activity's last state might be saved at an undesirable moment
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 01:13]
+:END:
+
+For example, if I have an activity that has some Ement rooms displayed, and then ~ement-disconnect~, the room buffers are killed, leaving the windows displaying, e.g. the scratch buffer.  Then the activity is automatically saved, and when it's resumed, it shows the scratch buffer, requiring the user to manually reset the activity.
+
++ Scenarios ::
+  - Backtrace being displayed
+  - Minibuffer is active
+  - Any non-bookmarkable, non-file-backed buffer is being displayed
+
++ Solution :: List of "anti-save" predicates: if any return non-nil, activity is not saved.
+
+** TODO Optionally save/restore ~tab-line~ buffers
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 16:58]
+:END:
+
+e.g. useful for having a ~deffy-project~ buffer available for jumping while not being displayed.
+
+** TODO Multiple named states
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 17:05]
+:END:
+
+Could be helpful.  The default and last state should just be entries in an activity's states map.
+
+** TODO Consider having project-specific activities
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 21:31]
+:END:
+
+e.g. pressing ~C-x p a~ could open a default activity for a project (perhaps with some of the metadata stored in the project directory?).  The idea would be to save the user from having to manually make an activity for a project.  Various hooks could probably solve this integration.  (Thanks to Joseph Turner for the idea.)
