@@ -371,7 +371,11 @@ File: README.info,  Node: v04-pre,  Next: v033,  Up: Changelog
 5.1 v0.4-pre
 ============
 
-*Fixes*
+*Additions*
+   • Option ‘activities-anti-save-predicates’ prevents saving activity
+     states at inappropriate times.
+
+   *Fixes*
    • Don’t save activity state if a minibuffer is active.
 
 
@@ -519,17 +523,17 @@ Node: Bookmarks9166
 Node: FAQ9518
 Node: Changelog12594
 Node: v04-pre12866
-Node: v03313030
-Node: v03213464
-Node: v03113592
-Node: v0313922
-Node: v0214312
-Node: v01314804
-Node: v01214953
-Node: v01115130
-Node: v0115293
-Node: Development15394
-Node: Copyright assignment15666
+Node: v03313159
+Node: v03213593
+Node: v03113721
+Node: v0314051
+Node: v0214441
+Node: v01314933
+Node: v01215082
+Node: v01115259
+Node: v0115422
+Node: Development15523
+Node: Copyright assignment15795
 
 End Tag Table
 
