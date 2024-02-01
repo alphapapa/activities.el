@@ -2,17 +2,19 @@
 
 * Issues
 
-** TODO [#A] An activity's last state might be saved at an undesirable moment
+** UNDERWAY [#A] An activity's last state might be saved at an undesirable moment
 :LOGBOOK:
+- State "UNDERWAY"   from "TODO"       [2024-02-01 Thu 00:58]
 - State "TODO"       from              [2024-01-24 Wed 01:13]
 :END:
 
 For example, if I have an activity that has some Ement rooms displayed, and then ~ement-disconnect~, the room buffers are killed, leaving the windows displaying, e.g. the scratch buffer.  Then the activity is automatically saved, and when it's resumed, it shows the scratch buffer, requiring the user to manually reset the activity.
 
 + Scenarios ::
-  - Backtrace being displayed
-  - Minibuffer is active
-  - Any non-bookmarkable, non-file-backed buffer is being displayed
+  - [X] Backtrace being displayed
+  - [X] Minibuffer is active
+  - [ ] Any non-bookmarkable, non-file-backed buffer is being displayed
+    * Not sure if this is worthy of a default predicate.
 
 + Solution :: List of "anti-save" predicates: if any return non-nil, activity is not saved.
 
