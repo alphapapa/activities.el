@@ -131,6 +131,9 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.4-pre
 
+*Additions*
++ Option ~activities-anti-save-predicates~ prevents saving activity states at inappropriate times.
+
 *Fixes*
 + Don't save activity state if a minibuffer is active.
 
