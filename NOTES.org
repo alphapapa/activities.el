@@ -14,6 +14,8 @@ For example, if I have an activity that has some Ement rooms displayed, and then
   - Minibuffer is active
   - Any non-bookmarkable, non-file-backed buffer is being displayed
 
++ Solution :: List of "anti-save" predicates: if any return non-nil, activity is not saved.
+
 ** TODO Optionally save/restore ~tab-line~ buffers
 :LOGBOOK:
 - State "TODO"       from              [2024-01-24 Wed 16:58]
