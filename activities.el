@@ -198,6 +198,9 @@ For example, the value of `window-preserved-size' includes a
 buffer, which must be serialized to a buffer name, and then
 deserialized back to the buffer after it is reincarnated.")
 
+(defvar activities-saving-p nil
+  "Non-nil when saving activities' states.")
+
 ;;;; Customization
 
 (defgroup activities nil
@@ -348,7 +351,8 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
   (with-demoted-errors "activities-save-all: ERROR: %S"
     (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (activities-save activity :lastp t))))
+      (let ((activities-saving-p t))
+        (activities-save activity :lastp t)))))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
@@ -473,7 +477,11 @@ Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
   (select-frame (or (activities--frame activity)
                     (make-frame `((activity . ,activity)))))
-  (raise-frame)
+  (unless activities-saving-p
+    ;; HACK: Don't raise the frame when saving the activity's state.
+    ;; (I don't love this solution, largely because it only applies
+    ;; when not using `activities-tabs-mode', but it will do for now.)
+    (raise-frame))
   (set-frame-name (activities-name-for activity)))
 
 (defun activities--frame (activity)

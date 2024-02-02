@@ -378,6 +378,9 @@ File: README.info,  Node: v04-pre,  Next: v033,  Up: Changelog
    *Fixes*
    • Don’t save activity state if a minibuffer is active.
    • Offer only active activities for suspending.
+   • Don’t raise frame when saving activity states.  (See #4
+     (https://github.com/alphapapa/activities.el/issues/4).  Thanks to
+     JD Smith (https://github.com/jdtsmith) for reporting.)
 
 
 File: README.info,  Node: v033,  Next: v032,  Prev: v04-pre,  Up: Changelog
@@ -524,17 +527,17 @@ Node: Bookmarks9166
 Node: FAQ9518
 Node: Changelog12594
 Node: v04-pre12866
-Node: v03313211
-Node: v03213645
-Node: v03113773
-Node: v0314103
-Node: v0214493
-Node: v01314985
-Node: v01215134
-Node: v01115311
-Node: v0115474
-Node: Development15575
-Node: Copyright assignment15847
+Node: v03313407
+Node: v03213841
+Node: v03113969
+Node: v0314299
+Node: v0214689
+Node: v01315181
+Node: v01215330
+Node: v01115507
+Node: v0115670
+Node: Development15771
+Node: Copyright assignment16043
 
 End Tag Table
 
