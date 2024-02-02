@@ -69,7 +69,7 @@ Usage
 
 Changelog
 
-* v0.4-pre: v04-pre.
+* v0.4: v04.
 * v0.3.3: v033.
 * v0.3.2: v032.
 * v0.3.1: v031.
@@ -354,7 +354,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.4-pre: v04-pre.
+* v0.4: v04.
 * v0.3.3: v033.
 * v0.3.2: v032.
 * v0.3.1: v031.
@@ -366,10 +366,10 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v04-pre,  Next: v033,  Up: Changelog
+File: README.info,  Node: v04,  Next: v033,  Up: Changelog
 
-5.1 v0.4-pre
-============
+5.1 v0.4
+========
 
 *Additions*
    • Option ‘activities-anti-save-predicates’ prevents saving activity
@@ -383,7 +383,7 @@ File: README.info,  Node: v04-pre,  Next: v033,  Up: Changelog
      JD Smith (https://github.com/jdtsmith) for reporting.)
 
 
-File: README.info,  Node: v033,  Next: v032,  Prev: v04-pre,  Up: Changelog
+File: README.info,  Node: v033,  Next: v032,  Prev: v04,  Up: Changelog
 
 5.2 v0.3.3
 ==========
@@ -513,31 +513,31 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2445
-Node: GNU ELPA2596
-Node: Quelpa2961
-Node: Configuration3681
-Node: Usage4528
-Node: Activities4717
-Node: Compatibility5705
-Node: Modes6189
-Node: Workflow6857
-Node: Commands7810
-Node: Bookmarks9166
-Node: FAQ9518
-Node: Changelog12594
-Node: v04-pre12866
-Node: v03313407
-Node: v03213841
-Node: v03113969
-Node: v0314299
-Node: v0214689
-Node: v01315181
-Node: v01215330
-Node: v01115507
-Node: v0115670
-Node: Development15771
-Node: Copyright assignment16043
+Node: Installation2437
+Node: GNU ELPA2588
+Node: Quelpa2953
+Node: Configuration3673
+Node: Usage4520
+Node: Activities4709
+Node: Compatibility5697
+Node: Modes6181
+Node: Workflow6849
+Node: Commands7802
+Node: Bookmarks9158
+Node: FAQ9510
+Node: Changelog12586
+Node: v0412850
+Node: v03313379
+Node: v03213809
+Node: v03113937
+Node: v0314267
+Node: v0214657
+Node: v01315149
+Node: v01215298
+Node: v01115475
+Node: v0115638
+Node: Development15739
+Node: Copyright assignment16011
 
 End Tag Table
 
