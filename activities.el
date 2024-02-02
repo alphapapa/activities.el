@@ -6,7 +6,7 @@
 ;; Maintainer: Adam Porter <adam@alphapapa.net>
 ;; URL: https://github.com/alphapapa/activities.el
 ;; Keywords: convenience
-;; Version: 0.3.3
+;; Version: 0.4
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -198,6 +198,9 @@ For example, the value of `window-preserved-size' includes a
 buffer, which must be serialized to a buffer name, and then
 deserialized back to the buffer after it is reincarnated.")
 
+(defvar activities-saving-p nil
+  "Non-nil when saving activities' states.")
+
 ;;;; Customization
 
 (defgroup activities nil
@@ -271,6 +274,16 @@ prefixes will be added automatically."
                  (const :tag "Current project's name" activities--project-name)
                  (function-item :tag "Other function")))
 
+(defcustom activities-anti-save-predicates
+  '(active-minibuffer-window activities--backtrace-visible-p)
+  "Predicates which prevent an activity's state from being saved.
+Each predicate is called without arguments, with the activity to
+be saved having been activated.  If any predicate returns
+non-nil, the activity's state is not saved."
+  :type '(set (function-item active-minibuffer-window)
+              (function-item activities--backtrace-visible-p)
+              (function :tag "Other predicate")))
+
 ;;;; Commands
 
 ;;;###autoload
@@ -322,8 +335,11 @@ Its last is saved, and its frames, windows, and tabs are closed."
   (interactive
    (let ((default (when (activities-current)
                     (activities-activity-name (activities-current)))))
-     (list (activities-completing-read :prompt (format-prompt "Suspend activity" default)
-                                       :default default))))
+     (list (activities-completing-read
+            :activities (cl-remove-if-not #'activities-activity-active-p
+                                          activities-activities :key #'cdr)
+            :prompt (format-prompt "Suspend activity" default)
+            :default default))))
   (activities-save activity :lastp t)
   (activities-close activity))
 
@@ -335,7 +351,8 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
   (interactive)
   (with-demoted-errors "activities-save-all: ERROR: %S"
     (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (activities-save activity :lastp t))))
+      (let ((activities-saving-p t))
+        (activities-save activity :lastp t)))))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
@@ -405,11 +422,14 @@ according to option `activities-always-persist', which see)."
   (unless (or defaultp lastp)
     (user-error "Neither DEFAULTP nor LASTP specified"))
   (activities-with activity
-    (pcase-let* (((cl-struct activities-activity name default last) activity)
-                 (new-state (activities-state)))
-      (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-            (activities-activity-last activity) (if (or lastp (not last)) new-state last)
-            (map-elt activities-activities name) activity)))
+    ;; Don't try to save if a minibuffer is active, because we
+    ;; wouldn't want to try to restore that layout.
+    (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
+      (pcase-let* (((cl-struct activities-activity name default last) activity)
+                   (new-state (activities-state)))
+        (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+              (activities-activity-last activity) (if (or lastp (not last)) new-state last)
+              (map-elt activities-activities name) activity))))
   (activities--persist persistp))
 
 (cl-defun activities-set (activity &key (state 'last))
@@ -457,7 +477,11 @@ Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
   (select-frame (or (activities--frame activity)
                     (make-frame `((activity . ,activity)))))
-  (raise-frame)
+  (unless activities-saving-p
+    ;; HACK: Don't raise the frame when saving the activity's state.
+    ;; (I don't love this solution, largely because it only applies
+    ;; when not using `activities-tabs-mode', but it will do for now.)
+    (raise-frame))
   (set-frame-name (activities-name-for activity)))
 
 (defun activities--frame (activity)
@@ -664,6 +688,14 @@ PROMPT and DEFAULT are passed to `completing-read', which see."
   "Return frame/tab name for ACTIVITY.
 Adds `activities-name-prefix'."
   (concat activities-name-prefix (activities-activity-name activity)))
+
+(defun activities--backtrace-visible-p ()
+  "Return non-nil if a visible window is in `backtrace-mode'."
+  (catch :found
+    (walk-windows (lambda (window)
+                    (with-selected-window window
+                      (when (derived-mode-p 'backtrace-mode)
+                        (throw :found t)))))))
 
 ;;;; Project support
 

@@ -69,6 +69,7 @@ Usage
 
 Changelog
 
+* v0.4: v04.
 * v0.3.3: v033.
 * v0.3.2: v032.
 * v0.3.1: v031.
@@ -353,6 +354,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
+* v0.4: v04.
 * v0.3.3: v033.
 * v0.3.2: v032.
 * v0.3.1: v031.
@@ -364,9 +366,26 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v033,  Next: v032,  Up: Changelog
+File: README.info,  Node: v04,  Next: v033,  Up: Changelog
 
-5.1 v0.3.3
+5.1 v0.4
+========
+
+*Additions*
+   • Option ‘activities-anti-save-predicates’ prevents saving activity
+     states at inappropriate times.
+
+   *Fixes*
+   • Don’t save activity state if a minibuffer is active.
+   • Offer only active activities for suspending.
+   • Don’t raise frame when saving activity states.  (See #4
+     (https://github.com/alphapapa/activities.el/issues/4).  Thanks to
+     JD Smith (https://github.com/jdtsmith) for reporting.)
+
+
+File: README.info,  Node: v033,  Next: v032,  Prev: v04,  Up: Changelog
+
+5.2 v0.3.3
 ==========
 
 *Fixes*
@@ -380,7 +399,7 @@ File: README.info,  Node: v033,  Next: v032,  Up: Changelog
 
 File: README.info,  Node: v032,  Next: v031,  Prev: v033,  Up: Changelog
 
-5.2 v0.3.2
+5.3 v0.3.2
 ==========
 
 Updated documentation, etc.
@@ -388,7 +407,7 @@ Updated documentation, etc.
 
 File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
-5.3 v0.3.1
+5.4 v0.3.1
 ==========
 
 *Fixes*
@@ -400,7 +419,7 @@ File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
 File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
-5.4 v0.3
+5.5 v0.3
 ========
 
 *Additions*
@@ -413,7 +432,7 @@ File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
-5.5 v0.2
+5.6 v0.2
 ========
 
 *Additions*
@@ -429,7 +448,7 @@ File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
-5.6 v0.1.3
+5.7 v0.1.3
 ==========
 
 *Fixes*
@@ -439,7 +458,7 @@ File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
-5.7 v0.1.2
+5.8 v0.1.2
 ==========
 
 *Fixes*
@@ -448,7 +467,7 @@ File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
-5.8 v0.1.1
+5.9 v0.1.1
 ==========
 
 *Fixes*
@@ -457,8 +476,8 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-5.9 v0.1
-========
+5.10 v0.1
+=========
 
 Initial release.
 
@@ -494,30 +513,31 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2424
-Node: GNU ELPA2575
-Node: Quelpa2940
-Node: Configuration3660
-Node: Usage4507
-Node: Activities4696
-Node: Compatibility5684
-Node: Modes6168
-Node: Workflow6836
-Node: Commands7789
-Node: Bookmarks9145
-Node: FAQ9497
-Node: Changelog12573
-Node: v03312824
-Node: v03213242
-Node: v03113370
-Node: v0313700
-Node: v0214090
-Node: v01314582
-Node: v01214731
-Node: v01114908
-Node: v0115071
-Node: Development15170
-Node: Copyright assignment15442
+Node: Installation2437
+Node: GNU ELPA2588
+Node: Quelpa2953
+Node: Configuration3673
+Node: Usage4520
+Node: Activities4709
+Node: Compatibility5697
+Node: Modes6181
+Node: Workflow6849
+Node: Commands7802
+Node: Bookmarks9158
+Node: FAQ9510
+Node: Changelog12586
+Node: v0412850
+Node: v03313379
+Node: v03213809
+Node: v03113937
+Node: v0314267
+Node: v0214657
+Node: v01315149
+Node: v01215298
+Node: v01115475
+Node: v0115638
+Node: Development15739
+Node: Copyright assignment16011
 
 End Tag Table
 
