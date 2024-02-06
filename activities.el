@@ -679,6 +679,7 @@ activity's name is NAME."
 
 (defun activities--error-buffer (name strings)
   "Return a new error buffer having NAME and content STRINGS."
+  ;; TODO: Use this elsewhere too.
   (with-current-buffer (get-buffer-create (format "*Activities (error): %s*" name))
     (visual-line-mode)
     (goto-char (point-max))
