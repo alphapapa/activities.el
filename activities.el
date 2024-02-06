@@ -642,18 +642,48 @@ activity's name is NAME."
   ;; back (which actually break the entire bookmark system when
   ;; such a props is saved in the bookmarks file), we have to
   ;; workaround a failure to read here.  See bug#56643.
-  (pcase-let* (((cl-struct activities-buffer bookmark) struct))
-    (save-window-excursion
-      (condition-case err
-          (progn
-            (bookmark-jump bookmark)
-            (when-let ((local-variable-map
-                        (bookmark-prop-get bookmark 'activities-buffer-local-variables)))
-              (cl-loop for (variable . value) in local-variable-map
-                       do (setf (buffer-local-value variable (current-buffer)) value))))
-        (error (delay-warning 'activity
-                              (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
-      (current-buffer))))
+
+  ;; Unfortunately, when a bookmarked file no longer exists,
+  ;; `bookmark-handle-bookmark' handles the error itself and returns
+  ;; nil, preventing us from handling the error.  Since
+  ;; `bookmark-jump' works by side effect, we have to test whether the
+  ;; buffer was changed in order to know whether it worked.  We call
+  ;; it from a temp buffer in case the jumped-to buffer would be the
+  ;; same as the current buffer.
+  (with-temp-buffer
+    (pcase-let* (((cl-struct activities-buffer bookmark) struct)
+                 (temp-buffer (current-buffer))
+                 (jumped-to-buffer
+                  (save-window-excursion
+                    (condition-case err
+                        (progn
+                          (bookmark-jump bookmark)
+                          (when-let ((local-variable-map
+                                      (bookmark-prop-get bookmark 'activities-buffer-local-variables)))
+                            (cl-loop for (variable . value) in local-variable-map
+                                     do (setf (buffer-local-value variable (current-buffer)) value))))
+                      (error (delay-warning 'activity
+                                            (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
+                    (current-buffer))))
+      (if (not (eq temp-buffer jumped-to-buffer))
+          ;; Bookmark appears to have been jumped to: return that buffer.
+          jumped-to-buffer
+        ;; Bookmark appears to have not changed the buffer: return a new one showing an error.
+        (activities--error-buffer
+         (format "%s:%s" (car bookmark) (bookmark-prop-get bookmark 'filename))
+         (list "Activities was unable to get a buffer for bookmark:\n\n"
+	       (prin1-to-string bookmark) "\n\n"
+	       "It's likely that the bookmark's file no longer exists, in which case you may need to relocate it and redefine this activity.\n\n"
+               "If this is not the case, please report this error to the `activities' maintainer.\n\n"
+               "In the meantime, you may ignore this error and use the other buffers in the activity.\n\n"))))))
+
+(defun activities--error-buffer (name strings)
+  "Return a new error buffer having NAME and content STRINGS."
+  (with-current-buffer (get-buffer-create (format "*Activities (error): %s*" name))
+    (visual-line-mode)
+    (goto-char (point-max))
+    (apply #'insert strings)
+    (current-buffer)))
 
 (defun activities--filename-buffer (activities-buffer)
   "Return buffer for ACTIVITIES-BUFFER having `filename' set."
