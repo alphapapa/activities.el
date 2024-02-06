@@ -377,6 +377,7 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
    • Show a helpful error if a bookmark’s target file is missing.  (#17
      (https://github.com/alphapapa/activities.el/issues/17).  Thanks to
      JD Smith (https://github.com/jdtsmith) for reporting.)
+   • Sort order in ‘activities-list’.
 
 
 File: README.info,  Node: v04,  Next: v033,  Prev: v05-pre,  Up: Changelog
@@ -540,18 +541,18 @@ Node: Bookmarks9179
 Node: FAQ9531
 Node: Changelog12607
 Node: v05-pre12892
-Node: v0413201
-Node: v03313746
-Node: v03214176
-Node: v03114304
-Node: v0314634
-Node: v0215024
-Node: v01315516
-Node: v01215665
-Node: v01115842
-Node: v0116007
-Node: Development16108
-Node: Copyright assignment16380
+Node: v0413245
+Node: v03313790
+Node: v03214220
+Node: v03114348
+Node: v0314678
+Node: v0215068
+Node: v01315560
+Node: v01215709
+Node: v01115886
+Node: v0116051
+Node: Development16152
+Node: Copyright assignment16424
 
 End Tag Table
 

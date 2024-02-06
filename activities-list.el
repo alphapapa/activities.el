@@ -75,7 +75,7 @@
            :formatter activities-list--format-time))
        :objects-function (lambda ()
                            (map-values activities-activities))
-       :sort-by '((2 . ascend) (0 . descend))
+       :sort-by '((2 . descend) (0 . descend))
        :actions `("q" (lambda (&rest _) (bury-buffer))
                   "n" (lambda (&rest _) (forward-line 1))
                   "p" (lambda (&rest _) (forward-line -1))
