@@ -342,7 +342,18 @@ Its last state is saved, and its frames, windows, and tabs are closed."
   (activities-save activity :lastp t)
   (activities-close activity))
 
-(defalias 'activities-kill #'activities-suspend)
+(defun activities-kill (activity)
+  "Kill ACTIVITY.
+Its last state is discarded (so when it is resumed, its default
+state will be used), and close its frame or tab."
+  (interactive
+   (list (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p
+                                        activities-activities :key #'cdr)
+          :prompt "Kill activity")))
+  (setf (activities-activity-last activity) nil)
+  (activities-save activity)
+  (activities-close activity))
 
 (defun activities-save-all ()
   "Save all active activities' last states.

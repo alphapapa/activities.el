@@ -283,7 +283,8 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Bindings,  Up: Usag
 ‘activities-suspend’ (‘C-x C-a C-s’)
      Save an activity’s state and close its frame or tab.
 ‘activities-kill’ (‘C-x C-a C-k’)
-     Alias for ‘activities-suspend’.
+     Discard an activity’s last state (so when it is resumed, its
+     default state will be used), and close its frame or tab.
 ‘activities-resume’ (‘C-x C-a C-a’)
      Resume an activity, switching to a new frame or tab for its window
      configuration, and restoring its buffers.  With prefix argument,
@@ -392,7 +393,12 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
 5.1 v0.5-pre
 ============
 
-*Fixes*
+*Changes*
+   • Command ‘activities-kill’ now discards an activity’s last state
+     (while ‘activities-suspend’ saves its last state), and closes its
+     frame or tab.
+
+   *Fixes*
    • Show a helpful error if a bookmark’s target file is missing.  (#17
      (https://github.com/alphapapa/activities.el/issues/17).  Thanks to
      JD Smith (https://github.com/jdtsmith) for reporting.)
@@ -557,22 +563,22 @@ Node: Modes6219
 Node: Workflow6887
 Node: Bindings7840
 Node: Commands8486
-Node: Bookmarks9846
-Node: FAQ10198
-Node: Changelog13274
-Node: v05-pre13559
-Node: v0413912
-Node: v03314457
-Node: v03214887
-Node: v03115015
-Node: v0315345
-Node: v0215735
-Node: v01316227
-Node: v01216376
-Node: v01116553
-Node: v0116718
-Node: Development16819
-Node: Copyright assignment17091
+Node: Bookmarks9935
+Node: FAQ10287
+Node: Changelog13363
+Node: v05-pre13648
+Node: v0414186
+Node: v03314731
+Node: v03215161
+Node: v03115289
+Node: v0315619
+Node: v0216009
+Node: v01316501
+Node: v01216650
+Node: v01116827
+Node: v0116992
+Node: Development17093
+Node: Copyright assignment17365
 
 End Tag Table
 
