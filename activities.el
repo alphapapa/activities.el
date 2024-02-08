@@ -415,17 +415,16 @@ To be called from `kill-emacs-hook'."
 If DEFAULTP, save its default state; if LASTP, its last.  If
 PERSISTP, force persisting of data (otherwise, data is persisted
 according to option `activities-always-persist', which see)."
-  (unless (or defaultp lastp)
-    (user-error "Neither DEFAULTP nor LASTP specified"))
   (activities-with activity
-    ;; Don't try to save if a minibuffer is active, because we
-    ;; wouldn't want to try to restore that layout.
-    (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
-      (pcase-let* (((cl-struct activities-activity name default last) activity)
-                   (new-state (activities-state)))
-        (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-              (activities-activity-last activity) (if (or lastp (not last)) new-state last)
-              (map-elt activities-activities name) activity))))
+    (when (or defaultp lastp)
+      (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
+        (pcase-let* (((cl-struct activities-activity default last) activity)
+                     (new-state (activities-state)))
+          (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+                (activities-activity-last activity) (if (or lastp (not last)) new-state last)))))
+    ;; Always set the value so, e.g. the activity can be modified
+    ;; externally and saved here.
+    (setf (map-elt activities-activities (activities-activity-name activity)) activity))
   (activities--persist persistp))
 
 (cl-defun activities-set (activity &key (state 'last))
