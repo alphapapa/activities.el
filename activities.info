@@ -64,6 +64,7 @@ Usage
 * Compatibility::
 * Modes::
 * Workflow::
+* Bindings::
 * Commands::
 * Bookmarks::
 
@@ -144,15 +145,15 @@ to be placed in the user’s init file:
        (activities-tabs-mode)
 
        :bind
-       (("C-x C-a n" . activities-new)
-        ("C-x C-a g" . activities-revert)
-        ("C-x C-a s" . activities-suspend)
-        ("C-x C-a C-k" . activities-kill)    ; Alias for `-suspend'
-        ("C-x C-a a" . activities-resume)
-        ;; For convenience, we also bind `activities-resume' to "C-x C-a
-        ;; C-a", so the user need not lift the Control key.
+       (("C-x C-a C-n" . activities-new)
+        ;; As resuming is expected to be one of the most commonly used
+        ;; commands, this binding is one of the easiest to press.
         ("C-x C-a C-a" . activities-resume)
+        ("C-x C-a C-s" . activities-suspend)
+        ("C-x C-a C-k" . activities-kill)
+        ;; This binding mirrors, e.g. "C-x t RET".
         ("C-x C-a RET" . activities-switch)
+        ("C-x C-a g" . activities-revert)
         ("C-x C-a l" . activities-list)))
 
 
@@ -167,6 +168,7 @@ File: README.info,  Node: Usage,  Next: FAQ,  Prev: Configuration,  Up: Top
 * Compatibility::
 * Modes::
 * Workflow::
+* Bindings::
 * Commands::
 * Bookmarks::
 
@@ -223,7 +225,7 @@ File: README.info,  Node: Modes,  Next: Workflow,  Prev: Compatibility,  Up: Usa
      please report them._)
 
 
-File: README.info,  Node: Workflow,  Next: Commands,  Prev: Modes,  Up: Usage
+File: README.info,  Node: Workflow,  Next: Bindings,  Prev: Modes,  Up: Usage
 
 3.4 Workflow
 ============
@@ -248,20 +250,37 @@ An example of a workflow using activities:
      saves its last state and closes its frame/tab).
 
 
-File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usage
+File: README.info,  Node: Bindings,  Next: Commands,  Prev: Workflow,  Up: Usage
 
-3.5 Commands
+3.5 Bindings
+============
+
+Key bindings are, as always, ultimately up to the user.  However, in
+*note Configuration::, we suggest a set of bindings with a simple
+philosophy behind them:
+
+   • A binding ending in a ‘C’-prefixed key is expected to result in the
+     set of active activities being changed (e.g.  defining a new
+     activity, activating one, or deactivating one).
+   • A binding not ending in a ‘C’-prefixed key is expected to merely
+     change an active one (e.g.  reverting it) or do something else
+     (like listing activities.)
+
+
+File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Bindings,  Up: Usage
+
+3.6 Commands
 ============
 
 ‘activities-list’ (‘C-x C-a l’)
      List activities in a ‘vtable’ buffer in which they can be managed
      with various commands.
-‘activities-new’ (‘C-x C-a n’)
+‘activities-new’ (‘C-x C-a C-n’)
      Define a new activity whose default state is the current frame’s or
      tab’s window configuration.  With prefix argument, overwrite an
      existing activity (thereby updating its default state to the
      current state).
-‘activities-suspend’ (‘C-x C-a s’)
+‘activities-suspend’ (‘C-x C-a C-s’)
      Save an activity’s state and close its frame or tab.
 ‘activities-kill’ (‘C-x C-a C-k’)
      Alias for ‘activities-suspend’.
@@ -282,7 +301,7 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Workflow,  Up: Usag
 
 File: README.info,  Node: Bookmarks,  Prev: Commands,  Up: Usage
 
-3.6 Bookmarks
+3.7 Bookmarks
 =============
 
 When option ‘activities-bookmark-store’ is enabled, an Emacs bookmark is
@@ -527,32 +546,33 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2458
-Node: GNU ELPA2609
-Node: Quelpa2974
-Node: Configuration3694
-Node: Usage4541
-Node: Activities4730
-Node: Compatibility5718
-Node: Modes6202
-Node: Workflow6870
-Node: Commands7823
-Node: Bookmarks9179
-Node: FAQ9531
-Node: Changelog12607
-Node: v05-pre12892
-Node: v0413245
-Node: v03313790
-Node: v03214220
-Node: v03114348
-Node: v0314678
-Node: v0215068
-Node: v01315560
-Node: v01215709
-Node: v01115886
-Node: v0116051
-Node: Development16152
-Node: Copyright assignment16424
+Node: Installation2471
+Node: GNU ELPA2622
+Node: Quelpa2987
+Node: Configuration3707
+Node: Usage4545
+Node: Activities4747
+Node: Compatibility5735
+Node: Modes6219
+Node: Workflow6887
+Node: Bindings7840
+Node: Commands8486
+Node: Bookmarks9846
+Node: FAQ10198
+Node: Changelog13274
+Node: v05-pre13559
+Node: v0413912
+Node: v03314457
+Node: v03214887
+Node: v03115015
+Node: v0315345
+Node: v0215735
+Node: v01316227
+Node: v01216376
+Node: v01116553
+Node: v0116718
+Node: Development16819
+Node: Copyright assignment17091
 
 End Tag Table
 

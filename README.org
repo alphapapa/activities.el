@@ -54,15 +54,15 @@ This is the recommended configuration, in terms of a ~use-package~ form to be pl
     (activities-tabs-mode)
 
     :bind
-    (("C-x C-a n" . activities-new)
-     ("C-x C-a g" . activities-revert)
-     ("C-x C-a s" . activities-suspend)
-     ("C-x C-a C-k" . activities-kill)    ; Alias for `-suspend'
-     ("C-x C-a a" . activities-resume)
-     ;; For convenience, we also bind `activities-resume' to "C-x C-a
-     ;; C-a", so the user need not lift the Control key.
+    (("C-x C-a C-n" . activities-new)
+     ;; As resuming is expected to be one of the most commonly used
+     ;; commands, this binding is one of the easiest to press.
      ("C-x C-a C-a" . activities-resume)
+     ("C-x C-a C-s" . activities-suspend)
+     ("C-x C-a C-k" . activities-kill)
+     ;; This binding mirrors, e.g. "C-x t RET".
      ("C-x C-a RET" . activities-switch)
+     ("C-x C-a g" . activities-revert)
      ("C-x C-a l" . activities-list)))
 #+END_SRC
 
@@ -97,11 +97,18 @@ An example of a workflow using activities:
 8. Call ~activities-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
 9. Suspend the activity with ~activities-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
+** Bindings
+
+Key bindings are, as always, ultimately up to the user.  However, in [[Configuration][Configuration]], we suggest a set of bindings with a simple philosophy behind them:
+
++ A binding ending in a ~C~-prefixed key is expected to result in the set of active activities being changed (e.g. defining a new activity, activating one, or deactivating one).
++ A binding not ending in a ~C~-prefixed key is expected to merely change an active one (e.g. reverting it) or do something else (like listing activities.)
+
 ** Commands
 
 + ~activities-list~ (~C-x C-a l~) :: List activities in a ~vtable~ buffer in which they can be managed with various commands.
-+ ~activities-new~ (~C-x C-a n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
-+ ~activities-suspend~ (~C-x C-a s~) :: Save an activity's state and close its frame or tab.
++ ~activities-new~ (~C-x C-a C-n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
++ ~activities-suspend~ (~C-x C-a C-s~) :: Save an activity's state and close its frame or tab.
 + ~activities-kill~ (~C-x C-a C-k~) :: Alias for ~activities-suspend~.
 + ~activities-resume~ (~C-x C-a C-a~) :: Resume an activity, switching to a new frame or tab for its window configuration, and restoring its buffers.  With prefix argument, restore its default state rather than its last.
 + ~activities-revert~ (~C-x C-a g~) :: Revert an activity to its default state.
