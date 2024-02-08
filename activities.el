@@ -314,7 +314,9 @@ activity."
 If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
-  (interactive (list (activities-completing-read) :resetp current-prefix-arg))
+  (interactive
+   (list (activities-completing-read :prompt "Resume activity" :default nil)
+         :resetp current-prefix-arg))
   (let ((already-active-p (activities-activity-active-p activity)))
     (activities--switch activity)
     (unless (or resetp already-active-p)
@@ -326,20 +328,17 @@ Interactively, offers active activities."
   (interactive
    (list (activities-completing-read
           :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-          :prompt "Switch to: ")))
+          :prompt "Switch to activity")))
   (activities--switch activity))
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
-Its last is saved, and its frames, windows, and tabs are closed."
+Its last state is saved, and its frames, windows, and tabs are closed."
   (interactive
-   (let ((default (when (activities-current)
-                    (activities-activity-name (activities-current)))))
-     (list (activities-completing-read
-            :activities (cl-remove-if-not #'activities-activity-active-p
-                                          activities-activities :key #'cdr)
-            :prompt (format-prompt "Suspend activity" default)
-            :default default))))
+   (list (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p
+                                        activities-activities :key #'cdr)
+          :prompt "Suspend activity")))
   (activities-save activity :lastp t)
   (activities-close activity))
 
@@ -366,10 +365,7 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
 It will not be recoverable."
   ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
   (interactive
-   (let ((default (when (activities-current)
-                    (activities-activity-name (activities-current)))))
-     (list (activities-completing-read :prompt (format-prompt "Discard activity" default)
-                                       :default default))))
+   (list (activities-completing-read :prompt "Discard activity")))
   (ignore-errors
     ;; FIXME: After fixing all the bugs, remove ignore-errors.
     (activities-close activity))
@@ -703,10 +699,15 @@ activity's name is NAME."
           (current-buffer)))))
 
 (cl-defun activities-completing-read
-    (&key (activities activities-activities) (prompt "Open activity: ") default)
+    (&key (activities activities-activities)
+          (default (when (activities-current)
+                     (activities-activity-name (activities-current))))
+          (prompt "Activity"))
   "Return an activity read with completion from ACTIVITIES.
-PROMPT and DEFAULT are passed to `completing-read', which see."
-  (let* ((names (activities-names activities))
+PROMPT is passed to `completing-read' by way of `format-prompt',
+which see, with DEFAULT."
+  (let* ((prompt (format-prompt prompt default))
+         (names (activities-names activities))
          (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
