@@ -52,6 +52,8 @@ This is the recommended configuration, in terms of a ~use-package~ form to be pl
     :init
     (activities-mode)
     (activities-tabs-mode)
+    ;; Prevent `edebug' default bindings from interfering.
+    (setq edebug-inhibit-emacs-lisp-mode-bindings t)
 
     :bind
     (("C-x C-a C-n" . activities-new)
@@ -137,6 +139,9 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 * Changelog
 
 ** v0.5-pre
+
+*Additions*
++ Suggest setting variable ~edebug-inhibit-emacs-lisp-mode-bindings~ to avoid conflicts with suggested keybindings.
 
 *Changes*
 + Command ~activities-kill~ now discards an activity's last state (while ~activities-suspend~ saves its last state), and closes its frame or tab.

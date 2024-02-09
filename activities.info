@@ -143,6 +143,8 @@ to be placed in the user’s init file:
        :init
        (activities-mode)
        (activities-tabs-mode)
+       ;; Prevent `edebug' default bindings from interfering.
+       (setq edebug-inhibit-emacs-lisp-mode-bindings t)
 
        :bind
        (("C-x C-a C-n" . activities-new)
@@ -393,7 +395,11 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
 5.1 v0.5-pre
 ============
 
-*Changes*
+*Additions*
+   • Suggest setting variable ‘edebug-inhibit-emacs-lisp-mode-bindings’
+     to avoid conflicts with suggested keybindings.
+
+   *Changes*
    • Command ‘activities-kill’ now discards an activity’s last state
      (while ‘activities-suspend’ saves its last state), and closes its
      frame or tab.
@@ -572,18 +578,18 @@ Node: Bookmarks10053
 Node: FAQ10405
 Node: Changelog13481
 Node: v05-pre13766
-Node: v0414636
-Node: v03315181
-Node: v03215611
-Node: v03115739
-Node: v0316069
-Node: v0216459
-Node: v01316951
-Node: v01217100
-Node: v01117277
-Node: v0117442
-Node: Development17543
-Node: Copyright assignment17815
+Node: v0414782
+Node: v03315327
+Node: v03215757
+Node: v03115885
+Node: v0316215
+Node: v0216605
+Node: v01317097
+Node: v01217246
+Node: v01117423
+Node: v0117588
+Node: Development17689
+Node: Copyright assignment17961
 
 End Tag Table
 
