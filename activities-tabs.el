@@ -50,8 +50,8 @@ Each is called with one argument, the activity."
   "Prepended to activity names in tabs."
   :type 'string)
 
-(defface activities-tabs-face
-  `((t :foreground ,(face-foreground 'font-lock-function-name-face nil 'default)))
+(defface activities-tabs
+  `((t :inherit font-lock-function-name-face))
   "Applied to tab-bar faces for tabs representing activities.")
 
 ;;;; Mode
@@ -126,11 +126,12 @@ Selects its tab, making one if needed.  Its state is not changed."
 
 (defun activities-tabs--tab-bar-tab-face-function (tab)
   "Return a face for TAB.
-If TAB represents an activity, `activities-tabs-face' is added."
+If TAB represents an activity, face `activities-tabs' is added as
+inherited."
   ;; TODO: Propose a tab-bar equivalent of `tab-line-tab-face-functions'.
   (let ((face (funcall activities-tabs-tab-bar-tab-face-function-original tab)))
     (if (activities-tabs--tab-parameter 'activity tab)
-        `(:inherit (activities-tabs-face ,face))
+        `(:inherit (activities-tabs ,face))
       face)))
 
 (defun activities-tabs-activity--set (activity)

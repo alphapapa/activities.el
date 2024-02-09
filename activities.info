@@ -397,6 +397,11 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
    • Command ‘activities-kill’ now discards an activity’s last state
      (while ‘activities-suspend’ saves its last state), and closes its
      frame or tab.
+   • Face ‘activities-tabs-face’ is renamed to ‘activities-tabs’, and
+     now inherits from another face by default, which allows it to
+     adjust with the loaded theme.  (#24
+     (https://github.com/alphapapa/activities.el/issues/24).  Thanks to
+     Karthik Chikmagalur (https://github.com/karthink) for suggesting.)
 
    *Fixes*
    • Show a helpful error if a bookmark’s target file is missing.  (#17
@@ -556,29 +561,29 @@ Node: Installation2471
 Node: GNU ELPA2622
 Node: Quelpa2987
 Node: Configuration3707
-Node: Usage4545
-Node: Activities4747
-Node: Compatibility5735
-Node: Modes6219
-Node: Workflow6887
-Node: Bindings7840
-Node: Commands8486
-Node: Bookmarks9935
-Node: FAQ10287
-Node: Changelog13363
-Node: v05-pre13648
-Node: v0414186
-Node: v03314731
-Node: v03215161
-Node: v03115289
-Node: v0315619
-Node: v0216009
-Node: v01316501
-Node: v01216650
-Node: v01116827
-Node: v0116992
-Node: Development17093
-Node: Copyright assignment17365
+Node: Usage4663
+Node: Activities4865
+Node: Compatibility5853
+Node: Modes6337
+Node: Workflow7005
+Node: Bindings7958
+Node: Commands8604
+Node: Bookmarks10053
+Node: FAQ10405
+Node: Changelog13481
+Node: v05-pre13766
+Node: v0414636
+Node: v03315181
+Node: v03215611
+Node: v03115739
+Node: v0316069
+Node: v0216459
+Node: v01316951
+Node: v01217100
+Node: v01117277
+Node: v0117442
+Node: Development17543
+Node: Copyright assignment17815
 
 End Tag Table
 
