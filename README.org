@@ -138,6 +138,11 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 * Changelog
 
+** v0.5.1
+
+*Fixes*
++ Listing activities without last-saved states.
+
 ** v0.5
 
 *Additions*
