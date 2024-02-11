@@ -414,6 +414,9 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
      (https://github.com/alphapapa/activities.el/issues/17).  Thanks to
      JD Smith (https://github.com/jdtsmith) for reporting.)
    • Sort order in ‘activities-list’.
+   • When discarding an inactive activity, don’t switch to it first.
+     (#18 (https://github.com/alphapapa/activity.el/issues/18).  Thanks
+     to JD Smith (https://github.com/jdtsmith) for reporting.)
 
 
 File: README.info,  Node: v04,  Next: v033,  Prev: v05-pre,  Up: Changelog
@@ -578,18 +581,18 @@ Node: Bookmarks10053
 Node: FAQ10405
 Node: Changelog13481
 Node: v05-pre13766
-Node: v0414782
-Node: v03315327
-Node: v03215757
-Node: v03115885
-Node: v0316215
-Node: v0216605
-Node: v01317097
-Node: v01217246
-Node: v01117423
-Node: v0117588
-Node: Development17689
-Node: Copyright assignment17961
+Node: v0414990
+Node: v03315535
+Node: v03215965
+Node: v03116093
+Node: v0316423
+Node: v0216813
+Node: v01317305
+Node: v01217454
+Node: v01117631
+Node: v0117796
+Node: Development17897
+Node: Copyright assignment18169
 
 End Tag Table
 

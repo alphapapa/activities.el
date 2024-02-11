@@ -377,10 +377,12 @@ It will not be recoverable."
   ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
   (interactive
    (list (activities-completing-read :prompt "Discard activity")))
-  (ignore-errors
-    ;; FIXME: After fixing all the bugs, remove ignore-errors.
-    (activities-close activity))
-  (setf activities-activities (map-delete activities-activities (activities-activity-name activity))))
+  (when (yes-or-no-p (format "Discard activity %S permanently?" (activities-activity-name activity)))
+    (ignore-errors
+      ;; FIXME: After fixing all the bugs, remove ignore-errors.
+      (when (activities-activity-active-p activity)
+        (activities-close activity)))
+    (setf activities-activities (map-delete activities-activities (activities-activity-name activity)))))
 
 ;;;; Activity mode
 
