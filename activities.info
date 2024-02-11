@@ -70,7 +70,7 @@ Usage
 
 Changelog
 
-* v0.5-pre: v05-pre.
+* v0.5: v05.
 * v0.4: v04.
 * v0.3.3: v033.
 * v0.3.2: v032.
@@ -377,7 +377,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.5-pre: v05-pre.
+* v0.5: v05.
 * v0.4: v04.
 * v0.3.3: v033.
 * v0.3.2: v032.
@@ -390,10 +390,10 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
+File: README.info,  Node: v05,  Next: v04,  Up: Changelog
 
-5.1 v0.5-pre
-============
+5.1 v0.5
+========
 
 *Additions*
    • Suggest setting variable ‘edebug-inhibit-emacs-lisp-mode-bindings’
@@ -431,7 +431,7 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
      Karthik Chikmagalur (https://github.com/karthink) for reporting.)
 
 
-File: README.info,  Node: v04,  Next: v033,  Prev: v05-pre,  Up: Changelog
+File: README.info,  Node: v04,  Next: v033,  Prev: v05,  Up: Changelog
 
 5.2 v0.4
 ========
@@ -578,33 +578,33 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2471
-Node: GNU ELPA2622
-Node: Quelpa2987
-Node: Configuration3707
-Node: Usage4663
-Node: Activities4865
-Node: Compatibility5853
-Node: Modes6337
-Node: Workflow7005
-Node: Bindings7958
-Node: Commands8604
-Node: Bookmarks10053
-Node: FAQ10405
-Node: Changelog13481
-Node: v05-pre13766
-Node: v0415742
-Node: v03316287
-Node: v03216717
-Node: v03116845
-Node: v0317175
-Node: v0217565
-Node: v01318057
-Node: v01218206
-Node: v01118383
-Node: v0118548
-Node: Development18649
-Node: Copyright assignment18921
+Node: Installation2463
+Node: GNU ELPA2614
+Node: Quelpa2979
+Node: Configuration3699
+Node: Usage4655
+Node: Activities4857
+Node: Compatibility5845
+Node: Modes6329
+Node: Workflow6997
+Node: Bindings7950
+Node: Commands8596
+Node: Bookmarks10045
+Node: FAQ10397
+Node: Changelog13473
+Node: v0513750
+Node: v0415714
+Node: v03316255
+Node: v03216685
+Node: v03116813
+Node: v0317143
+Node: v0217533
+Node: v01318025
+Node: v01218174
+Node: v01118351
+Node: v0118516
+Node: Development18617
+Node: Copyright assignment18889
 
 End Tag Table
 
