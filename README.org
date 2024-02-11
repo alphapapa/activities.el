@@ -140,7 +140,8 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.6-pre
 
-Nothing new yet.
+*Changes*
++ Default time format in activities list.
 
 ** v0.5.1
 

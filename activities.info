@@ -399,7 +399,8 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
 5.1 v0.6-pre
 ============
 
-Nothing new yet.
+*Changes*
+   • Default time format in activities list.
 
 
 File: README.info,  Node: v051,  Next: v05,  Prev: v06-pre,  Up: Changelog
@@ -614,20 +615,20 @@ Node: Bookmarks10082
 Node: FAQ10434
 Node: Changelog13510
 Node: v06-pre13824
-Node: v05113935
-Node: v0514098
-Node: v0416075
-Node: v03316616
-Node: v03217046
-Node: v03117174
-Node: v0317504
-Node: v0217894
-Node: v01318386
-Node: v01218537
-Node: v01118716
-Node: v0118881
-Node: Development18982
-Node: Copyright assignment19254
+Node: v05113975
+Node: v0514138
+Node: v0416115
+Node: v03316656
+Node: v03217086
+Node: v03117214
+Node: v0317544
+Node: v0217934
+Node: v01318426
+Node: v01218577
+Node: v01118756
+Node: v0118921
+Node: Development19022
+Node: Copyright assignment19294
 
 End Tag Table
 

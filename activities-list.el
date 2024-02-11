@@ -32,7 +32,7 @@
   "Activities list buffer."
   :group 'activities)
 
-(defcustom activities-list-time-format "%c"
+(defcustom activities-list-time-format "%Y-%m-%d %H:%M:%S"
   "Time format for `activities-list' buffer."
   :type 'string)
 
