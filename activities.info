@@ -70,6 +70,7 @@ Usage
 
 Changelog
 
+* v0.6-pre: v06-pre.
 * v0.5.1: v051.
 * v0.5: v05.
 * v0.4: v04.
@@ -378,6 +379,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
+* v0.6-pre: v06-pre.
 * v0.5.1: v051.
 * v0.5: v05.
 * v0.4: v04.
@@ -392,9 +394,17 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v051,  Next: v05,  Up: Changelog
+File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
 
-5.1 v0.5.1
+5.1 v0.6-pre
+============
+
+Nothing new yet.
+
+
+File: README.info,  Node: v051,  Next: v05,  Prev: v06-pre,  Up: Changelog
+
+5.2 v0.5.1
 ==========
 
 *Fixes*
@@ -403,7 +413,7 @@ File: README.info,  Node: v051,  Next: v05,  Up: Changelog
 
 File: README.info,  Node: v05,  Next: v04,  Prev: v051,  Up: Changelog
 
-5.2 v0.5
+5.3 v0.5
 ========
 
 *Additions*
@@ -444,7 +454,7 @@ File: README.info,  Node: v05,  Next: v04,  Prev: v051,  Up: Changelog
 
 File: README.info,  Node: v04,  Next: v033,  Prev: v05,  Up: Changelog
 
-5.3 v0.4
+5.4 v0.4
 ========
 
 *Additions*
@@ -461,7 +471,7 @@ File: README.info,  Node: v04,  Next: v033,  Prev: v05,  Up: Changelog
 
 File: README.info,  Node: v033,  Next: v032,  Prev: v04,  Up: Changelog
 
-5.4 v0.3.3
+5.5 v0.3.3
 ==========
 
 *Fixes*
@@ -475,7 +485,7 @@ File: README.info,  Node: v033,  Next: v032,  Prev: v04,  Up: Changelog
 
 File: README.info,  Node: v032,  Next: v031,  Prev: v033,  Up: Changelog
 
-5.5 v0.3.2
+5.6 v0.3.2
 ==========
 
 Updated documentation, etc.
@@ -483,7 +493,7 @@ Updated documentation, etc.
 
 File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
-5.6 v0.3.1
+5.7 v0.3.1
 ==========
 
 *Fixes*
@@ -495,7 +505,7 @@ File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
 File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
-5.7 v0.3
+5.8 v0.3
 ========
 
 *Additions*
@@ -508,7 +518,7 @@ File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
-5.8 v0.2
+5.9 v0.2
 ========
 
 *Additions*
@@ -524,8 +534,8 @@ File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
-5.9 v0.1.3
-==========
+5.10 v0.1.3
+===========
 
 *Fixes*
    • Autoloads.
@@ -534,7 +544,7 @@ File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
-5.10 v0.1.2
+5.11 v0.1.2
 ===========
 
 *Fixes*
@@ -543,7 +553,7 @@ File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
-5.11 v0.1.1
+5.12 v0.1.1
 ===========
 
 *Fixes*
@@ -552,7 +562,7 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-5.12 v0.1
+5.13 v0.1
 =========
 
 Initial release.
@@ -589,34 +599,35 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2479
-Node: GNU ELPA2630
-Node: Quelpa2995
-Node: Configuration3715
-Node: Usage4671
-Node: Activities4873
-Node: Compatibility5861
-Node: Modes6345
-Node: Workflow7013
-Node: Bindings7966
-Node: Commands8612
-Node: Bookmarks10061
-Node: FAQ10413
-Node: Changelog13489
-Node: v05113782
-Node: v0513929
-Node: v0415906
-Node: v03316447
-Node: v03216877
-Node: v03117005
-Node: v0317335
-Node: v0217725
-Node: v01318217
-Node: v01218366
-Node: v01118545
-Node: v0118710
-Node: Development18811
-Node: Copyright assignment19083
+Node: Installation2500
+Node: GNU ELPA2651
+Node: Quelpa3016
+Node: Configuration3736
+Node: Usage4692
+Node: Activities4894
+Node: Compatibility5882
+Node: Modes6366
+Node: Workflow7034
+Node: Bindings7987
+Node: Commands8633
+Node: Bookmarks10082
+Node: FAQ10434
+Node: Changelog13510
+Node: v06-pre13824
+Node: v05113935
+Node: v0514098
+Node: v0416075
+Node: v03316616
+Node: v03217046
+Node: v03117174
+Node: v0317504
+Node: v0217894
+Node: v01318386
+Node: v01218537
+Node: v01118716
+Node: v0118881
+Node: Development18982
+Node: Copyright assignment19254
 
 End Tag Table
 
