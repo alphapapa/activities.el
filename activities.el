@@ -611,7 +611,7 @@ activity's name is NAME."
   "Return `activities-buffer' struct for BUFFER."
   (with-current-buffer buffer
     (make-activities-buffer
-     :bookmark (condition-case-unless-debug err
+     :bookmark (condition-case err
                    (bookmark-make-record)
                  (error
                   (pcase (error-message-string err)
