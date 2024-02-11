@@ -398,6 +398,9 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
 *Additions*
    • Suggest setting variable ‘edebug-inhibit-emacs-lisp-mode-bindings’
      to avoid conflicts with suggested keybindings.
+   • Option ‘activities-bookmark-warnings’ enables warning messages when
+     a non-file-visiting buffer can’t be bookmarked (for debugging
+     purposes).
 
    *Changes*
    • Command ‘activities-kill’ now discards an activity’s last state
@@ -417,6 +420,10 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
    • When discarding an inactive activity, don’t switch to it first.
      (#18 (https://github.com/alphapapa/activity.el/issues/18).  Thanks
      to JD Smith (https://github.com/jdtsmith) for reporting.)
+   • Don’t signal an error when ‘debug-on-error’ is enabled and a buffer
+     is not visiting a file.  (#25
+     (https://github.com/alphapapa/activity.el/issues/25).  Thanks to
+     Karthik Chikmagalur (https://github.com/karthink) for reporting.)
 
 
 File: README.info,  Node: v04,  Next: v033,  Prev: v05-pre,  Up: Changelog
@@ -581,18 +588,18 @@ Node: Bookmarks10053
 Node: FAQ10405
 Node: Changelog13481
 Node: v05-pre13766
-Node: v0414990
-Node: v03315535
-Node: v03215965
-Node: v03116093
-Node: v0316423
-Node: v0216813
-Node: v01317305
-Node: v01217454
-Node: v01117631
-Node: v0117796
-Node: Development17897
-Node: Copyright assignment18169
+Node: v0415411
+Node: v03315956
+Node: v03216386
+Node: v03116514
+Node: v0316844
+Node: v0217234
+Node: v01317726
+Node: v01217875
+Node: v01118052
+Node: v0118217
+Node: Development18318
+Node: Copyright assignment18590
 
 End Tag Table
 

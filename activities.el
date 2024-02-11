@@ -284,6 +284,15 @@ non-nil, the activity's state is not saved."
               (function-item activities--backtrace-visible-p)
               (function :tag "Other predicate")))
 
+(defcustom activities-bookmark-warnings nil
+  "Warn when a buffer can't be bookmarked.
+This is expected to be the case for non-file-visiting buffers
+whose major mode does not provide bookmark support, for which no
+warning is necessary.  This option may be enabled for debugging,
+which will cause a message to be printed for such buffers when an
+activity's state is saved."
+  :type 'boolean)
+
 ;;;; Commands
 
 ;;;###autoload
@@ -616,7 +625,8 @@ activity's name is NAME."
                  (error
                   (pcase (error-message-string err)
                     ("Buffer not visiting a file or directory")
-                    (_ (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err)))
+                    (_ (when activities-bookmark-warnings
+                         (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err))))
                   nil))
      :filename (buffer-file-name buffer)
      :name (buffer-name buffer)
