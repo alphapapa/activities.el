@@ -284,6 +284,14 @@ non-nil, the activity's state is not saved."
               (function-item activities--backtrace-visible-p)
               (function :tag "Other predicate")))
 
+(defcustom activities-resume-into-frame 'current
+  "Which frame to resume an activity into.
+Only applies when `activities-tabs-mode' is disabled."
+  :type '(choice (const :tag "Current frame"
+                        :doc "Replace current frame's window configuration"
+                        current)
+                 (const :tag "New frame" :doc "Make a new frame" new)))
+
 (defcustom activities-bookmark-warnings nil
   "Warn when a buffer can't be bookmarked.
 This is expected to be the case for non-file-visiting buffers
@@ -492,8 +500,11 @@ closed."
   "Switch to ACTIVITY.
 Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
-  (select-frame (or (activities--frame activity)
-                    (make-frame `((activity . ,activity)))))
+  (if (activities-activity-active-p activity)
+      (select-frame (activities--frame activity))
+    (pcase activities-resume-into-frame
+      ('current nil)
+      ('new (select-frame (make-frame `((activity . ,activity)))))))
   (unless activities-saving-p
     ;; HACK: Don't raise the frame when saving the activity's state.
     ;; (I don't love this solution, largely because it only applies

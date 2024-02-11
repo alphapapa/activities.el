@@ -401,6 +401,11 @@ File: README.info,  Node: v05-pre,  Next: v04,  Up: Changelog
    • Option ‘activities-bookmark-warnings’ enables warning messages when
      a non-file-visiting buffer can’t be bookmarked (for debugging
      purposes).
+   • Option ‘activities-resume-into-frame’ controls whether resuming an
+     activity opens a new frame or uses the current one (when
+     ‘activities-tabs-mode’ is disabled).  (#22
+     (https://github.com/alphapapa/activities.el/issues/22).  Thanks to
+     Icy-Thought (https://github.com/Icy-Thought) for suggesting.)
 
    *Changes*
    • Command ‘activities-kill’ now discards an activity’s last state
@@ -588,18 +593,18 @@ Node: Bookmarks10053
 Node: FAQ10405
 Node: Changelog13481
 Node: v05-pre13766
-Node: v0415411
-Node: v03315956
-Node: v03216386
-Node: v03116514
-Node: v0316844
-Node: v0217234
-Node: v01317726
-Node: v01217875
-Node: v01118052
-Node: v0118217
-Node: Development18318
-Node: Copyright assignment18590
+Node: v0415742
+Node: v03316287
+Node: v03216717
+Node: v03116845
+Node: v0317175
+Node: v0217565
+Node: v01318057
+Node: v01218206
+Node: v01118383
+Node: v0118548
+Node: Development18649
+Node: Copyright assignment18921
 
 End Tag Table
 
