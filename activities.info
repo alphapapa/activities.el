@@ -70,7 +70,7 @@ Usage
 
 Changelog
 
-* v0.5.1-pre: v051-pre.
+* v0.5.1: v051.
 * v0.5: v05.
 * v0.4: v04.
 * v0.3.3: v033.
@@ -378,7 +378,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.5.1-pre: v051-pre.
+* v0.5.1: v051.
 * v0.5: v05.
 * v0.4: v04.
 * v0.3.3: v033.
@@ -392,16 +392,16 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v051-pre,  Next: v05,  Up: Changelog
+File: README.info,  Node: v051,  Next: v05,  Up: Changelog
 
-5.1 v0.5.1-pre
-==============
+5.1 v0.5.1
+==========
 
 *Fixes*
    • Listing activities without last-saved states.
 
 
-File: README.info,  Node: v05,  Next: v04,  Prev: v051-pre,  Up: Changelog
+File: README.info,  Node: v05,  Next: v04,  Prev: v051,  Up: Changelog
 
 5.2 v0.5
 ========
@@ -589,34 +589,34 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2487
-Node: GNU ELPA2638
-Node: Quelpa3003
-Node: Configuration3723
-Node: Usage4679
-Node: Activities4881
-Node: Compatibility5869
-Node: Modes6353
-Node: Workflow7021
-Node: Bindings7974
-Node: Commands8620
-Node: Bookmarks10069
-Node: FAQ10421
-Node: Changelog13497
-Node: v051-pre13798
-Node: v0513957
-Node: v0415938
-Node: v03316479
-Node: v03216909
-Node: v03117037
-Node: v0317367
-Node: v0217757
-Node: v01318249
-Node: v01218398
-Node: v01118577
-Node: v0118742
-Node: Development18843
-Node: Copyright assignment19115
+Node: Installation2479
+Node: GNU ELPA2630
+Node: Quelpa2995
+Node: Configuration3715
+Node: Usage4671
+Node: Activities4873
+Node: Compatibility5861
+Node: Modes6345
+Node: Workflow7013
+Node: Bindings7966
+Node: Commands8612
+Node: Bookmarks10061
+Node: FAQ10413
+Node: Changelog13489
+Node: v05113782
+Node: v0513929
+Node: v0415906
+Node: v03316447
+Node: v03216877
+Node: v03117005
+Node: v0317335
+Node: v0217725
+Node: v01318217
+Node: v01218366
+Node: v01118545
+Node: v0118710
+Node: Development18811
+Node: Copyright assignment19083
 
 End Tag Table
 
