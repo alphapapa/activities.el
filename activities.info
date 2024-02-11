@@ -397,7 +397,8 @@ File: README.info,  Node: v051-pre,  Next: v05,  Up: Changelog
 5.1 v0.5.1-pre
 ==============
 
-Nothing new yet.
+*Fixes*
+   • Listing activities without last-saved states.
 
 
 File: README.info,  Node: v05,  Next: v04,  Prev: v051-pre,  Up: Changelog
@@ -603,19 +604,19 @@ Node: Bookmarks10069
 Node: FAQ10421
 Node: Changelog13497
 Node: v051-pre13798
-Node: v0513913
-Node: v0415894
-Node: v03316435
-Node: v03216865
-Node: v03116993
-Node: v0317323
-Node: v0217713
-Node: v01318205
-Node: v01218354
-Node: v01118533
-Node: v0118698
-Node: Development18799
-Node: Copyright assignment19071
+Node: v0513957
+Node: v0415938
+Node: v03316479
+Node: v03216909
+Node: v03117037
+Node: v0317367
+Node: v0217757
+Node: v01318249
+Node: v01218398
+Node: v01118577
+Node: v0118742
+Node: Development18843
+Node: Copyright assignment19115
 
 End Tag Table
 

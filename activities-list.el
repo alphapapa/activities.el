@@ -65,13 +65,15 @@
                      (activities-activity-name object)))
          ( :name "Last saved"
            :getter (lambda (activity _table)
-                     (or (map-elt (activities-activity-state-etc (activities-activity-last activity)) 'time)
-                         0))
+                     (pcase-let (((cl-struct activities-activity last) activity))
+                       (when last
+                         (map-elt (activities-activity-state-etc last) 'time))))
            :formatter activities-list--format-time)
          ( :name "Default saved"
            :getter (lambda (activity _table)
-                     (or (map-elt (activities-activity-state-etc (activities-activity-default activity)) 'time)
-                         0))
+                     (pcase-let (((cl-struct activities-activity default) activity))
+                       (when default
+                         (map-elt (activities-activity-state-etc default) 'time))))
            :formatter activities-list--format-time))
        :objects-function (lambda ()
                            (map-values activities-activities))
@@ -90,7 +92,9 @@
 
 (defun activities-list--format-time (time)
   "Return TIME formatted according to `activities-list-time-format', which see.."
-  (format-time-string activities-list-time-format time))
+  (if time
+      (format-time-string activities-list-time-format time)
+    "never"))
 
 ;;;; Footer
 
