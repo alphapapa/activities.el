@@ -6,7 +6,7 @@
 ;; Maintainer: Adam Porter <adam@alphapapa.net>
 ;; URL: https://github.com/alphapapa/activities.el
 ;; Keywords: convenience
-;; Version: 0.4
+;; Version: 0.5
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -284,6 +284,23 @@ non-nil, the activity's state is not saved."
               (function-item activities--backtrace-visible-p)
               (function :tag "Other predicate")))
 
+(defcustom activities-resume-into-frame 'current
+  "Which frame to resume an activity into.
+Only applies when `activities-tabs-mode' is disabled."
+  :type '(choice (const :tag "Current frame"
+                        :doc "Replace current frame's window configuration"
+                        current)
+                 (const :tag "New frame" :doc "Make a new frame" new)))
+
+(defcustom activities-bookmark-warnings nil
+  "Warn when a buffer can't be bookmarked.
+This is expected to be the case for non-file-visiting buffers
+whose major mode does not provide bookmark support, for which no
+warning is necessary.  This option may be enabled for debugging,
+which will cause a message to be printed for such buffers when an
+activity's state is saved."
+  :type 'boolean)
+
 ;;;; Commands
 
 ;;;###autoload
@@ -314,7 +331,9 @@ activity."
 If RESETP (interactively, with universal prefix), reset to
 ACTIVITY's default state; otherwise, resume its last state, if
 available."
-  (interactive (list (activities-completing-read) :resetp current-prefix-arg))
+  (interactive
+   (list (activities-completing-read :prompt "Resume activity" :default nil)
+         :resetp current-prefix-arg))
   (let ((already-active-p (activities-activity-active-p activity)))
     (activities--switch activity)
     (unless (or resetp already-active-p)
@@ -326,24 +345,32 @@ Interactively, offers active activities."
   (interactive
    (list (activities-completing-read
           :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-          :prompt "Switch to: ")))
+          :prompt "Switch to activity")))
   (activities--switch activity))
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
-Its last is saved, and its frames, windows, and tabs are closed."
+Its last state is saved, and its frames, windows, and tabs are closed."
   (interactive
-   (let ((default (when (activities-current)
-                    (activities-activity-name (activities-current)))))
-     (list (activities-completing-read
-            :activities (cl-remove-if-not #'activities-activity-active-p
-                                          activities-activities :key #'cdr)
-            :prompt (format-prompt "Suspend activity" default)
-            :default default))))
+   (list (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p
+                                        activities-activities :key #'cdr)
+          :prompt "Suspend activity")))
   (activities-save activity :lastp t)
   (activities-close activity))
 
-(defalias 'activities-kill #'activities-suspend)
+(defun activities-kill (activity)
+  "Kill ACTIVITY.
+Its last state is discarded (so when it is resumed, its default
+state will be used), and close its frame or tab."
+  (interactive
+   (list (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p
+                                        activities-activities :key #'cdr)
+          :prompt "Kill activity")))
+  (setf (activities-activity-last activity) nil)
+  (activities-save activity)
+  (activities-close activity))
 
 (defun activities-save-all ()
   "Save all active activities' last states.
@@ -366,14 +393,13 @@ In order to be safe for `kill-emacs-hook', this demotes errors."
 It will not be recoverable."
   ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
   (interactive
-   (let ((default (when (activities-current)
-                    (activities-activity-name (activities-current)))))
-     (list (activities-completing-read :prompt (format-prompt "Discard activity" default)
-                                       :default default))))
-  (ignore-errors
-    ;; FIXME: After fixing all the bugs, remove ignore-errors.
-    (activities-close activity))
-  (setf activities-activities (map-delete activities-activities (activities-activity-name activity))))
+   (list (activities-completing-read :prompt "Discard activity")))
+  (when (yes-or-no-p (format "Discard activity %S permanently?" (activities-activity-name activity)))
+    (ignore-errors
+      ;; FIXME: After fixing all the bugs, remove ignore-errors.
+      (when (activities-activity-active-p activity)
+        (activities-close activity)))
+    (setf activities-activities (map-delete activities-activities (activities-activity-name activity)))))
 
 ;;;; Activity mode
 
@@ -419,17 +445,16 @@ To be called from `kill-emacs-hook'."
 If DEFAULTP, save its default state; if LASTP, its last.  If
 PERSISTP, force persisting of data (otherwise, data is persisted
 according to option `activities-always-persist', which see)."
-  (unless (or defaultp lastp)
-    (user-error "Neither DEFAULTP nor LASTP specified"))
   (activities-with activity
-    ;; Don't try to save if a minibuffer is active, because we
-    ;; wouldn't want to try to restore that layout.
-    (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
-      (pcase-let* (((cl-struct activities-activity name default last) activity)
-                   (new-state (activities-state)))
-        (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-              (activities-activity-last activity) (if (or lastp (not last)) new-state last)
-              (map-elt activities-activities name) activity))))
+    (when (or defaultp lastp)
+      (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
+        (pcase-let* (((cl-struct activities-activity default last) activity)
+                     (new-state (activities-state)))
+          (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
+                (activities-activity-last activity) (if (or lastp (not last)) new-state last)))))
+    ;; Always set the value so, e.g. the activity can be modified
+    ;; externally and saved here.
+    (setf (map-elt activities-activities (activities-activity-name activity)) activity))
   (activities--persist persistp))
 
 (cl-defun activities-set (activity &key (state 'last))
@@ -475,8 +500,11 @@ closed."
   "Switch to ACTIVITY.
 Select's ACTIVITY's frame, making a new one if needed.  Its state
 is not changed."
-  (select-frame (or (activities--frame activity)
-                    (make-frame `((activity . ,activity)))))
+  (if (activities-activity-active-p activity)
+      (select-frame (activities--frame activity))
+    (pcase activities-resume-into-frame
+      ('current nil)
+      ('new (select-frame (make-frame `((activity . ,activity)))))))
   (unless activities-saving-p
     ;; HACK: Don't raise the frame when saving the activity's state.
     ;; (I don't love this solution, largely because it only applies
@@ -603,12 +631,13 @@ activity's name is NAME."
   "Return `activities-buffer' struct for BUFFER."
   (with-current-buffer buffer
     (make-activities-buffer
-     :bookmark (condition-case-unless-debug err
+     :bookmark (condition-case err
                    (bookmark-make-record)
                  (error
                   (pcase (error-message-string err)
                     ("Buffer not visiting a file or directory")
-                    (_ (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err)))
+                    (_ (when activities-bookmark-warnings
+                         (message (format "Activities: Error while making bookmark for buffer %S: %%S" buffer) err))))
                   nil))
      :filename (buffer-file-name buffer)
      :name (buffer-name buffer)
@@ -642,18 +671,49 @@ activity's name is NAME."
   ;; back (which actually break the entire bookmark system when
   ;; such a props is saved in the bookmarks file), we have to
   ;; workaround a failure to read here.  See bug#56643.
-  (pcase-let* (((cl-struct activities-buffer bookmark) struct))
-    (save-window-excursion
-      (condition-case err
-          (progn
-            (bookmark-jump bookmark)
-            (when-let ((local-variable-map
-                        (bookmark-prop-get bookmark 'activities-buffer-local-variables)))
-              (cl-loop for (variable . value) in local-variable-map
-                       do (setf (buffer-local-value variable (current-buffer)) value))))
-        (error (delay-warning 'activity
-                              (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
-      (current-buffer))))
+
+  ;; Unfortunately, when a bookmarked file no longer exists,
+  ;; `bookmark-handle-bookmark' handles the error itself and returns
+  ;; nil, preventing us from handling the error.  Since
+  ;; `bookmark-jump' works by side effect, we have to test whether the
+  ;; buffer was changed in order to know whether it worked.  We call
+  ;; it from a temp buffer in case the jumped-to buffer would be the
+  ;; same as the current buffer.
+  (with-temp-buffer
+    (pcase-let* (((cl-struct activities-buffer bookmark) struct)
+                 (temp-buffer (current-buffer))
+                 (jumped-to-buffer
+                  (save-window-excursion
+                    (condition-case err
+                        (progn
+                          (bookmark-jump bookmark)
+                          (when-let ((local-variable-map
+                                      (bookmark-prop-get bookmark 'activities-buffer-local-variables)))
+                            (cl-loop for (variable . value) in local-variable-map
+                                     do (setf (buffer-local-value variable (current-buffer)) value))))
+                      (error (delay-warning 'activity
+                                            (format "Error while opening bookmark: ERROR:%S  RECORD:%S" err struct))))
+                    (current-buffer))))
+      (if (not (eq temp-buffer jumped-to-buffer))
+          ;; Bookmark appears to have been jumped to: return that buffer.
+          jumped-to-buffer
+        ;; Bookmark appears to have not changed the buffer: return a new one showing an error.
+        (activities--error-buffer
+         (format "%s:%s" (car bookmark) (bookmark-prop-get bookmark 'filename))
+         (list "Activities was unable to get a buffer for bookmark:\n\n"
+	       (prin1-to-string bookmark) "\n\n"
+	       "It's likely that the bookmark's file no longer exists, in which case you may need to relocate it and redefine this activity.\n\n"
+               "If this is not the case, please report this error to the `activities' maintainer.\n\n"
+               "In the meantime, you may ignore this error and use the other buffers in the activity.\n\n"))))))
+
+(defun activities--error-buffer (name strings)
+  "Return a new error buffer having NAME and content STRINGS."
+  ;; TODO: Use this elsewhere too.
+  (with-current-buffer (get-buffer-create (format "*Activities (error): %s*" name))
+    (visual-line-mode)
+    (goto-char (point-max))
+    (apply #'insert strings)
+    (current-buffer)))
 
 (defun activities--filename-buffer (activities-buffer)
   "Return buffer for ACTIVITIES-BUFFER having `filename' set."
@@ -672,10 +732,15 @@ activity's name is NAME."
           (current-buffer)))))
 
 (cl-defun activities-completing-read
-    (&key (activities activities-activities) (prompt "Open activity: ") default)
+    (&key (activities activities-activities)
+          (default (when (activities-current)
+                     (activities-activity-name (activities-current))))
+          (prompt "Activity"))
   "Return an activity read with completion from ACTIVITIES.
-PROMPT and DEFAULT are passed to `completing-read', which see."
-  (let* ((names (activities-names activities))
+PROMPT is passed to `completing-read' by way of `format-prompt',
+which see, with DEFAULT."
+  (let* ((prompt (format-prompt prompt default))
+         (names (activities-names activities))
          (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))

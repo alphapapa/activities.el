@@ -52,17 +52,19 @@ This is the recommended configuration, in terms of a ~use-package~ form to be pl
     :init
     (activities-mode)
     (activities-tabs-mode)
+    ;; Prevent `edebug' default bindings from interfering.
+    (setq edebug-inhibit-emacs-lisp-mode-bindings t)
 
     :bind
-    (("C-x C-a n" . activities-new)
-     ("C-x C-a g" . activities-revert)
-     ("C-x C-a s" . activities-suspend)
-     ("C-x C-a C-k" . activities-kill)    ; Alias for `-suspend'
-     ("C-x C-a a" . activities-resume)
-     ;; For convenience, we also bind `activities-resume' to "C-x C-a
-     ;; C-a", so the user need not lift the Control key.
+    (("C-x C-a C-n" . activities-new)
+     ;; As resuming is expected to be one of the most commonly used
+     ;; commands, this binding is one of the easiest to press.
      ("C-x C-a C-a" . activities-resume)
+     ("C-x C-a C-s" . activities-suspend)
+     ("C-x C-a C-k" . activities-kill)
+     ;; This binding mirrors, e.g. "C-x t RET".
      ("C-x C-a RET" . activities-switch)
+     ("C-x C-a g" . activities-revert)
      ("C-x C-a l" . activities-list)))
 #+END_SRC
 
@@ -97,12 +99,19 @@ An example of a workflow using activities:
 8. Call ~activities-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
 9. Suspend the activity with ~activities-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
+** Bindings
+
+Key bindings are, as always, ultimately up to the user.  However, in [[Configuration][Configuration]], we suggest a set of bindings with a simple philosophy behind them:
+
++ A binding ending in a ~C~-prefixed key is expected to result in the set of active activities being changed (e.g. defining a new activity, activating one, or deactivating one).
++ A binding not ending in a ~C~-prefixed key is expected to merely change an active one (e.g. reverting it) or do something else (like listing activities.)
+
 ** Commands
 
 + ~activities-list~ (~C-x C-a l~) :: List activities in a ~vtable~ buffer in which they can be managed with various commands.
-+ ~activities-new~ (~C-x C-a n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
-+ ~activities-suspend~ (~C-x C-a s~) :: Save an activity's state and close its frame or tab.
-+ ~activities-kill~ (~C-x C-a C-k~) :: Alias for ~activities-suspend~.
++ ~activities-new~ (~C-x C-a C-n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
++ ~activities-suspend~ (~C-x C-a C-s~) :: Save an activity's state and close its frame or tab.
++ ~activities-kill~ (~C-x C-a C-k~) :: Discard an activity's last state (so when it is resumed, its default state will be used), and close its frame or tab.
 + ~activities-resume~ (~C-x C-a C-a~) :: Resume an activity, switching to a new frame or tab for its window configuration, and restoring its buffers.  With prefix argument, restore its default state rather than its last.
 + ~activities-revert~ (~C-x C-a g~) :: Revert an activity to its default state.
 + ~activities-switch~ (~C-x C-a RET~) :: Switch to an already-active activity.
@@ -128,6 +137,23 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 + Why did I get an error? :: Because ~activities~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
 
 * Changelog
+
+** v0.5
+
+*Additions*
++ Suggest setting variable ~edebug-inhibit-emacs-lisp-mode-bindings~ to avoid conflicts with suggested keybindings.
++ Option ~activities-bookmark-warnings~ enables warning messages when a non-file-visiting buffer can't be bookmarked (for debugging purposes).
++ Option ~activities-resume-into-frame~ controls whether resuming an activity opens a new frame or uses the current one (when ~activities-tabs-mode~ is disabled).  ([[https://github.com/alphapapa/activities.el/issues/22][#22]].  Thanks to [[https://github.com/Icy-Thought][Icy-Thought]] for suggesting.)
+
+*Changes*
++ Command ~activities-kill~ now discards an activity's last state (while ~activities-suspend~ saves its last state), and closes its frame or tab.
++ Face ~activities-tabs-face~ is renamed to ~activities-tabs~, and now inherits from another face by default, which allows it to adjust with the loaded theme.  ([[https://github.com/alphapapa/activities.el/issues/24][#24]].  Thanks to [[https://github.com/karthink][Karthik Chikmagalur]] for suggesting.)
+
+*Fixes*
++ Show a helpful error if a bookmark's target file is missing.  ([[https://github.com/alphapapa/activities.el/issues/17][#17]].  Thanks to [[https://github.com/jdtsmith][JD Smith]] for reporting.)
++ Sort order in ~activities-list~.
++ When discarding an inactive activity, don't switch to it first.  ([[https://github.com/alphapapa/activity.el/issues/18][#18]].  Thanks to [[https://github.com/jdtsmith][JD Smith]] for reporting.)
++ Don't signal an error when ~debug-on-error~ is enabled and a buffer is not visiting a file.  ([[https://github.com/alphapapa/activity.el/issues/25][#25]].  Thanks to [[https://github.com/karthink][Karthik Chikmagalur]] for reporting.)
 
 ** v0.4
 
