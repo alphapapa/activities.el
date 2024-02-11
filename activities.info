@@ -70,6 +70,7 @@ Usage
 
 Changelog
 
+* v0.5.1-pre: v051-pre.
 * v0.5: v05.
 * v0.4: v04.
 * v0.3.3: v033.
@@ -377,6 +378,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
+* v0.5.1-pre: v051-pre.
 * v0.5: v05.
 * v0.4: v04.
 * v0.3.3: v033.
@@ -390,9 +392,17 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v05,  Next: v04,  Up: Changelog
+File: README.info,  Node: v051-pre,  Next: v05,  Up: Changelog
 
-5.1 v0.5
+5.1 v0.5.1-pre
+==============
+
+Nothing new yet.
+
+
+File: README.info,  Node: v05,  Next: v04,  Prev: v051-pre,  Up: Changelog
+
+5.2 v0.5
 ========
 
 *Additions*
@@ -433,7 +443,7 @@ File: README.info,  Node: v05,  Next: v04,  Up: Changelog
 
 File: README.info,  Node: v04,  Next: v033,  Prev: v05,  Up: Changelog
 
-5.2 v0.4
+5.3 v0.4
 ========
 
 *Additions*
@@ -450,7 +460,7 @@ File: README.info,  Node: v04,  Next: v033,  Prev: v05,  Up: Changelog
 
 File: README.info,  Node: v033,  Next: v032,  Prev: v04,  Up: Changelog
 
-5.3 v0.3.3
+5.4 v0.3.3
 ==========
 
 *Fixes*
@@ -464,7 +474,7 @@ File: README.info,  Node: v033,  Next: v032,  Prev: v04,  Up: Changelog
 
 File: README.info,  Node: v032,  Next: v031,  Prev: v033,  Up: Changelog
 
-5.4 v0.3.2
+5.5 v0.3.2
 ==========
 
 Updated documentation, etc.
@@ -472,7 +482,7 @@ Updated documentation, etc.
 
 File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
-5.5 v0.3.1
+5.6 v0.3.1
 ==========
 
 *Fixes*
@@ -484,7 +494,7 @@ File: README.info,  Node: v031,  Next: v03,  Prev: v032,  Up: Changelog
 
 File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
-5.6 v0.3
+5.7 v0.3
 ========
 
 *Additions*
@@ -497,7 +507,7 @@ File: README.info,  Node: v03,  Next: v02,  Prev: v031,  Up: Changelog
 
 File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
-5.7 v0.2
+5.8 v0.2
 ========
 
 *Additions*
@@ -513,7 +523,7 @@ File: README.info,  Node: v02,  Next: v013,  Prev: v03,  Up: Changelog
 
 File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
-5.8 v0.1.3
+5.9 v0.1.3
 ==========
 
 *Fixes*
@@ -523,8 +533,8 @@ File: README.info,  Node: v013,  Next: v012,  Prev: v02,  Up: Changelog
 
 File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
-5.9 v0.1.2
-==========
+5.10 v0.1.2
+===========
 
 *Fixes*
    • Some single-window configurations were not restored properly.
@@ -532,7 +542,7 @@ File: README.info,  Node: v012,  Next: v011,  Prev: v013,  Up: Changelog
 
 File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
-5.10 v0.1.1
+5.11 v0.1.1
 ===========
 
 *Fixes*
@@ -541,7 +551,7 @@ File: README.info,  Node: v011,  Next: v01,  Prev: v012,  Up: Changelog
 
 File: README.info,  Node: v01,  Prev: v011,  Up: Changelog
 
-5.11 v0.1
+5.12 v0.1
 =========
 
 Initial release.
@@ -578,33 +588,34 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2463
-Node: GNU ELPA2614
-Node: Quelpa2979
-Node: Configuration3699
-Node: Usage4655
-Node: Activities4857
-Node: Compatibility5845
-Node: Modes6329
-Node: Workflow6997
-Node: Bindings7950
-Node: Commands8596
-Node: Bookmarks10045
-Node: FAQ10397
-Node: Changelog13473
-Node: v0513750
-Node: v0415714
-Node: v03316255
-Node: v03216685
-Node: v03116813
-Node: v0317143
-Node: v0217533
-Node: v01318025
-Node: v01218174
-Node: v01118351
-Node: v0118516
-Node: Development18617
-Node: Copyright assignment18889
+Node: Installation2487
+Node: GNU ELPA2638
+Node: Quelpa3003
+Node: Configuration3723
+Node: Usage4679
+Node: Activities4881
+Node: Compatibility5869
+Node: Modes6353
+Node: Workflow7021
+Node: Bindings7974
+Node: Commands8620
+Node: Bookmarks10069
+Node: FAQ10421
+Node: Changelog13497
+Node: v051-pre13798
+Node: v0513913
+Node: v0415894
+Node: v03316435
+Node: v03216865
+Node: v03116993
+Node: v0317323
+Node: v0217713
+Node: v01318205
+Node: v01218354
+Node: v01118533
+Node: v0118698
+Node: Development18799
+Node: Copyright assignment19071
 
 End Tag Table
 
