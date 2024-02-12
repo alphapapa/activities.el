@@ -654,14 +654,14 @@ activity's name is NAME."
 
 (cl-defmethod activities--deserialize ((struct activities-buffer))
   "Return buffer for `activities-buffer' STRUCT."
-  (pcase-let (((cl-struct activities-buffer bookmark filename name) struct))
-    (let ((buffer (cond (bookmark (activities--bookmark-buffer struct))
-                        (filename (activities--filename-buffer struct))
-                        (name (activities--name-buffer struct))
-                        (t (error "Activity struct is invalid: %S" struct)))))
-      (cl-assert (buffer-live-p buffer))
-      (activities-debug struct buffer)
-      buffer)))
+  (pcase-let* (((cl-struct activities-buffer bookmark filename name) struct)
+               (buffer (cond (bookmark (activities--bookmark-buffer struct))
+                             (filename (activities--filename-buffer struct))
+                             (name (activities--name-buffer struct))
+                             (t (error "Activity struct is invalid: %S" struct)))))
+    (cl-assert (buffer-live-p buffer))
+    (activities-debug struct buffer)
+    buffer))
 
 (defun activities--bookmark-buffer (struct)
   "Return buffer for `activities-buffer' STRUCT."
