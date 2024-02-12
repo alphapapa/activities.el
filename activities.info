@@ -14,26 +14,35 @@ activities.el
 file:https://elpa.gnu.org/packages/activities.svg
 (https://elpa.gnu.org/packages/activities.html)
 
-   Inspired by Genera’s and KDE’s concepts of "activities", this library
-allows the user to select an "activity", the loading of which restores a
-window configuration into a ‘tab-bar’ tab or frame, along with the
-buffers shown in each window.  Saving an activity saves the state for
-later restoration.  Switching away from an activity saves the last-used
-state for later switching back to, while still allowing the activity’s
-initial or default state to be restored on demand.  Resuming an activity
-loads the last-used state, or the initial/default state when a universal
-argument is provided.
+   Inspired by Genera’s and KDE’s concepts of "activities", this Emacs
+library allows the user to manage frames/tabs, windows, and buffers
+according to their purpose.  An "activity" comprises a frame or tab, its
+window configuration, and the buffers displayed in them–its "state";
+this state would be related to a certain task the user performs at
+various times, such as developing a certain software project, reading
+and writing email, working with one’s Org mode system, etc.
 
-   The implementation uses the bookmark system to save buffers’
-states–that is, any major mode that supports the bookmark system is
-compatible.  A buffer whose major mode does not support the bookmark
-system (or does not support it well enough to restore useful state) is
-not compatible and can’t be fully restored, or perhaps not at all; but
-solving that is as simple as implementing bookmark support for the mode,
-which is usually trivial.
+   "Suspending" an activity saves the activity’s state and closes its
+frame/tab; the user would do this when finished with the activity’s task
+for the time being.  "Resuming" the activity restores its buffers and
+windows to its frame/tab; the user would do this when ready to resume
+the task at a later time.  This saves the user from having to manually
+arrange the same windows and buffers each time the task is to be done.
 
-   Integration with Emacs’s ‘tab-bar-mode’ is provided: a window
-configuration or can be restored to a ‘tab-bar’ tab or to a frame.
+   Each activity saves two states: the default state, set when the
+activity is defined by the user, and the last-used state, which was how
+the user left it when the activity was suspended (or when Emacs exited,
+etc).  This allows the user to resume the activity where the task was
+left off, while also allowing it to be reverted to the default state,
+providing a consistent entry point into the activity.
+
+   Internally, the Emacs ‘bookmark’ library is used to save and restore
+buffers’ states–that is, any major mode that supports the bookmark
+system is compatible.  A buffer whose major mode does not support the
+bookmark system (or does not support it well enough to restore useful
+state) is not compatible and can’t be fully restored, or perhaps not at
+all; but solving that is as simple as implementing bookmark support for
+the mode, which is often trivial.
 
    Various hooks are (or will be–feedback is welcome) provided, both
 globally and per-activity, so that the user can define functions to be
@@ -600,35 +609,35 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation2500
-Node: GNU ELPA2651
-Node: Quelpa3016
-Node: Configuration3736
-Node: Usage4692
-Node: Activities4894
-Node: Compatibility5882
-Node: Modes6366
-Node: Workflow7034
-Node: Bindings7987
-Node: Commands8633
-Node: Bookmarks10082
-Node: FAQ10434
-Node: Changelog13510
-Node: v06-pre13824
-Node: v05113975
-Node: v0514138
-Node: v0416115
-Node: v03316656
-Node: v03217086
-Node: v03117214
-Node: v0317544
-Node: v0217934
-Node: v01318426
-Node: v01218577
-Node: v01118756
-Node: v0118921
-Node: Development19022
-Node: Copyright assignment19294
+Node: Installation3094
+Node: GNU ELPA3245
+Node: Quelpa3610
+Node: Configuration4330
+Node: Usage5286
+Node: Activities5488
+Node: Compatibility6476
+Node: Modes6960
+Node: Workflow7628
+Node: Bindings8581
+Node: Commands9227
+Node: Bookmarks10676
+Node: FAQ11028
+Node: Changelog14104
+Node: v06-pre14418
+Node: v05114569
+Node: v0514732
+Node: v0416709
+Node: v03317250
+Node: v03217680
+Node: v03117808
+Node: v0318138
+Node: v0218528
+Node: v01319020
+Node: v01219171
+Node: v01119350
+Node: v0119515
+Node: Development19616
+Node: Copyright assignment19888
 
 End Tag Table
 
