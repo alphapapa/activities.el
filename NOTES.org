@@ -46,6 +46,9 @@ e.g. pressing ~C-x p a~ could open a default activity for a project (perhaps wit
 
 + Seal ::
   - [[https://duckduckgo.com/?t=ftsa&q=sea+lion+illustration&iax=images&ia=images&iaf=license%3AModifyCommercially&iai=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb9%2FNew_Zealand_Sea_Lion.jpg][DDG "sea lion illustration"]]
+  - [[https://digitalcollections.nypl.org/search/index?utf8=%E2%9C%93&keywords=sea+lion#][NYPL "sea lion"]]
+  - [[https://commons.wikimedia.org/wiki/Category:Zalophus_californianus_(illustrations)][Category:Zalophus californianus (illustrations) - Wikimedia Commons]]
+  - [[https://commons.wikimedia.org/wiki/Category:Sea_lions_in_art][Category:Sea lions in art - Wikimedia Commons]]
 
 ** DONE [#A] An activity's last state might be saved at an undesirable moment
 CLOSED: [2024-02-13 Tue 11:23]
