@@ -266,6 +266,11 @@ Called with one argument, the activity."
 Called with one argument, the activity."
   :type 'hook)
 
+(defcustom activities-after-switch-functions nil
+  "Functions called after switching to an activity.
+Called with one argument, the activity."
+  :type 'hook)
+
 (defcustom activities-default-name-fn 'activities--project-name
   "Function that returns the default name for a new activity.
 The string should not be prefixed by, e.g. \"Activity\" because
@@ -346,7 +351,8 @@ Interactively, offers active activities."
    (list (activities-completing-read
           :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
           :prompt "Switch to activity")))
-  (activities--switch activity))
+  (activities--switch activity)
+  (run-hook-with-args 'activities-after-switch-functions activity))
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.

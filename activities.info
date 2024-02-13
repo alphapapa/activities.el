@@ -408,7 +408,11 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
 5.1 v0.6-pre
 ============
 
-*Changes*
+*Additions*
+   • Option ‘activities-after-switch-functions’, a hook called after
+     switching to an activity.
+
+   *Changes*
    • Default time format in activities list.
 
 
@@ -624,20 +628,20 @@ Node: Bookmarks10676
 Node: FAQ11028
 Node: Changelog14104
 Node: v06-pre14418
-Node: v05114569
-Node: v0514732
-Node: v0416709
-Node: v03317250
-Node: v03217680
-Node: v03117808
-Node: v0318138
-Node: v0218528
-Node: v01319020
-Node: v01219171
-Node: v01119350
-Node: v0119515
-Node: Development19616
-Node: Copyright assignment19888
+Node: v05114691
+Node: v0514854
+Node: v0416831
+Node: v03317372
+Node: v03217802
+Node: v03117930
+Node: v0318260
+Node: v0218650
+Node: v01319142
+Node: v01219293
+Node: v01119472
+Node: v0119637
+Node: Development19738
+Node: Copyright assignment20010
 
 End Tag Table
 

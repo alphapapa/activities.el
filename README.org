@@ -142,6 +142,9 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.6-pre
 
+*Additions*
++ Option ~activities-after-switch-functions~, a hook called after switching to an activity.
+
 *Changes*
 + Default time format in activities list.
 
