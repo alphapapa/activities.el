@@ -5,8 +5,45 @@
 :VISIBILITY: children
 :END:
 
-** UNDERWAY [#A] An activity's last state might be saved at an undesirable moment
+** TODO [#B] Optionally save/restore ~tab-line~ buffers
 :LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 16:58]
+:END:
+
+e.g. useful for having a ~deffy-project~ buffer available for jumping while not being displayed.
+
+** TODO Track buffers shown in a tab/frame and optionally kill 
+:LOGBOOK:
+- State "TODO"       from              [2024-02-13 Tue 12:26]
+:END:
+
+If we can track which buffers are shown only in an activity's frame/tab, they could optionally be killed when the activity is suspended.
+
+** TODO Multiple named states
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 17:05]
+:END:
+
+Could be helpful.  The default and last state should just be entries in an activity's states map.
+
+** TODO Hierarchical states
+:LOGBOOK:
+- State "TODO"       from              [2024-02-13 Tue 11:25]
+:END:
+
+e.g. if working on a project involved multiple git repos, each having its own activity, and one wanted to resume working on the project as a whole, it would be helpful if there were a parent activity for the project as a whole, and resuming that parent activity would resume the sub-activity that was last active.
+
+** TODO Consider having project-specific activities
+:LOGBOOK:
+- State "TODO"       from              [2024-01-24 Wed 21:31]
+:END:
+
+e.g. pressing ~C-x p a~ could open a default activity for a project (perhaps with some of the metadata stored in the project directory?).  The idea would be to save the user from having to manually make an activity for a project.  Various hooks could probably solve this integration.  (Thanks to Joseph Turner for the idea.)
+** DONE [#A] An activity's last state might be saved at an undesirable moment
+CLOSED: [2024-02-13 Tue 11:23]
+:LOGBOOK:
+- State "DONE"       from "UNDERWAY"   [2024-02-13 Tue 11:23] \\
+  Fixed in 54522cb546bb61d8608b6c3e814f326b7fb0a3ee.
 - State "UNDERWAY"   from "TODO"       [2024-02-01 Thu 00:58]
 - State "TODO"       from              [2024-01-24 Wed 01:13]
 :END:
@@ -21,23 +58,3 @@ For example, if I have an activity that has some Ement rooms displayed, and then
 
 + Solution :: List of "anti-save" predicates: if any return non-nil, activity is not saved.
 
-** TODO [#B] Optionally save/restore ~tab-line~ buffers
-:LOGBOOK:
-- State "TODO"       from              [2024-01-24 Wed 16:58]
-:END:
-
-e.g. useful for having a ~deffy-project~ buffer available for jumping while not being displayed.
-
-** TODO Multiple named states
-:LOGBOOK:
-- State "TODO"       from              [2024-01-24 Wed 17:05]
-:END:
-
-Could be helpful.  The default and last state should just be entries in an activity's states map.
-
-** TODO Consider having project-specific activities
-:LOGBOOK:
-- State "TODO"       from              [2024-01-24 Wed 21:31]
-:END:
-
-e.g. pressing ~C-x p a~ could open a default activity for a project (perhaps with some of the metadata stored in the project directory?).  The idea would be to save the user from having to manually make an activity for a project.  Various hooks could probably solve this integration.  (Thanks to Joseph Turner for the idea.)
