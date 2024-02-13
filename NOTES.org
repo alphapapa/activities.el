@@ -39,6 +39,14 @@ e.g. if working on a project involved multiple git repos, each having its own ac
 :END:
 
 e.g. pressing ~C-x p a~ could open a default activity for a project (perhaps with some of the metadata stored in the project directory?).  The idea would be to save the user from having to manually make an activity for a project.  Various hooks could probably solve this integration.  (Thanks to Joseph Turner for the idea.)
+** TODO Mascot 
+:LOGBOOK:
+- State "TODO"       from              [2024-02-13 Tue 16:17]
+:END:
+
++ Seal ::
+  - [[https://duckduckgo.com/?t=ftsa&q=sea+lion+illustration&iax=images&ia=images&iaf=license%3AModifyCommercially&iai=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb9%2FNew_Zealand_Sea_Lion.jpg][DDG "sea lion illustration"]]
+
 ** DONE [#A] An activity's last state might be saved at an undesirable moment
 CLOSED: [2024-02-13 Tue 11:23]
 :LOGBOOK:
