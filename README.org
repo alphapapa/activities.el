@@ -147,6 +147,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 *Changes*
 + Default time format in activities list.
++ When saving all activities, don't persist to disk for each activity.  ([[https://github.com/alphapapa/activities.el/issues/34][#34]].  Thanks to [[https://github.com/yrns][Al M.]] for reporting.)
 
 ** v0.5.1
 

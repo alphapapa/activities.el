@@ -378,14 +378,19 @@ state will be used), and close its frame or tab."
   (activities-save activity)
   (activities-close activity))
 
-(defun activities-save-all ()
+(cl-defun activities-save-all (&key persistp)
   "Save all active activities' last states.
-In order to be safe for `kill-emacs-hook', this demotes errors."
+With PERSISTP, persist to disk (otherwise see
+`activities-always-persist').  To be safe for `kill-emacs-hook',
+this demotes errors."
   (interactive)
   (with-demoted-errors "activities-save-all: ERROR: %S"
     (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (let ((activities-saving-p t))
-        (activities-save activity :lastp t)))))
+      (let ((activities-saving-p t)
+            ;; Don't write to disk for each activity.
+            (activities-always-persist nil))
+        (activities-save activity :lastp t)))
+    (activities--persist persistp)))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."

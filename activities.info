@@ -414,6 +414,10 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
 
    *Changes*
    • Default time format in activities list.
+   • When saving all activities, don’t persist to disk for each
+     activity.  (#34
+     (https://github.com/alphapapa/activities.el/issues/34).  Thanks to
+     Al M.  (https://github.com/yrns) for reporting.)
 
 
 File: README.info,  Node: v051,  Next: v05,  Prev: v06-pre,  Up: Changelog
@@ -628,20 +632,20 @@ Node: Bookmarks10676
 Node: FAQ11028
 Node: Changelog14104
 Node: v06-pre14418
-Node: v05114691
-Node: v0514854
-Node: v0416831
-Node: v03317372
-Node: v03217802
-Node: v03117930
-Node: v0318260
-Node: v0218650
-Node: v01319142
-Node: v01219293
-Node: v01119472
-Node: v0119637
-Node: Development19738
-Node: Copyright assignment20010
+Node: v05114906
+Node: v0515069
+Node: v0417046
+Node: v03317587
+Node: v03218017
+Node: v03118145
+Node: v0318475
+Node: v0218865
+Node: v01319357
+Node: v01219508
+Node: v01119687
+Node: v0119852
+Node: Development19953
+Node: Copyright assignment20225
 
 End Tag Table
 
