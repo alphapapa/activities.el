@@ -12,12 +12,17 @@
 
 e.g. useful for having a ~deffy-project~ buffer available for jumping while not being displayed.
 
-** TODO Track buffers shown in a tab/frame and optionally kill 
+** UNDERWAY Track buffers shown in a tab/frame and optionally kill 
 :LOGBOOK:
+- State "UNDERWAY"   from "TODO"       [2024-02-16 Fri 00:23]
 - State "TODO"       from              [2024-02-13 Tue 12:26]
 :END:
 
++ Branch :: wip/kill-buffers
+
 If we can track which buffers are shown only in an activity's frame/tab, they could optionally be killed when the activity is suspended.
+
++ [2024-02-16 Fri 00:23] Seems to be working, even in tabs mode, with the function I added to ~window-configuration-change-hook~.
 
 ** TODO Multiple named states
 :LOGBOOK:
