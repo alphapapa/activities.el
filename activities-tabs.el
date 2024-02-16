@@ -35,6 +35,8 @@
   "Records the original value of `tab-bar-tab-face-function'.
 When `activities-tabs-mode' is enabled.")
 
+(defvar activities-kill-buffers)
+
 ;;;; Customization
 
 (defgroup activities-tabs nil
@@ -71,6 +73,7 @@ accordingly."
     (if activities-tabs-mode
         (progn
           (tab-bar-mode 1)
+          (add-hook 'window-configuration-change-hook #'activities-tabs--window-configuration-change)
           (advice-add #'activities-resume :before #'activities-tabs-before-resume)
           (pcase-dolist (`(,symbol . ,function) override-map)
             (advice-add symbol :override function))
@@ -83,6 +86,7 @@ accordingly."
           (unless activities-tabs-tab-bar-tab-face-function-original
             (setf activities-tabs-tab-bar-tab-face-function-original tab-bar-tab-face-function
                   tab-bar-tab-face-function #'activities-tabs--tab-bar-tab-face-function)))
+      (remove-hook 'window-configuration-change-hook #'activities-tabs--window-configuration-change)
       (advice-remove #'activities-resume #'activities-tabs-before-resume)
       (pcase-dolist (`(,symbol . ,function) override-map)
         (advice-remove symbol function))
@@ -97,7 +101,36 @@ accordingly."
 Its state is not saved, and its frames, windows, and tabs are
 closed."
   (activities--switch activity)
+  (activities-tabs--kill-buffers)
   (tab-bar-close-tab))
+
+(defun activities-tabs--window-configuration-change ()
+  "Add frame's windows' buffers to the current tab's `buffer-list' parameter."
+  (cl-assert tab-bar-mode)
+  (let ((tab (tab-bar--current-tab-find)))
+    (walk-windows (lambda (window)
+                    (cl-pushnew (window-buffer window)
+                                (alist-get 'activities-buffer-list (cdr tab)))))))
+
+(defun activities-tabs--kill-buffers ()
+  ;; TODO: Exclude e.g. special buffers from being killed.
+  ;; TODO: Frame parameter name should be prefixed with `activities'.
+  "Kill buffers that are only in the current tab's buffer list.
+Only does so when `activities-kill-buffers' is non-nil."
+  (when activities-kill-buffers
+    (let* ((all-tabs (funcall tab-bar-tabs-function))
+           (current-tab (tab-bar--current-tab-find))
+           (tab-buffers
+            (cl-reduce
+             (lambda (acc tab)
+               (seq-difference acc (activities-tabs--tab-parameter 'activities-buffer-list tab)))
+             (remove current-tab all-tabs)
+             :initial-value (activities-tabs--tab-parameter 'activities-buffer-list current-tab)))
+           (target-buffers (cl-remove-if (lambda (buffer)
+                                           (run-hook-with-args-until-success
+                                            'activities-anti-kill-predicates buffer))
+                                         tab-buffers)))
+      (mapc #'kill-buffer target-buffers))))
 
 (defun activities-tabs--switch (activity)
   "Switch to ACTIVITY.

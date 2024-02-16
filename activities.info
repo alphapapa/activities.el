@@ -418,6 +418,8 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
      switching to an activity.  (#33
      (https://github.com/alphapapa/activities.el/issues/33).  Thanks to
      JD Smith (https://github.com/jdtsmith).)
+   • Option ‘activities-kill-buffers’, when suspending an activity,
+     kills buffers that were only shown in that activity.
 
    *Changes*
    • Default time format in activities list.
@@ -639,20 +641,20 @@ Node: Bookmarks10725
 Node: FAQ11077
 Node: Changelog14153
 Node: v06-pre14467
-Node: v05115242
-Node: v0515405
-Node: v0417382
-Node: v03317923
-Node: v03218353
-Node: v03118481
-Node: v0318811
-Node: v0219201
-Node: v01319693
-Node: v01219844
-Node: v01120023
-Node: v0120188
-Node: Development20289
-Node: Copyright assignment20561
+Node: v05115374
+Node: v0515537
+Node: v0417514
+Node: v03318055
+Node: v03218485
+Node: v03118613
+Node: v0318943
+Node: v0219333
+Node: v01319825
+Node: v01219976
+Node: v01120155
+Node: v0120320
+Node: Development20421
+Node: Copyright assignment20693
 
 End Tag Table
 

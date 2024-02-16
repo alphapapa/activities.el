@@ -311,6 +311,12 @@ which will cause a message to be printed for such buffers when an
 activity's state is saved."
   :type 'boolean)
 
+(defcustom activities-kill-buffers nil
+  "Kill buffers when suspending an activity.
+Kills buffers that have only been shown in that activity's
+frame/tab."
+  :type 'boolean)
+
 ;;;; Commands
 
 ;;;###autoload
@@ -518,6 +524,7 @@ See option `activities-always-persist'."
 Its state is not saved, and its frames, windows, and tabs are
 closed."
   (activities--switch activity)
+  (activities--kill-buffers)
   ;; TODO: Set frame parameter when resuming.
   (delete-frame))
 
@@ -791,6 +798,19 @@ Adds `activities-name-prefix'."
                     (with-selected-window window
                       (when (derived-mode-p 'backtrace-mode)
                         (throw :found t)))))))
+
+(defun activities--kill-buffers ()
+  ;; TODO: Exclude e.g. special buffers from being killed.
+  ;; TODO: Frame parameter name should be prefixed with `activities'.
+  "Kill buffers that are only in the current frame's/tab's buffer list.
+Only does so when `activities-kill-buffers' is non-nil."
+  (when activities-kill-buffers
+    (let ((target-buffers
+           (cl-reduce (lambda (acc frame)
+                        (seq-difference acc (frame-parameter frame 'buffer-list)))
+                      (remove (selected-frame) (frame-list))
+                      :initial-value (frame-parameter nil 'buffer-list))))
+      (mapc #'kill-buffer target-buffers))))
 
 ;;;; Project support
 
