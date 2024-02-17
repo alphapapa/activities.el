@@ -306,6 +306,8 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Bindings,  Up: Usag
      Revert an activity to its default state.
 ‘activities-switch’ (‘C-x C-a RET’)
      Switch to an already-active activity.
+‘activities-rename’
+     Rename an activity.
 ‘activities-discard’
      Discard an activity permanently.
 ‘activities-save-all’
@@ -409,6 +411,7 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
 ============
 
 *Additions*
+   • Command ‘activities-rename’ renames an activity.
    • Option ‘activities-after-switch-functions’, a hook called after
      switching to an activity.
 
@@ -628,24 +631,24 @@ Node: Modes6960
 Node: Workflow7628
 Node: Bindings8581
 Node: Commands9227
-Node: Bookmarks10676
-Node: FAQ11028
-Node: Changelog14104
-Node: v06-pre14418
-Node: v05114906
-Node: v0515069
-Node: v0417046
-Node: v03317587
-Node: v03218017
-Node: v03118145
-Node: v0318475
-Node: v0218865
-Node: v01319357
-Node: v01219508
-Node: v01119687
-Node: v0119852
-Node: Development19953
-Node: Copyright assignment20225
+Node: Bookmarks10725
+Node: FAQ11077
+Node: Changelog14153
+Node: v06-pre14467
+Node: v05115015
+Node: v0515178
+Node: v0417155
+Node: v03317696
+Node: v03218126
+Node: v03118254
+Node: v0318584
+Node: v0218974
+Node: v01319466
+Node: v01219617
+Node: v01119796
+Node: v0119961
+Node: Development20062
+Node: Copyright assignment20334
 
 End Tag Table
 

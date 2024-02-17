@@ -117,6 +117,7 @@ Key bindings are, as always, ultimately up to the user.  However, in [[Configura
 + ~activities-resume~ (~C-x C-a C-a~) :: Resume an activity, switching to a new frame or tab for its window configuration, and restoring its buffers.  With prefix argument, restore its default state rather than its last.
 + ~activities-revert~ (~C-x C-a g~) :: Revert an activity to its default state.
 + ~activities-switch~ (~C-x C-a RET~) :: Switch to an already-active activity.
++ ~activities-rename~ :: Rename an activity.
 + ~activities-discard~ :: Discard an activity permanently.
 + ~activities-save-all~ :: Save all active activities' states.  (~activities-mode~ does this automatically, so this command should rarely be needed.)
 
@@ -143,6 +144,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 ** v0.6-pre
 
 *Additions*
++ Command ~activities-rename~ renames an activity.
 + Option ~activities-after-switch-functions~, a hook called after switching to an activity.
 
 *Changes*

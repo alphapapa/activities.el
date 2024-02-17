@@ -330,6 +330,19 @@ activity."
     (activities--switch activity)
     activity))
 
+(defun activities-rename (activity name)
+  "Rename ACTIVITY to NAME."
+  (interactive
+   (let* ((activity (activities-completing-read :prompt "Rename activity" :default nil))
+          (name (read-string (format "Rename activity %S to: "
+                                     (activities-activity-name activity)))))
+     (list activity name)))
+  (setf activities-activities (map-delete activities-activities
+                                          (activities-activity-name activity))
+        (activities-activity-name activity) name
+        (map-elt activities-activities name) activity)
+  (activities--persist))
+
 ;;;###autoload
 (cl-defun activities-resume (activity &key resetp)
   "Resume ACTIVITY.
