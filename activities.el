@@ -284,6 +284,17 @@ prefixes will be added automatically."
 Only applies when `activities-tabs-mode' is disabled."
   :type 'boolean)
 
+(defcustom activities-anti-kill-predicates
+  '(activities-buffer-hidden-p activities-buffer-special-p)
+  "Predicates which prevent a buffer from being killed.
+Used when suspending an activity and `activities-kill-buffers' is
+enabled.  Each predicate is called with the buffer as its
+argument.  If any predicate returns non-nil, the buffer is not
+killed."
+  :type '(set (function-item activities-buffer-special-p)
+              (function-item activities-buffer-hidden-p)
+              (function :tag "Other predicate")))
+
 (defcustom activities-anti-save-predicates
   '(active-minibuffer-window activities--backtrace-visible-p)
   "Predicates which prevent an activity's state from being saved.
@@ -800,17 +811,29 @@ Adds `activities-name-prefix'."
                         (throw :found t)))))))
 
 (defun activities--kill-buffers ()
-  ;; TODO: Exclude e.g. special buffers from being killed.
   ;; TODO: Frame parameter name should be prefixed with `activities'.
   "Kill buffers that are only in the current frame's/tab's buffer list.
 Only does so when `activities-kill-buffers' is non-nil."
   (when activities-kill-buffers
-    (let ((target-buffers
-           (cl-reduce (lambda (acc frame)
-                        (seq-difference acc (frame-parameter frame 'buffer-list)))
-                      (remove (selected-frame) (frame-list))
-                      :initial-value (frame-parameter nil 'buffer-list))))
+    (let* ((frame-buffers (cl-reduce (lambda (acc frame)
+                                       (seq-difference acc (frame-parameter frame 'buffer-list)))
+                                     (remove (selected-frame) (frame-list))
+                                     :initial-value (frame-parameter nil 'buffer-list)))
+           (target-buffers (cl-remove-if (lambda (buffer)
+                                           (run-hook-with-args-until-success
+                                            'activities-anti-kill-predicates buffer))
+                                         frame-buffers)))
       (mapc #'kill-buffer target-buffers))))
+
+(defun activities-buffer-special-p (buffer)
+  "Return non-nil if BUFFER is special.
+That is, if its name starts with an asterisk."
+  (string-prefix-p "*" (buffer-name buffer)))
+
+(defun activities-buffer-hidden-p (buffer)
+  "Return non-nil if BUFFER is hidden.
+That is, if its name starts with a space."
+  (string-prefix-p " " (buffer-name buffer)))
 
 ;;;; Project support
 

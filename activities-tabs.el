@@ -113,7 +113,6 @@ closed."
                                 (alist-get 'activities-buffer-list (cdr tab)))))))
 
 (defun activities-tabs--kill-buffers ()
-  ;; TODO: Exclude e.g. special buffers from being killed.
   ;; TODO: Frame parameter name should be prefixed with `activities'.
   "Kill buffers that are only in the current tab's buffer list.
 Only does so when `activities-kill-buffers' is non-nil."
