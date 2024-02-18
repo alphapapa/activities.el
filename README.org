@@ -146,6 +146,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 *Additions*
 + Command ~activities-rename~ renames an activity.
 + Option ~activities-after-switch-functions~, a hook called after switching to an activity.
++ Option ~activities-inhibit-frame-name~, to inhibit setting the frame name of an activity.
 
 *Changes*
 + Default time format in activities list.
