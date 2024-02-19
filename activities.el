@@ -279,6 +279,11 @@ prefixes will be added automatically."
                  (const :tag "Current project's name" activities--project-name)
                  (function-item :tag "Other function")))
 
+(defcustom activities-set-frame-name t
+  "Set frame name after switching activity.
+Only applies when `activities-tabs-mode' is disabled."
+  :type 'boolean)
+
 (defcustom activities-anti-save-predicates
   '(active-minibuffer-window activities--backtrace-visible-p)
   "Predicates which prevent an activity's state from being saved.
@@ -534,7 +539,8 @@ is not changed."
     ;; (I don't love this solution, largely because it only applies
     ;; when not using `activities-tabs-mode', but it will do for now.)
     (raise-frame))
-  (set-frame-name (activities-name-for activity)))
+  (when activities-set-frame-name
+    (set-frame-name (activities-name-for activity))))
 
 (defun activities--frame (activity)
   "Return ACTIVITY's frame."
