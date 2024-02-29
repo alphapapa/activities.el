@@ -346,13 +346,13 @@ How is this different from Burly.el (https://github.com/alphapapa/burly.el) or B
 How does this differ from "workspace" packages?
      Yes, there are many Emacs packages that provide "workspace"-like
      features in one way or another.  To date, only Burly and Bufler
-     seem to offer the ability to restore one across Emacs sessions.  As
-     mentioned, ‘activities’ is intended to be more refined and easier
-     to use (e.g.  automatically saving activities’ states when
-     ‘activities-mode’ is enabled).  Comparisons to other packages are
-     left to the reader; suffice to say that ‘activities’ is intended to
-     provide what other tools haven’t, in an idiomatic, intuitive way.
-     (Feedback is welcome.)
+     seem to offer the ability to restore one across Emacs sessions,
+     including non-file-backed buffers.  As mentioned, ‘activities’ is
+     intended to be more refined and easier to use (e.g.  automatically
+     saving activities’ states when ‘activities-mode’ is enabled).
+     Comparisons to other packages are left to the reader; suffice to
+     say that ‘activities’ is intended to provide what other tools
+     haven’t, in an idiomatic, intuitive way.  (Feedback is welcome.)
 
 How does this differ from the built-in ‘desktop-mode’?
      As best this author can tell, ‘desktop-mode’ saves and restores one
@@ -648,22 +648,22 @@ Node: Bindings8630
 Node: Commands9276
 Node: Bookmarks10935
 Node: FAQ11287
-Node: Changelog14363
-Node: v06-pre14677
-Node: v05115922
-Node: v0516085
-Node: v0418062
-Node: v03318603
-Node: v03219033
-Node: v03119161
-Node: v0319491
-Node: v0219881
-Node: v01320373
-Node: v01220524
-Node: v01120703
-Node: v0120868
-Node: Development20969
-Node: Copyright assignment21241
+Node: Changelog14398
+Node: v06-pre14712
+Node: v05115957
+Node: v0516120
+Node: v0418097
+Node: v03318638
+Node: v03219068
+Node: v03119196
+Node: v0319526
+Node: v0219916
+Node: v01320408
+Node: v01220559
+Node: v01120738
+Node: v0120903
+Node: Development21004
+Node: Copyright assignment21276
 
 End Tag Table
 
