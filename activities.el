@@ -432,6 +432,7 @@ this demotes errors."
   (interactive (list (activities-current)))
   (unless activity
     (user-error "No active activity"))
+  ;; TODO: Consider resetting the activity's buffers list.
   (activities-set activity :state 'default))
 
 (defun activities-discard (activity)
