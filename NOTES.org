@@ -5,6 +5,10 @@
 :VISIBILITY: children
 :END:
 
+** TODO Consider storing buffer lists in activities' ~etc~ slot
+
+The challenge is that that slot would get serialized with the activity, so we'd need to nullify it before saving.  But since we persist the same objects that are in memory, doing so would wipe it out while the user's still using it.  We'd probably need to have some kind of pre/post serialize functions that would save the value, nullify it, and then restore it after saving.  Kind of awkward, but maybe less so than having one implementation for frames and another for tabs.
+
 ** TODO [#B] Optionally save/restore ~tab-line~ buffers
 :LOGBOOK:
 - State "TODO"       from              [2024-01-24 Wed 16:58]
