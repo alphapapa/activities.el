@@ -166,6 +166,7 @@ to be placed in the user’s init file:
         ("C-x C-a C-k" . activities-kill)
         ;; This binding mirrors, e.g. "C-x t RET".
         ("C-x C-a RET" . activities-switch)
+        ("C-x C-a b" . activities-switch-buffer)
         ("C-x C-a g" . activities-revert)
         ("C-x C-a l" . activities-list)))
 
@@ -306,6 +307,9 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Bindings,  Up: Usag
      Revert an activity to its default state.
 ‘activities-switch’ (‘C-x C-a RET’)
      Switch to an already-active activity.
+‘activities-switch-buffer’ (‘C-x C-a b’)
+     Switch to a buffer associated with the current activity (or, with
+     prefix argument, another activity).
 ‘activities-rename’
      Rename an activity.
 ‘activities-discard’
@@ -411,6 +415,11 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
 ============
 
 *Additions*
+   • Command ‘activities-switch-buffer’ switches to a buffer associated
+     with the current activity (or, with prefix argument, another
+     activity).  (A buffer is considered to be associated with an
+     activity if it has been displayed in its tab.  Note that this
+     feature currently requires ‘activities-tabs-mode’.)
    • Command ‘activities-rename’ renames an activity.
    • Option ‘activities-after-switch-functions’, a hook called after
      switching to an activity.
@@ -630,31 +639,31 @@ Node: Installation3094
 Node: GNU ELPA3245
 Node: Quelpa3610
 Node: Configuration4330
-Node: Usage5286
-Node: Activities5488
-Node: Compatibility6476
-Node: Modes6960
-Node: Workflow7628
-Node: Bindings8581
-Node: Commands9227
-Node: Bookmarks10725
-Node: FAQ11077
-Node: Changelog14153
-Node: v06-pre14467
-Node: v05115374
-Node: v0515537
-Node: v0417514
-Node: v03318055
-Node: v03218485
-Node: v03118613
-Node: v0318943
-Node: v0219333
-Node: v01319825
-Node: v01219976
-Node: v01120155
-Node: v0120320
-Node: Development20421
-Node: Copyright assignment20693
+Node: Usage5335
+Node: Activities5537
+Node: Compatibility6525
+Node: Modes7009
+Node: Workflow7677
+Node: Bindings8630
+Node: Commands9276
+Node: Bookmarks10935
+Node: FAQ11287
+Node: Changelog14363
+Node: v06-pre14677
+Node: v05115922
+Node: v0516085
+Node: v0418062
+Node: v03318603
+Node: v03219033
+Node: v03119161
+Node: v0319491
+Node: v0219881
+Node: v01320373
+Node: v01220524
+Node: v01120703
+Node: v0120868
+Node: Development20969
+Node: Copyright assignment21241
 
 End Tag Table
 

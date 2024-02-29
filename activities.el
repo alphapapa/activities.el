@@ -835,6 +835,17 @@ That is, if its name starts with an asterisk."
 That is, if its name starts with a space."
   (string-prefix-p " " (buffer-name buffer)))
 
+(defun activities-switch-buffer (_activity)
+  "Switch to a buffer associated with ACTIVITY.
+Interactively, select from buffers associated with ACTIVITY; or,
+with prefix argument, choose another activity."
+  (interactive
+   (list (if current-prefix-arg
+             (activities-completing-read)
+           (or (activities-current) (activities-completing-read)))))
+  (unless (defvar activities-tabs-mode)
+    (error "`activities-switch-buffer' currently requires `activities-tabs-mode'")))
+
 ;;;; Project support
 
 (declare-function project-name "project")

@@ -69,7 +69,8 @@ accordingly."
                         (activities--set . activities-tabs-activity--set)
                         (activities--switch . activities-tabs--switch)
                         (activities-current . activities-tabs-current)
-                        (activities-close . activities-tabs-close))))
+                        (activities-close . activities-tabs-close)
+                        (activities-switch-buffer . activities-tabs--switch-buffer))))
     (if activities-tabs-mode
         (progn
           (tab-bar-mode 1)
@@ -93,6 +94,42 @@ accordingly."
       (when activities-tabs-tab-bar-tab-face-function-original
         (setf tab-bar-tab-face-function activities-tabs-tab-bar-tab-face-function-original
               activities-tabs-tab-bar-tab-face-function-original nil)))))
+
+;;;; Commands
+
+(defun activities-tabs--switch-buffer (activity)
+  "Switch to a buffer associated with ACTIVITY.
+Interactively, select from buffers associated with ACTIVITY; or,
+with prefix argument, choose another activity."
+  (interactive
+   (list (if current-prefix-arg
+             (activities-completing-read)
+           (or (activities-current) (activities-completing-read)))))
+  ;; Much code borrowed from `read-buffer-to-switch', which see.
+  (let* ((tab (activities-tabs--tab activity))
+         (activity-buffers (activities-tabs--tab-parameter 'activities-buffer-list tab))
+         (current-buffer-name (buffer-name (current-buffer)))
+         (rbts-completion-table
+          (apply-partially
+           #'completion-table-with-predicate
+	   #'internal-complete-buffer
+	   (lambda (buffer-name)
+             (let ((buffer-name (if (consp buffer-name) (car buffer-name) buffer-name)))
+               (and (not (equal buffer-name current-buffer-name))
+                    (cl-member buffer-name activity-buffers :key #'buffer-name))))
+	   nil))
+         (selected-buffer
+          (minibuffer-with-setup-hook
+              (lambda ()
+                (setq-local minibuffer-completion-table rbts-completion-table)
+                (if (and (boundp 'icomplete-with-completion-tables)
+                         (listp icomplete-with-completion-tables))
+                    (setq-local icomplete-with-completion-tables
+                                (cons rbts-completion-table
+                                      icomplete-with-completion-tables))))
+            (read-buffer "Switch to activity buffer:" (other-buffer (current-buffer))
+                         (confirm-nonexistent-file-or-buffer)))))
+    (switch-to-buffer selected-buffer)))
 
 ;;;; Functions
 
