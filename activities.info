@@ -79,7 +79,7 @@ Usage
 
 Changelog
 
-* v0.6-pre: v06-pre.
+* v0.6: v06.
 * v0.5.1: v051.
 * v0.5: v05.
 * v0.4: v04.
@@ -394,7 +394,7 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 
 * Menu:
 
-* v0.6-pre: v06-pre.
+* v0.6: v06.
 * v0.5.1: v051.
 * v0.5: v05.
 * v0.4: v04.
@@ -409,10 +409,10 @@ File: README.info,  Node: Changelog,  Next: Development,  Prev: FAQ,  Up: Top
 * v0.1: v01.
 
 
-File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
+File: README.info,  Node: v06,  Next: v051,  Up: Changelog
 
-5.1 v0.6-pre
-============
+5.1 v0.6
+========
 
 *Additions*
    • Command ‘activities-switch-buffer’ switches to a buffer associated
@@ -438,7 +438,7 @@ File: README.info,  Node: v06-pre,  Next: v051,  Up: Changelog
      Al M.  (https://github.com/yrns) for reporting.)
 
 
-File: README.info,  Node: v051,  Next: v05,  Prev: v06-pre,  Up: Changelog
+File: README.info,  Node: v051,  Next: v05,  Prev: v06,  Up: Changelog
 
 5.2 v0.5.1
 ==========
@@ -635,35 +635,35 @@ to request the assignment form.
 
 Tag Table:
 Node: Top231
-Node: Installation3094
-Node: GNU ELPA3245
-Node: Quelpa3610
-Node: Configuration4330
-Node: Usage5335
-Node: Activities5537
-Node: Compatibility6525
-Node: Modes7009
-Node: Workflow7677
-Node: Bindings8630
-Node: Commands9276
-Node: Bookmarks10935
-Node: FAQ11287
-Node: Changelog14398
-Node: v06-pre14712
-Node: v05115957
-Node: v0516120
-Node: v0418097
-Node: v03318638
-Node: v03219068
-Node: v03119196
-Node: v0319526
-Node: v0219916
-Node: v01320408
-Node: v01220559
-Node: v01120738
-Node: v0120903
-Node: Development21004
-Node: Copyright assignment21276
+Node: Installation3086
+Node: GNU ELPA3237
+Node: Quelpa3602
+Node: Configuration4322
+Node: Usage5327
+Node: Activities5529
+Node: Compatibility6517
+Node: Modes7001
+Node: Workflow7669
+Node: Bindings8622
+Node: Commands9268
+Node: Bookmarks10927
+Node: FAQ11279
+Node: Changelog14390
+Node: v0614696
+Node: v05115929
+Node: v0516088
+Node: v0418065
+Node: v03318606
+Node: v03219036
+Node: v03119164
+Node: v0319494
+Node: v0219884
+Node: v01320376
+Node: v01220527
+Node: v01120706
+Node: v0120871
+Node: Development20972
+Node: Copyright assignment21244
 
 End Tag Table
 

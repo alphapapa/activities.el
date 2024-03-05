@@ -143,7 +143,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 * Changelog
 
-** v0.6-pre
+** v0.6
 
 *Additions*
 + Command ~activities-switch-buffer~ switches to a buffer associated with the current activity (or, with prefix argument, another activity).  (A buffer is considered to be associated with an activity if it has been displayed in its tab.  Note that this feature currently requires ~activities-tabs-mode~.)
