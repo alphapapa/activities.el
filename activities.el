@@ -6,7 +6,7 @@
 ;; Maintainer: Adam Porter <adam@alphapapa.net>
 ;; URL: https://github.com/alphapapa/activities.el
 ;; Keywords: convenience
-;; Version: 0.5.1
+;; Version: 0.6
 ;; Package-Requires: ((emacs "29.1") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -266,6 +266,11 @@ Called with one argument, the activity."
 Called with one argument, the activity."
   :type 'hook)
 
+(defcustom activities-after-switch-functions nil
+  "Functions called after switching to an activity.
+Called with one argument, the activity."
+  :type 'hook)
+
 (defcustom activities-default-name-fn 'activities--project-name
   "Function that returns the default name for a new activity.
 The string should not be prefixed by, e.g. \"Activity\" because
@@ -273,6 +278,22 @@ prefixes will be added automatically."
   :type '(choice (const :tag "No default name" (lambda (&rest _) nil))
                  (const :tag "Current project's name" activities--project-name)
                  (function-item :tag "Other function")))
+
+(defcustom activities-set-frame-name t
+  "Set frame name after switching activity.
+Only applies when `activities-tabs-mode' is disabled."
+  :type 'boolean)
+
+(defcustom activities-anti-kill-predicates
+  '(activities-buffer-hidden-p activities-buffer-special-p)
+  "Predicates which prevent a buffer from being killed.
+Used when suspending an activity and `activities-kill-buffers' is
+enabled.  Each predicate is called with the buffer as its
+argument.  If any predicate returns non-nil, the buffer is not
+killed."
+  :type '(set (function-item activities-buffer-special-p)
+              (function-item activities-buffer-hidden-p)
+              (function :tag "Other predicate")))
 
 (defcustom activities-anti-save-predicates
   '(active-minibuffer-window activities--backtrace-visible-p)
@@ -301,6 +322,12 @@ which will cause a message to be printed for such buffers when an
 activity's state is saved."
   :type 'boolean)
 
+(defcustom activities-kill-buffers nil
+  "Kill buffers when suspending an activity.
+Kills buffers that have only been shown in that activity's
+frame/tab."
+  :type 'boolean)
+
 ;;;; Commands
 
 ;;;###autoload
@@ -325,6 +352,19 @@ activity."
     (activities--switch activity)
     activity))
 
+(defun activities-rename (activity name)
+  "Rename ACTIVITY to NAME."
+  (interactive
+   (let* ((activity (activities-completing-read :prompt "Rename activity" :default nil))
+          (name (read-string (format "Rename activity %S to: "
+                                     (activities-activity-name activity)))))
+     (list activity name)))
+  (setf activities-activities (map-delete activities-activities
+                                          (activities-activity-name activity))
+        (activities-activity-name activity) name
+        (map-elt activities-activities name) activity)
+  (activities--persist))
+
 ;;;###autoload
 (cl-defun activities-resume (activity &key resetp)
   "Resume ACTIVITY.
@@ -346,7 +386,8 @@ Interactively, offers active activities."
    (list (activities-completing-read
           :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
           :prompt "Switch to activity")))
-  (activities--switch activity))
+  (activities--switch activity)
+  (run-hook-with-args 'activities-after-switch-functions activity))
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
@@ -372,20 +413,26 @@ state will be used), and close its frame or tab."
   (activities-save activity)
   (activities-close activity))
 
-(defun activities-save-all ()
+(cl-defun activities-save-all (&key persistp)
   "Save all active activities' last states.
-In order to be safe for `kill-emacs-hook', this demotes errors."
+With PERSISTP, persist to disk (otherwise see
+`activities-always-persist').  To be safe for `kill-emacs-hook',
+this demotes errors."
   (interactive)
   (with-demoted-errors "activities-save-all: ERROR: %S"
     (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (let ((activities-saving-p t))
-        (activities-save activity :lastp t)))))
+      (let ((activities-saving-p t)
+            ;; Don't write to disk for each activity.
+            (activities-always-persist nil))
+        (activities-save activity :lastp t)))
+    (activities--persist persistp)))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
   (interactive (list (activities-current)))
   (unless activity
     (user-error "No active activity"))
+  ;; TODO: Consider resetting the activity's buffers list.
   (activities-set activity :state 'default))
 
 (defun activities-discard (activity)
@@ -489,6 +536,7 @@ See option `activities-always-persist'."
 Its state is not saved, and its frames, windows, and tabs are
 closed."
   (activities--switch activity)
+  (activities--kill-buffers)
   ;; TODO: Set frame parameter when resuming.
   (delete-frame))
 
@@ -510,7 +558,8 @@ is not changed."
     ;; (I don't love this solution, largely because it only applies
     ;; when not using `activities-tabs-mode', but it will do for now.)
     (raise-frame))
-  (set-frame-name (activities-name-for activity)))
+  (when activities-set-frame-name
+    (set-frame-name (activities-name-for activity))))
 
 (defun activities--frame (activity)
   "Return ACTIVITY's frame."
@@ -654,14 +703,14 @@ activity's name is NAME."
 
 (cl-defmethod activities--deserialize ((struct activities-buffer))
   "Return buffer for `activities-buffer' STRUCT."
-  (pcase-let (((cl-struct activities-buffer bookmark filename name) struct))
-    (let ((buffer (cond (bookmark (activities--bookmark-buffer struct))
-                        (filename (activities--filename-buffer struct))
-                        (name (activities--name-buffer struct))
-                        (t (error "Activity struct is invalid: %S" struct)))))
-      (cl-assert (buffer-live-p buffer))
-      (activities-debug struct buffer)
-      buffer)))
+  (pcase-let* (((cl-struct activities-buffer bookmark filename name) struct)
+               (buffer (cond (bookmark (activities--bookmark-buffer struct))
+                             (filename (activities--filename-buffer struct))
+                             (name (activities--name-buffer struct))
+                             (t (error "Activity struct is invalid: %S" struct)))))
+    (cl-assert (buffer-live-p buffer))
+    (activities-debug struct buffer)
+    buffer))
 
 (defun activities--bookmark-buffer (struct)
   "Return buffer for `activities-buffer' STRUCT."
@@ -761,6 +810,42 @@ Adds `activities-name-prefix'."
                     (with-selected-window window
                       (when (derived-mode-p 'backtrace-mode)
                         (throw :found t)))))))
+
+(defun activities--kill-buffers ()
+  ;; TODO: Frame parameter name should be prefixed with `activities'.
+  "Kill buffers that are only in the current frame's/tab's buffer list.
+Only does so when `activities-kill-buffers' is non-nil."
+  (when activities-kill-buffers
+    (let* ((frame-buffers (cl-reduce (lambda (acc frame)
+                                       (seq-difference acc (frame-parameter frame 'buffer-list)))
+                                     (remove (selected-frame) (frame-list))
+                                     :initial-value (frame-parameter nil 'buffer-list)))
+           (target-buffers (cl-remove-if (lambda (buffer)
+                                           (run-hook-with-args-until-success
+                                            'activities-anti-kill-predicates buffer))
+                                         frame-buffers)))
+      (mapc #'kill-buffer target-buffers))))
+
+(defun activities-buffer-special-p (buffer)
+  "Return non-nil if BUFFER is special.
+That is, if its name starts with an asterisk."
+  (string-prefix-p "*" (buffer-name buffer)))
+
+(defun activities-buffer-hidden-p (buffer)
+  "Return non-nil if BUFFER is hidden.
+That is, if its name starts with a space."
+  (string-prefix-p " " (buffer-name buffer)))
+
+(defun activities-switch-buffer (_activity)
+  "Switch to a buffer associated with ACTIVITY.
+Interactively, select from buffers associated with ACTIVITY; or,
+with prefix argument, choose another activity."
+  (interactive
+   (list (if current-prefix-arg
+             (activities-completing-read)
+           (or (activities-current) (activities-completing-read)))))
+  (unless (defvar activities-tabs-mode)
+    (error "`activities-switch-buffer' currently requires `activities-tabs-mode'")))
 
 ;;;; Project support
 
