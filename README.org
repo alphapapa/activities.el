@@ -59,12 +59,9 @@ This is the recommended configuration, in terms of a ~use-package~ form to be pl
 
     :bind
     (("C-x C-a C-n" . activities-new)
-     ;; As resuming is expected to be one of the most commonly used
-     ;; commands, this binding is one of the easiest to press.
      ("C-x C-a C-a" . activities-resume)
      ("C-x C-a C-s" . activities-suspend)
      ("C-x C-a C-k" . activities-kill)
-     ;; This binding mirrors, e.g. "C-x t RET".
      ("C-x C-a RET" . activities-switch)
      ("C-x C-a b" . activities-switch-buffer)
      ("C-x C-a g" . activities-revert)
@@ -106,10 +103,12 @@ An example of a workflow using activities:
 
 Key bindings are, as always, ultimately up to the user.  However, in [[Configuration][Configuration]], we suggest a set of bindings with a simple philosophy behind them:
 
-+ A binding ending in a ~C~-prefixed key is expected to result in the set of active activities being changed (e.g. defining a new activity, activating one, or deactivating one).
-+ A binding not ending in a ~C~-prefixed key is expected to merely change an active one (e.g. reverting it) or do something else (like listing activities.)
++ A binding ending in a ~C~-prefixed key is expected to result in the set of active activities being changed (e.g. defining a new activity, switching to one, or suspending one).
++ A binding not ending in a ~C~-prefixed key is expected to modify an activity (e.g. reverting it) or do something else (like listing activities.)
 
 ** Commands
+
+/With the recommended bindings:/
 
 + ~activities-list~ (~C-x C-a l~) :: List activities in a ~vtable~ buffer in which they can be managed with various commands.
 + ~activities-new~ (~C-x C-a C-n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
