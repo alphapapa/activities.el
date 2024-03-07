@@ -550,7 +550,10 @@ closed."
   (activities--switch activity)
   (activities--kill-buffers)
   ;; TODO: Set frame parameter when resuming.
-  (delete-frame))
+  (let ((deleting-frame (selected-frame)))
+    (when (= 1 (length (frame-list)))
+      (select-frame (make-frame)))
+    (delete-frame deleting-frame)))
 
 (defun activities-named (name)
   "Return activity having NAME."

@@ -428,6 +428,9 @@ File: README.info,  Node: v07-pre,  Next: v06,  Up: Changelog
      binding ‘C-x C-a C-d’.  (See #46
      (https://github.com/alphapapa/activities.el/issues/46).)
 
+   *Fixes*
+   • Suspending/killing an activity when only one frame/tab is open.
+
 
 File: README.info,  Node: v06,  Next: v051,  Prev: v07-pre,  Up: Changelog
 
@@ -670,21 +673,21 @@ Node: Bookmarks10951
 Node: FAQ11303
 Node: Changelog14414
 Node: v07-pre14741
-Node: v0615190
-Node: v05116439
-Node: v0516598
-Node: v0418575
-Node: v03319116
-Node: v03219546
-Node: v03119674
-Node: v0320004
-Node: v0220394
-Node: v01320888
-Node: v01221039
-Node: v01121218
-Node: v0121383
-Node: Development21484
-Node: Copyright assignment21756
+Node: v0615273
+Node: v05116522
+Node: v0516681
+Node: v0418658
+Node: v03319199
+Node: v03219629
+Node: v03119757
+Node: v0320087
+Node: v0220477
+Node: v01320971
+Node: v01221122
+Node: v01121301
+Node: v0121466
+Node: Development21567
+Node: Copyright assignment21839
 
 End Tag Table
 
