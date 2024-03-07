@@ -160,12 +160,10 @@ to be placed in the user’s init file:
 
        :bind
        (("C-x C-a C-n" . activities-new)
-        ;; As resuming is expected to be one of the most commonly used
-        ;; commands, this binding is one of the easiest to press.
+        ("C-x C-a C-d" . activities-define)
         ("C-x C-a C-a" . activities-resume)
         ("C-x C-a C-s" . activities-suspend)
         ("C-x C-a C-k" . activities-kill)
-        ;; This binding mirrors, e.g. "C-x t RET".
         ("C-x C-a RET" . activities-switch)
         ("C-x C-a b" . activities-switch-buffer)
         ("C-x C-a g" . activities-revert)
@@ -276,10 +274,10 @@ philosophy behind them:
 
    • A binding ending in a ‘C’-prefixed key is expected to result in the
      set of active activities being changed (e.g.  defining a new
-     activity, activating one, or deactivating one).
-   • A binding not ending in a ‘C’-prefixed key is expected to merely
-     change an active one (e.g.  reverting it) or do something else
-     (like listing activities.)
+     activity, switching to one, or suspending one).
+   • A binding not ending in a ‘C’-prefixed key is expected to modify an
+     activity (e.g.  reverting it) or do something else (like listing
+     activities.)
 
 
 File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Bindings,  Up: Usage
@@ -287,12 +285,17 @@ File: README.info,  Node: Commands,  Next: Bookmarks,  Prev: Bindings,  Up: Usag
 3.6 Commands
 ============
 
+_With the recommended bindings:_
+
 ‘activities-list’ (‘C-x C-a l’)
      List activities in a ‘vtable’ buffer in which they can be managed
      with various commands.
 ‘activities-new’ (‘C-x C-a C-n’)
+     Switch to a new, empty activity (i.e.  one showing a new
+     frame/tab).
+‘activities-define’ (‘C-x C-a C-d’)
      Define a new activity whose default state is the current frame’s or
-     tab’s window configuration.  With prefix argument, overwrite an
+     tab’s window configuration.  With prefix argument, redefine an
      existing activity (thereby updating its default state to the
      current state).
 ‘activities-suspend’ (‘C-x C-a C-s’)
@@ -416,7 +419,14 @@ File: README.info,  Node: v07-pre,  Next: v06,  Up: Changelog
 5.1 v0.7-pre
 ============
 
-Nothing new yet.
+*Additions*
+   • Command ‘activities-new’ switches to a new, "empty" activity.  (See
+     #46 (https://github.com/alphapapa/activities.el/issues/46).)
+
+   *Changes*
+   • Command ‘activities-new’ renamed to ‘activities-define’, with new
+     binding ‘C-x C-a C-d’.  (See #46
+     (https://github.com/alphapapa/activities.el/issues/46).)
 
 
 File: README.info,  Node: v06,  Next: v051,  Prev: v07-pre,  Up: Changelog
@@ -649,32 +659,32 @@ Node: Installation3107
 Node: GNU ELPA3258
 Node: Quelpa3623
 Node: Configuration4343
-Node: Usage5348
-Node: Activities5550
-Node: Compatibility6538
-Node: Modes7022
-Node: Workflow7690
-Node: Bindings8643
-Node: Commands9289
-Node: Bookmarks10948
-Node: FAQ11300
-Node: Changelog14411
-Node: v07-pre14738
-Node: v0614848
-Node: v05116097
-Node: v0516256
-Node: v0418233
-Node: v03318774
-Node: v03219204
-Node: v03119332
-Node: v0319662
-Node: v0220052
-Node: v01320546
-Node: v01220697
-Node: v01120876
-Node: v0121041
-Node: Development21142
-Node: Copyright assignment21414
+Node: Usage5204
+Node: Activities5406
+Node: Compatibility6394
+Node: Modes6878
+Node: Workflow7546
+Node: Bindings8499
+Node: Commands9136
+Node: Bookmarks10951
+Node: FAQ11303
+Node: Changelog14414
+Node: v07-pre14741
+Node: v0615190
+Node: v05116439
+Node: v0516598
+Node: v0418575
+Node: v03319116
+Node: v03219546
+Node: v03119674
+Node: v0320004
+Node: v0220394
+Node: v01320888
+Node: v01221039
+Node: v01121218
+Node: v0121383
+Node: Development21484
+Node: Copyright assignment21756
 
 End Tag Table
 
