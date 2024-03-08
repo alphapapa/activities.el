@@ -270,21 +270,20 @@ This package is part of [[https://www.gnu.org/software/emacs/][GNU Emacs]], bein
 
 ** Info export options
 
+#+EXPORT_FILE_NAME: activities.texi
+#+TEXINFO_FILENAME: activities.info
 #+TEXINFO_DIR_CATEGORY: Emacs
 #+TEXINFO_DIR_TITLE: Activities: (activities)
 #+TEXINFO_DIR_DESC: Suspend/resume activities (sets of windows, frames, and buffers)
-
-# NOTE: We could use these, but that causes a pointless error, "org-compile-file: File "..README.info" wasn't produced...", so we just rename the files in the after-save-hook instead.
-# #+TEXINFO_FILENAME: org-ql.info
-# #+EXPORT_FILE_NAME: org-ql.texi
 
 ** File-local variables
 
 # NOTE: Setting org-comment-string buffer-locally is a nasty hack to work around GitHub's org-ruby's HTML rendering, which does not respect noexport tags.  The only way to hide this tree from its output is to use the COMMENT keyword, but that prevents Org from processing the export options declared in it.  So since these file-local variables don't affect org-ruby, wet set org-comment-string to an unused keyword, which prevents Org from deleting this tree from the export buffer, which allows it to find the export options in it.  And since org-export does respect the noexport tag, the tree is excluded from the info page.
 
+# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activities.info" t)))
+
 # Local Variables:
 # before-save-hook: org-make-toc
-# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activities.info" t)))
 # org-export-initial-scope: buffer
 # org-comment-string: "NOTCOMMENT"
 # End:
