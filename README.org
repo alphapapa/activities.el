@@ -91,13 +91,13 @@ This library is designed to not interfere with other workflows and tools; it is 
 An example of a workflow using activities:
 
 1. Arrange windows in a tab according to an activity you're performing.
-2. Call ~activities-new~ (~C-x C-a n~) to save the activity under a name.
+2. Call ~activities-define~ (~C-x C-a C-d~) to save the activity under a name.
 3. Perform the activity for a while.
 4. Change window configuration, change tab, close the tab, or even restart Emacs.
 5. Call ~activities-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
 6. Return to the original activity state with ~activities-revert~ (~C-x C-a g~).
 7. Rearrange windows and buffers.
-8. Call ~activities-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
+8. Call ~activities-define~ with a universal prefix argument (~C-u C-x C-a C-d~) to redefine an activity's default state.
 9. Suspend the activity with ~activities-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
 ** Bindings
