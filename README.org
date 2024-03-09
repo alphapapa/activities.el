@@ -266,7 +266,7 @@ This package is part of [[https://www.gnu.org/software/emacs/][GNU Emacs]], bein
 
 # Copied from org-super-agenda's readme, in which much was borrowed from Org's =org-manual.org=.
 
-#+OPTIONS: broken-links:t *:t
+#+OPTIONS: broken-links:t *:t num:1
 
 ** Info export options
 
