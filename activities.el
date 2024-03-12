@@ -285,6 +285,10 @@ Only applies when `activities-tabs-mode' is disabled."
   :type 'boolean)
 
 (defcustom activities-anti-kill-predicates
+  ;; TODO(v0.7): Consider removing `activities-buffer-special-p'. from the
+  ;; default value.  Not sure if it's really a good idea (e.g. it
+  ;; would prevent Magit buffers from being killed, and for no good
+  ;; reason I can think of).
   '(activities-buffer-hidden-p activities-buffer-special-p)
   "Predicates which prevent a buffer from being killed.
 Used when suspending an activity and `activities-kill-buffers' is
