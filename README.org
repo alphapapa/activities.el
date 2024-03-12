@@ -161,6 +161,7 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 *Fixes*
 + Suspending/killing an activity when only one frame/tab is open.
++ Generation of Info manual on GNU ELPA.  (Thanks to Stefan Monnier.)
 
 ** v0.6
 
