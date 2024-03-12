@@ -1,5 +1,11 @@
 #+TITLE: activities.el
 
+# NOTE: It would be preferable to put these at the bottom of the file under the export options heading, but it seems that "TEXINFO_DIR_CATEGORY" only works at the top of the file.
+#+EXPORT_FILE_NAME: activities.texi
+#+TEXINFO_DIR_CATEGORY: Emacs
+#+TEXINFO_DIR_TITLE: Activities: (activities)
+#+TEXINFO_DIR_DESC: Suspend/resume activities (sets of windows, frames, and buffers)
+
 [[https://elpa.gnu.org/packages/activities.html][file:https://elpa.gnu.org/packages/activities.svg]]
 
 Inspired by Genera's and KDE's concepts of "activities", this Emacs library allows the user to manage frames/tabs, windows, and buffers according to their purpose.  An "activity" comprises a frame or tab, its window configuration, and the buffers displayed in them--its "state"; this state would be related to a certain task the user performs at various times, such as developing a certain software project, reading and writing email, working with one's Org mode system, etc.
@@ -59,12 +65,10 @@ This is the recommended configuration, in terms of a ~use-package~ form to be pl
 
     :bind
     (("C-x C-a C-n" . activities-new)
-     ;; As resuming is expected to be one of the most commonly used
-     ;; commands, this binding is one of the easiest to press.
+     ("C-x C-a C-d" . activities-define)
      ("C-x C-a C-a" . activities-resume)
      ("C-x C-a C-s" . activities-suspend)
      ("C-x C-a C-k" . activities-kill)
-     ;; This binding mirrors, e.g. "C-x t RET".
      ("C-x C-a RET" . activities-switch)
      ("C-x C-a b" . activities-switch-buffer)
      ("C-x C-a g" . activities-revert)
@@ -93,26 +97,29 @@ This library is designed to not interfere with other workflows and tools; it is 
 An example of a workflow using activities:
 
 1. Arrange windows in a tab according to an activity you're performing.
-2. Call ~activities-new~ (~C-x C-a n~) to save the activity under a name.
+2. Call ~activities-define~ (~C-x C-a C-d~) to save the activity under a name.
 3. Perform the activity for a while.
 4. Change window configuration, change tab, close the tab, or even restart Emacs.
 5. Call ~activities-resume~ (~C-x C-a C-a~) to resume the activity where you left off.
 6. Return to the original activity state with ~activities-revert~ (~C-x C-a g~).
 7. Rearrange windows and buffers.
-8. Call ~activities-new~ with a universal prefix argument (~C-u C-x C-a n~) to redefine an activity's default state.
+8. Call ~activities-define~ with a universal prefix argument (~C-u C-x C-a C-d~) to redefine an activity's default state.
 9. Suspend the activity with ~activities-suspend~ (~C-x C-a s~) (which saves its last state and closes its frame/tab).
 
 ** Bindings
 
 Key bindings are, as always, ultimately up to the user.  However, in [[Configuration][Configuration]], we suggest a set of bindings with a simple philosophy behind them:
 
-+ A binding ending in a ~C~-prefixed key is expected to result in the set of active activities being changed (e.g. defining a new activity, activating one, or deactivating one).
-+ A binding not ending in a ~C~-prefixed key is expected to merely change an active one (e.g. reverting it) or do something else (like listing activities.)
++ A binding ending in a ~C~-prefixed key is expected to result in the set of active activities being changed (e.g. defining a new activity, switching to one, or suspending one).
++ A binding not ending in a ~C~-prefixed key is expected to modify an activity (e.g. reverting it) or do something else (like listing activities.)
 
 ** Commands
 
+/With the recommended bindings:/
+
 + ~activities-list~ (~C-x C-a l~) :: List activities in a ~vtable~ buffer in which they can be managed with various commands.
-+ ~activities-new~ (~C-x C-a C-n~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, overwrite an existing activity (thereby updating its default state to the current state).
++ ~activities-new~ (~C-x C-a C-n~) :: Switch to a new, empty activity (i.e. one showing a new frame/tab).
++ ~activities-define~ (~C-x C-a C-d~) :: Define a new activity whose default state is the current frame's or tab's window configuration.  With prefix argument, redefine an existing activity (thereby updating its default state to the current state).
 + ~activities-suspend~ (~C-x C-a C-s~) :: Save an activity's state and close its frame or tab.
 + ~activities-kill~ (~C-x C-a C-k~) :: Discard an activity's last state (so when it is resumed, its default state will be used), and close its frame or tab.
 + ~activities-resume~ (~C-x C-a C-a~) :: Resume an activity, switching to a new frame or tab for its window configuration, and restoring its buffers.  With prefix argument, restore its default state rather than its last.
@@ -142,6 +149,19 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 + Why did I get an error? :: Because ~activities~ is at an early stage of development and some of these features are not simple to implement.  But it's based on Burly, which has already been through much bug-fixing, so it should proceed smoothly.  Please report any bugs you find.
 
 * Changelog
+
+** v0.7
+
+*Additions*
++ Command ~activities-new~ switches to a new, "empty" activity.  (See [[https://github.com/alphapapa/activities.el/issues/46][#46]].)
+
+*Changes*
++ Command ~activities-new~ renamed to ~activities-define~, with new binding ~C-x C-a C-d~.  (See [[https://github.com/alphapapa/activities.el/issues/46][#46]].)
++ Improve error message when jumping to a buffer's bookmark signals an error.
+
+*Fixes*
++ Suspending/killing an activity when only one frame/tab is open.
++ Generation of Info manual on GNU ELPA.  (Thanks to Stefan Monnier.)
 
 ** v0.6
 
@@ -254,25 +274,20 @@ This package is part of [[https://www.gnu.org/software/emacs/][GNU Emacs]], bein
 
 # Copied from org-super-agenda's readme, in which much was borrowed from Org's =org-manual.org=.
 
-#+OPTIONS: broken-links:t *:t
+#+OPTIONS: broken-links:t *:t num:1
 
 ** Info export options
 
-#+TEXINFO_DIR_CATEGORY: Emacs
-#+TEXINFO_DIR_TITLE: Activities: (activities)
-#+TEXINFO_DIR_DESC: Suspend/resume activities (sets of windows, frames, and buffers)
-
-# NOTE: We could use these, but that causes a pointless error, "org-compile-file: File "..README.info" wasn't produced...", so we just rename the files in the after-save-hook instead.
-# #+TEXINFO_FILENAME: org-ql.info
-# #+EXPORT_FILE_NAME: org-ql.texi
+# NOTE: See note at top of file.
 
 ** File-local variables
 
 # NOTE: Setting org-comment-string buffer-locally is a nasty hack to work around GitHub's org-ruby's HTML rendering, which does not respect noexport tags.  The only way to hide this tree from its output is to use the COMMENT keyword, but that prevents Org from processing the export options declared in it.  So since these file-local variables don't affect org-ruby, wet set org-comment-string to an unused keyword, which prevents Org from deleting this tree from the export buffer, which allows it to find the export options in it.  And since org-export does respect the noexport tag, the tree is excluded from the info page.
 
+# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activities.info" t)))
+
 # Local Variables:
 # before-save-hook: org-make-toc
-# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activities.info" t)))
 # org-export-initial-scope: buffer
 # org-comment-string: "NOTCOMMENT"
 # End:

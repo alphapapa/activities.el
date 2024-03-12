@@ -139,7 +139,11 @@ Its state is not saved, and its frames, windows, and tabs are
 closed."
   (activities--switch activity)
   (activities-tabs--kill-buffers)
-  (tab-bar-close-tab))
+  (if (= 1 (length (tab-bar-tabs)))
+      (progn
+        (tab-bar-new-tab)
+        (tab-bar-close-other-tabs))
+    (tab-bar-close-tab)))
 
 (defun activities-tabs--window-configuration-change ()
   "Add frame's windows' buffers to the current tab's `buffer-list' parameter."
