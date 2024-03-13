@@ -747,6 +747,7 @@ activity's name is NAME."
   ;; buffer was changed in order to know whether it worked.  We call
   ;; it from a temp buffer in case the jumped-to buffer would be the
   ;; same as the current buffer.
+  ;; FIXME: Use `bookmark-jump`'s DISPLAY-FUNC argument!
   (with-temp-buffer
     (pcase-let* (((cl-struct activities-buffer bookmark) struct)
                  (temp-buffer (current-buffer))
