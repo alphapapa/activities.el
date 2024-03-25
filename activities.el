@@ -399,9 +399,14 @@ available."
   "Switch to ACTIVITY.
 Interactively, offers active activities."
   (interactive
-   (list (activities-completing-read
-          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-          :prompt "Switch to activity")))
+   (list
+    (let ((activities (cl-remove-if (lambda (a) (or (not (activities-activity-active-p a))
+						    (eq (activities-current) a)))
+				    activities-activities :key #'cdr)))
+      (activities-completing-read
+       :activities activities
+       :default (car activities)
+       :prompt "Switch to activity"))))
   (activities--switch activity)
   (run-hook-with-args 'activities-after-switch-functions activity))
 
