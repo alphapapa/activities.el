@@ -397,16 +397,19 @@ available."
 
 (defun activities-switch (activity)
   "Switch to ACTIVITY.
-Interactively, offers active activities."
+Interactively, offers active activities other than current one. When one activity is
+present, switches without prompt."
   (interactive
    (list
     (let ((activities (cl-remove-if (lambda (a) (or (not (activities-activity-active-p a))
 						    (eq (activities-current) a)))
 				    activities-activities :key #'cdr)))
+      (if (eq 1 (length activities))
+	  (cdar activities)
       (activities-completing-read
        :activities activities
        :default (car activities)
-       :prompt "Switch to activity"))))
+       :prompt "Switch to activity")))))
   (activities--switch activity)
   (run-hook-with-args 'activities-after-switch-functions activity))
 
