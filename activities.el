@@ -402,21 +402,21 @@ present, switches to that one. When two are present, either
 switches to the non-active one, or prompts."
   (interactive
    (list
-    (cond ((length= activities-activities 1)
-           (cdar activities-activities))
-          ((length= activities-activities 2)
-           (if (activities-current)
-                (if (string= (activities-activity-name (activities-current)) (activities-activity-name (cdar activities-activities)))
-                    (cdr (second activities-activities))
-                  (cdar activities-activities))
-             (activities-completing-read
-                    :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-                    :prompt "Switch to activity")))
-          (t (activities-completing-read
+    (pcase activities-activities
+      (`(,a)
+         (cdr a))
+      (`(,_ ,_)
+       (if (activities-current)
+           (cdar (cl-remove (activities-current) activities-activities :key #'cdr))
+         (activities-completing-read
+          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
+          :prompt "Switch to activity")))
+      (_ (activities-completing-read
                     :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
                     :prompt "Switch to activity")))))
   (activities--switch activity)
   (run-hook-with-args 'activities-after-switch-functions activity))
+
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
