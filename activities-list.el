@@ -36,6 +36,11 @@
   "Time format for `activities-list' buffer."
   :type 'string)
 
+(defcustom activities-list-time-column-width 20
+  "`activities-list' column-width for columns which display time."
+  :type '(choice (integer :tag "Number of chars")
+                 (string :tag "Width String (See info node `(vtable)Top' for more information.)")))
+
 (defmacro activities-list-command (command)
   "Expand to a lambda that applies its args to COMMAND and reverts the list buffer."
   `(lambda (&rest args)
@@ -68,12 +73,14 @@
                      (pcase-let (((cl-struct activities-activity last) activity))
                        (when last
                          (map-elt (activities-activity-state-etc last) 'time))))
+           :width ,activities-list-time-column-width
            :formatter activities-list--format-time)
          ( :name "Default saved"
            :getter (lambda (activity _table)
                      (pcase-let (((cl-struct activities-activity default) activity))
                        (when default
                          (map-elt (activities-activity-state-etc default) 'time))))
+           :width ,activities-list-time-column-width
            :formatter activities-list--format-time))
        :objects-function (lambda ()
                            (map-values activities-activities))
