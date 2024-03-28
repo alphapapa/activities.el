@@ -167,6 +167,7 @@ Nothing new yet.
 *Fixes*
 + Suspending/killing an activity when only one frame/tab is open.
 + Generation of Info manual on GNU ELPA.  (Thanks to Stefan Monnier.)
++ Ignore minimum window sizes and fixed size restrictions.  ([[https://github.com/alphapapa/activity.el/issues/56][#56]].  Thanks to [[https://github.com/jellelicht][Jelle Licht]].)
 
 ** v0.6
 

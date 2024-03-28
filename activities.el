@@ -649,7 +649,7 @@ activity's name is NAME."
     ;; function after handling the bookmark, we use an immediate timer to
     ;; set the window configuration.
     (run-at-time nil nil (lambda ()
-                           (window-state-put state (frame-root-window))))))
+                           (window-state-put state (frame-root-window) 'safe)))))
 
 (defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
