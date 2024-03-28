@@ -275,7 +275,7 @@ Called with one argument, the activity."
   "Function that returns the default name for a new activity.
 The string should not be prefixed by, e.g. \"Activity\" because
 prefixes will be added automatically."
-  :type '(choice (const :tag "No default name" (lambda (&rest _) nil))
+  :type '(choice (const :tag "No default name" ignore)
                  (const :tag "Current project's name" activities--project-name)
                  (function-item :tag "Other function")))
 
