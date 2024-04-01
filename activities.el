@@ -399,9 +399,20 @@ available."
   "Switch to ACTIVITY.
 Interactively, offers active activities."
   (interactive
-   (list (activities-completing-read
-          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-          :prompt "Switch to activity")))
+   (let* ((active-activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr))
+          (selected (pcase (length active-activities)
+                      (0 (user-error (substitute-command-keys "No active activities (use `\\[activities-resume]' to resume one)")))
+                      (1 (user-error "Only one active activity"))
+                      (_ (let
+                             ((candidates
+                               (cl-remove (activities-current) active-activities :key #'cdr :test #'eq)))
+                           (pcase (length candidates)
+                             (1 (cdar candidates))
+                             ;; TODO: Sort by recently used.
+                             (_ (activities-completing-read :activities candidates
+                                                            :default (car candidates)
+                                                            :prompt "Switch to activity"))))))))
+     (list selected)))
   (activities--switch activity)
   (run-hook-with-args 'activities-after-switch-functions activity))
 
