@@ -42,7 +42,7 @@
      (let ((list-buffer (current-buffer)))
        (apply #',command args)
        (with-current-buffer list-buffer
-         (vtable-revert)))))
+         (vtable-revert-command)))))
 
 ;;;###autoload
 (defun activities-list ()
