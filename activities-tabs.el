@@ -202,10 +202,11 @@ Selects its tab, making one if needed.  Its state is not changed."
 If TAB represents an activity, face `activities-tabs' is added as
 inherited."
   ;; TODO: Propose a tab-bar equivalent of `tab-line-tab-face-functions'.
-  (let ((face (funcall activities-tabs-tab-bar-tab-face-function-original tab)))
-    (if (activities-tabs--tab-parameter 'activity tab)
-        `(:inherit (activities-tabs ,face))
-      face)))
+  ;; (let ((face (funcall activities-tabs-tab-bar-tab-face-function-original tab)))
+  ;;   (if (activities-tabs--tab-parameter 'activity tab)
+  ;;       `(:inherit (activities-tabs ,face))
+  ;;     face))
+  (funcall activities-tabs-tab-bar-tab-face-function-original tab))
 
 (defun activities-tabs-activity--set (activity)
   "Set the current activity.
