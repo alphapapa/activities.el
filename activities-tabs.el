@@ -48,10 +48,6 @@ When `activities-tabs-mode' is enabled.")
 Each is called with one argument, the activity."
   :type 'hook)
 
-(defcustom activities-tabs-prefix "α:"
-  "Prepended to activity names in tabs."
-  :type 'string)
-
 (defface activities-tabs
   `((t :inherit font-lock-function-name-face))
   "Applied to tab-bar faces for tabs representing activities.")
