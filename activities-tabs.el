@@ -43,11 +43,6 @@ When `activities-tabs-mode' is enabled.")
   "Integrates activities and tabs."
   :group 'activities)
 
-(defcustom activities-tabs-before-resume-functions nil
-  "Functions called before resuming an activity.
-Each is called with one argument, the activity."
-  :type 'hook)
-
 (defcustom activities-tabs-prefix "α:"
   "Prepended to activity names in tabs."
   :type 'string)
@@ -75,7 +70,6 @@ accordingly."
         (progn
           (tab-bar-mode 1)
           (add-hook 'window-configuration-change-hook #'activities-tabs--window-configuration-change)
-          (advice-add #'activities-resume :before #'activities-tabs-before-resume)
           (pcase-dolist (`(,symbol . ,function) override-map)
             (advice-add symbol :override function))
           ;; The mode command could be called to activate the mode
@@ -88,7 +82,6 @@ accordingly."
             (setf activities-tabs-tab-bar-tab-face-function-original tab-bar-tab-face-function
                   tab-bar-tab-face-function #'activities-tabs--tab-bar-tab-face-function)))
       (remove-hook 'window-configuration-change-hook #'activities-tabs--window-configuration-change)
-      (advice-remove #'activities-resume #'activities-tabs-before-resume)
       (pcase-dolist (`(,symbol . ,function) override-map)
         (advice-remove symbol function))
       (when activities-tabs-tab-bar-tab-face-function-original
@@ -218,10 +211,6 @@ Sets the current tab's `activity' parameter to ACTIVITY."
 That is, if any tabs have an `activity' parameter whose
 activity's name is NAME."
   (activities-tabs--tab activity))
-
-(defun activities-tabs-before-resume (activity &rest _)
-  "Called before resuming ACTIVITY."
-  (run-hook-with-args 'activities-tabs-before-resume-functions activity))
 
 ;; (defun activity-tabs-switch-to-tab (activity)
 ;;   "Switch to a tab for ACTIVITY."
