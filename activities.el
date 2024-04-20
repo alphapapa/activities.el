@@ -846,7 +846,7 @@ Adapted from `magit--age'."
     (fn age activities--age-spec)))
 
 (defun activities--oldest-age (activities)
-  "Return the age in seconds of the olds of ACTIVITIES."
+  "Return the age in seconds of the oldest activity in ACTIVITIES."
   (cl-loop for (_name . act) in activities maximize
 	   (cl-loop
 	    for type in '(default last)
