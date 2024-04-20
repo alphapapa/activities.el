@@ -845,6 +845,17 @@ Adapted from `magit--age'."
                       (fn age (cdr spec)))))))
     (fn age activities--age-spec)))
 
+(defun activities--oldest-age (activities)
+  "Return the age in seconds of the olds of ACTIVITIES."
+  (cl-loop for (_name . act) in activities maximize
+	   (cl-loop
+	    for type in '(default last)
+	    for func = (intern (format "activities-activity-%s" type))
+	    maximize
+	    (float-time
+	     (time-since
+	      (map-elt (activities-activity-state-etc (funcall func act)) 'time))))))
+
 (defun activities-annotate (max-age)
   "Return an activity annotation function.
 MAX-AGE is the maximum age of any activity in seconds."
@@ -895,17 +906,6 @@ MAX-AGE is the maximum age of any activity in seconds."
 	    (concat (propertize " " 'display
 				`(space :align-to (- right ,(+ (length ann) 13))))
 		    ann age-ann)))))))
-
-(defun activities--oldest-age (activities)
-  "Return the age in seconds of the olds of ACTIVITIES."
-  (cl-loop for (_name . act) in activities maximize
-	   (cl-loop
-	    for type in '(default last)
-	    for func = (intern (format "activities-activity-%s" type))
-	    maximize
-	    (float-time
-	     (time-since
-	      (map-elt (activities-activity-state-etc (funcall func act)) 'time))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
