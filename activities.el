@@ -865,7 +865,7 @@ MAX-AGE is the maximum age of any activity in seconds."
 			      '(parameters activities-buffer))))))))
 	    (setf (alist-get type data)
 		  (list :bufcnt (length buffers)
-			:filecnt (length files)
+			:filecnt (length (delq nil files))
 			:time (float-time (time-since time))))))
 	(cl-labels ((data-el (&rest keys) (map-nested-elt data keys)))
 	  (let* ((oldest (vc-annotate-oldest-in-map vc-annotate-color-map))
