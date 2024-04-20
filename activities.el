@@ -856,9 +856,10 @@ Adapted from `magit--age'."
 	     (time-since
 	      (map-elt (activities-activity-state-etc (funcall func act)) 'time))))))
 
-(defun activities-annotate (max-age)
+(defun activities-annotate (max-age oldest-possible)
   "Return an activity annotation function.
-MAX-AGE is the maximum age of any activity in seconds."
+MAX-AGE is the maximum age of any activity in seconds.
+OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
   (lambda (name)
     (when-let ((activity (map-elt activities-activities name)))
       (let (data)
@@ -868,23 +869,22 @@ MAX-AGE is the maximum age of any activity in seconds."
 		 (time (map-elt (activities-activity-state-etc state) 'time))
 		 (window-state (activities-activity-state-window-state state))
 		 (buffers (window-state-buffers window-state))
-		 (files (activities--map-window-state-leafs window-state
-			 (lambda (l)
-			   (bookmark-get-filename
-			    (activities-buffer-bookmark
-			     (map-nested-elt (cdr l)
-			      '(parameters activities-buffer))))))))
+		 (files ( activities--map-window-state-leafs window-state
+			  (lambda (l)
+			    (bookmark-get-filename
+			     (activities-buffer-bookmark
+			      (map-nested-elt (cdr l)
+					      '(parameters activities-buffer))))))))
 	    (setf (alist-get type data)
 		  (list :bufcnt (length buffers)
 			:filecnt (length (delq nil files))
 			:time (float-time (time-since time))))))
 	(cl-labels ((data-el (&rest keys) (map-nested-elt data keys)))
-	  (let* ((oldest (vc-annotate-oldest-in-map vc-annotate-color-map))
-		 (age (min (data-el 'last :time)
+	  (let* ((age (min (data-el 'last :time)
 			   (data-el 'default :time)))
 		 (ann (format "%s:%s|%s %s:%s|%s "
 			      (propertize "buffers" 'face 'bold)
-			      (propertize (format "%2d"  (data-el 'last :bufcnt))
+			      (propertize (format "%2d" (data-el 'last :bufcnt))
 					  'face 'success)
 			      (propertize (format "%-2d" (data-el 'default :bufcnt))
 					  'face 'warning)
@@ -894,7 +894,7 @@ MAX-AGE is the maximum age of any activity in seconds."
 			      (propertize (format "%-2d" (data-el 'default :filecnt))
 					  'face 'warning)))
 		 (age-color (or (cdr (vc-annotate-compcar
-				      (* (/ age max-age) oldest)
+				      (* (/ age max-age) oldest-possible)
 				      vc-annotate-color-map))
 				vc-annotate-very-old-color))
 		 (age-ann
@@ -919,7 +919,9 @@ which see, with DEFAULT."
          (names (activities-names activities))
 	 (completion-extra-properties `(:annotation-function
 					,(activities-annotate
-					  (activities--oldest-age activities))))
+					  (activities--oldest-age activities)
+					  (vc-annotate-oldest-in-map
+					   vc-annotate-color-map))))
          (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
