@@ -66,6 +66,7 @@
 (require 'map)
 (require 'persist)
 (require 'subr-x)
+(require 'vc-annotate)
 
 ;;;; Types
 
@@ -651,6 +652,23 @@ activity's name is NAME."
 	       ;; NOTE: We copy the state so as not to mutate the one in storage.
 	       (activities--bufferize-window-state (copy-tree state))))
 
+(defun activities--map-window-state-leafs (state func)
+  "Call FUNC on all the leaf nodes in window-state STATE.
+The resulting values are returned as a list."
+  (let (ret)
+    (cl-labels ((map-leafs (state func)
+		  (pcase state
+		    (`(leaf . ,_attrs)
+		     (push (funcall func state) ret))
+		    ((pred atom) state)
+		    (`(,_key . ,(pred atom)) state)
+		    ((pred list)
+		     (if-let ((leaf-pos (cl-position 'leaf state)))
+			 (push (funcall func (cl-subseq state leaf-pos)) ret)
+		       (dolist (s state) (map-leafs s func)))))))
+      (map-leafs state func))
+    (nreverse ret)))
+
 (defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
   (cl-labels ((bufferize-state (state)
@@ -803,6 +821,92 @@ activity's name is NAME."
                   "In the meantime, it's recommended to not use buffers of this major mode in an activity's layout; or you may simply ignore this error and use the other buffers in the activity.")
           (current-buffer)))))
 
+(defvar activities--age-spec
+  `((?Y "year"   "years"   ,(round (* 60 60 24 365.2425)))
+    (?M "month"  "months"  ,(round (* 60 60 24 30.436875)))
+    (?w "week"   "weeks"   ,(* 60 60 24 7))
+    (?d "day"    "days"    ,(* 60 60 24))
+    (?h "hour"   "hours"   ,(* 60 60))
+    (?m "minute" "minutes" 60)
+    (?s "second" "seconds" 1))
+  "Age specification.  See `magit--age-spec', which this duplicates.")
+
+(defun activities--age (age &optional abbreviate)
+  "Summarize AGE and possibly ABBREVIATE.
+Adapted from `magit--age'."
+  (cl-labels ((fn (age spec)
+                (pcase-let ((`(,char ,unit ,units ,weight) (car spec)))
+                  (let ((cnt (round (/ age weight 1.0))))
+                    (if (or (not (cdr spec))
+                            (>= (/ age weight) 1))
+                        (list cnt (cond (abbreviate char)
+                                        ((= cnt 1) unit)
+                                        (t units)))
+                      (fn age (cdr spec)))))))
+    (fn age activities--age-spec)))
+
+(defun activities-annotate (max-age)
+  "Return an activity annotation function.
+MAX-AGE is the maximum age of any activity in seconds."
+  (lambda (name)
+    (when-let ((activity (map-elt activities-activities name)))
+      (let (data)
+	(dolist (type '(last default))
+	  (let* ((func (intern (format "activities-activity-%s" type)))
+		 (state (funcall func activity))
+		 (time (map-elt (activities-activity-state-etc state) 'time))
+		 (window-state (activities-activity-state-window-state state))
+		 (buffers (window-state-buffers window-state))
+		 (files (activities--map-window-state-leafs window-state
+			 (lambda (l)
+			   (bookmark-get-filename
+			    (activities-buffer-bookmark
+			     (map-nested-elt (cdr l)
+			      '(parameters activities-buffer))))))))
+	    (setf (alist-get type data)
+		  (list :bufcnt (length buffers)
+			:filecnt (length files)
+			:time (float-time (time-since time))))))
+	(cl-labels ((data-el (&rest keys) (map-nested-elt data keys)))
+	  (let* ((oldest (vc-annotate-oldest-in-map vc-annotate-color-map))
+		 (age (min (data-el 'last :time)
+			   (data-el 'default :time)))
+		 (ann (format "%s:%s|%s %s:%s|%s "
+			      (propertize "buffers" 'face 'bold)
+			      (propertize (format "%2d"  (data-el 'last :bufcnt))
+					  'face 'success)
+			      (propertize (format "%-2d" (data-el 'default :bufcnt))
+					  'face 'warning)
+			      (propertize "files" 'face 'bold)
+			      (propertize (format "%2d" (data-el 'last :filecnt))
+					  'face 'success)
+			      (propertize (format "%-2d" (data-el 'default :filecnt))
+					  'face 'warning)))
+		 (age-color (or (cdr (vc-annotate-compcar
+				      (* (/ age max-age) oldest)
+				      vc-annotate-color-map))
+				vc-annotate-very-old-color))
+		 (age-ann
+		  (propertize (apply #'format "[%d %s]" (activities--age age)) 'face
+			      `( :foreground ,age-color
+				 :background ,vc-annotate-background))))
+	    (when (< (length age-ann) 13)
+	      (setq age-ann (concat (make-string (- 13 (length age-ann)) ?\s) age-ann)))
+	    (concat (propertize " " 'display
+				`(space :align-to (- right ,(+ (length ann) 13))))
+		    ann age-ann)))))))
+
+(defun activities--oldest-age (activities)
+  "Return the age in seconds of the olds of ACTIVITIES."
+  (cl-loop for (_name . act) in activities maximize
+	   (cl-loop
+	    for type in '(default last)
+	    for func = (intern (format "activities-activity-%s" type))
+	    maximize
+	    (float-time
+	     (time-since
+	      (map-elt (activities-activity-state-etc (funcall func act)) 'time))))))
+
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
           (default (when (activities-current)
@@ -813,6 +917,9 @@ PROMPT is passed to `completing-read' by way of `format-prompt',
 which see, with DEFAULT."
   (let* ((prompt (format-prompt prompt default))
          (names (activities-names activities))
+	 (completion-extra-properties `(:annotation-function
+					,(activities-annotate
+					  (activities--oldest-age activities))))
          (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
