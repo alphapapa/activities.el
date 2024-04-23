@@ -849,6 +849,7 @@ Adapted from `magit--age'."
 	   (cl-loop
 	    for type in '(default last)
  	    for state = (cl-struct-slot-value 'activities-activity type act)
+	    if state
 	    for etc = (activities-activity-state-etc state)
 	    maximize (float-time (time-since (map-elt etc 'time))))))
 
@@ -860,44 +861,44 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
     (when-let ((activity (map-elt activities-activities name)))
       (let (data)
 	(dolist (type '(last default))
-	  (let* ((state (cl-struct-slot-value 'activities-activity type activity))
-		 (time (map-elt (activities-activity-state-etc state) 'time))
-		 (window-state (activities-activity-state-window-state state))
-		 (buffers (window-state-buffers window-state))
-		 (files (activities--map-window-state-leafs
-			 window-state
-			 (lambda (leaf)
-			   (bookmark-get-filename
-			    (activities-buffer-bookmark
-			     (map-nested-elt (cdr leaf)
-			 		     '(parameters activities-buffer))))))))
-	    (setf (alist-get type data)
-		  (list (length buffers)
-			(length (delq nil files))
-			(float-time (time-since time))))))
-	(pcase-let* ((`(,last-bufs ,last-files ,last-time) (map-elt data 'last))
-		     (`(,default-bufs ,default-files ,default-time) (map-elt data 'default))
-		     (age (min last-time default-time))
-		     (ann (format "%s:%s|%s %s:%s|%s "
-				  (propertize "buffers" 'face 'bold)
-				  (propertize (format "%2d" last-bufs) 'face 'success)
-				  (propertize (format "%-2d" default-bufs) 'face 'warning)
-				  (propertize "files" 'face 'bold)
-				  (propertize (format "%2d" last-files) 'face 'success)
-				  (propertize (format "%-2d" default-files) 'face 'warning)))
+	  (when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
+	    (let* ((time (map-elt (activities-activity-state-etc state) 'time))
+		   (window-state (activities-activity-state-window-state state))
+		   (buffers (window-state-buffers window-state))
+		   (files (activities--map-window-state-leafs
+			   window-state
+			   (lambda (leaf)
+			     (bookmark-get-filename
+			      (activities-buffer-bookmark
+			       (map-nested-elt (cdr leaf)
+			 		       '(parameters activities-buffer))))))))
+	      (setf (alist-get type data)
+		    (list (length (delq nil files))
+			  (and time (float-time (time-since time))) buffers)))))
+	(pcase-let* ((`(,last-file-cnt ,last-age ,last-bufs) (map-elt data 'last))
+		     (`(,default-file-cnt ,default-age ,default-bufs) (map-elt data 'default))
+		     (age (if last-age (min last-age default-age) default-age))
+		     (buf-cnt (length (or last-bufs default-bufs)))
+		     (file-cnt (or last-file-cnt default-file-cnt))
+		     (dirty (and last-bufs
+				 (or (/= (length last-bufs) (length default-bufs))
+				     (not (seq-set-equal-p last-bufs default-bufs)))))
+		     (ann (format "%s bufs %s files "
+				  (propertize (format "%2d" buf-cnt) 'face 'success)
+				  (propertize (format "%2d" file-cnt) 'face 'warning)))
 		     (age-color (or (cdr (vc-annotate-compcar
 					  (* (/ age max-age) oldest-possible)
 					  vc-annotate-color-map))
 				    vc-annotate-very-old-color))
 		     (age-ann (propertize
-			       (format "%15s" (apply #'format "[%d %s]"
-						     (activities--age age)))
+			       (format "%15s" (apply #'format "[%d %s]" (activities--age age)))
 			       'face `( :foreground ,age-color
-					:background ,vc-annotate-background))))
+					:background ,vc-annotate-background)))
+		     (dirty-ann (propertize (if dirty "*" " ") 'face 'bold)))
 	  (concat (propertize " " 'display
 			      `( space :align-to
-				 (- right ,(+ (length ann) (length age-ann)))))
-		  ann age-ann))))))
+				 (- right ,(+ (length ann) (length age-ann) 1))))
+		  ann age-ann dirty-ann))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
