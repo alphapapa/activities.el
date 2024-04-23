@@ -875,30 +875,30 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 	      (setf (alist-get type data)
 		    (list (length (delq nil files))
 			  (and time (float-time (time-since time))) buffers)))))
-	(pcase-let* ((`(,last-file-cnt ,last-age ,last-bufs) (map-elt data 'last))
-		     (`(,default-file-cnt ,default-age ,default-bufs) (map-elt data 'default))
+	(pcase-let* ((`(,num-last-files ,last-age ,last-buffers) (map-elt data 'last))
+		     (`(,num-default-files ,default-age ,default-buffers) (map-elt data 'default))
 		     (age (if last-age (min last-age default-age) default-age))
-		     (buf-cnt (length (or last-bufs default-bufs)))
-		     (file-cnt (or last-file-cnt default-file-cnt))
-		     (dirty (and last-bufs
-				 (or (/= (length last-bufs) (length default-bufs))
-				     (not (seq-set-equal-p last-bufs default-bufs)))))
-		     (ann (format "%s bufs %s files "
-				  (propertize (format "%2d" buf-cnt) 'face 'success)
-				  (propertize (format "%2d" file-cnt) 'face 'warning)))
+		     (num-buffers (length (or last-buffers default-buffers)))
+		     (num-files (or num-last-files num-default-files))
+		     (dirtyp (when last-buffers
+			       (or (/= (length last-buffers) (length default-buffers))
+				   (not (seq-set-equal-p last-buffers default-buffers)))))
+		     (annotation (format "%s bufs %s files "
+					 (propertize (format "%2d" num-buffers) 'face 'success)
+					 (propertize (format "%2d" num-files) 'face 'warning)))
 		     (age-color (or (cdr (vc-annotate-compcar
 					  (* (/ age max-age) oldest-possible)
 					  vc-annotate-color-map))
 				    vc-annotate-very-old-color))
-		     (age-ann (propertize
-			       (format "%15s" (apply #'format "[%d %s]" (activities--age age)))
-			       'face `( :foreground ,age-color
-					:background ,vc-annotate-background)))
-		     (dirty-ann (propertize (if dirty "*" " ") 'face 'bold)))
+		     (age-annotation (propertize
+				      (format "%15s" (apply #'format "[%d %s]" (activities--age age)))
+				      'face `(:foreground ,age-color
+							  :background ,vc-annotate-background)))
+		     (dirty-annotation (propertize (if dirtyp "*" " ") 'face 'bold)))
 	  (concat (propertize " " 'display
-			      `( space :align-to
-				 (- right ,(+ (length ann) (length age-ann) 1))))
-		  ann age-ann dirty-ann))))))
+			      `(space :align-to
+				      (- right ,(+ (length annotation) (length age-annotation) 1))))
+		  annotation age-annotation dirty-annotation))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
