@@ -660,7 +660,6 @@ The resulting values are returned as a list."
 		  (pcase state
 		    (`(leaf . ,_attrs)
 		     (push (funcall func state) ret))
-		    (`(,_key . ,(pred atom))) ; skip
 		    ((pred proper-list-p)
 		     (if-let ((leaf-pos (cl-position 'leaf state)))
 			 (push (funcall func (cl-subseq state leaf-pos)) ret)
