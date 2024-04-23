@@ -858,47 +858,45 @@ MAX-AGE is the maximum age of any activity in seconds.
 OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
   (lambda (name)
     (when-let ((activity (map-elt activities-activities name)))
-      (let (data (age-len 14))
+      (let (data)
 	(dolist (type '(last default))
 	  (let* ((state (cl-struct-slot-value 'activities-activity type activity))
 		 (time (map-elt (activities-activity-state-etc state) 'time))
 		 (window-state (activities-activity-state-window-state state))
 		 (buffers (window-state-buffers window-state))
 		 (files (activities--map-window-state-leafs window-state
-			 (lambda (l)
+			 (lambda (leaf)
 			   (bookmark-get-filename
 			    (activities-buffer-bookmark
-			     (map-nested-elt (cdr l)
+			     (map-nested-elt (cdr leaf)
 			 		     '(parameters activities-buffer))))))))
 	    (setf (alist-get type data)
 		  (list (length buffers)
 			(length (delq nil files))
 			(float-time (time-since time))))))
-	(pcase-let* ((`(,lastb ,lastf ,lastt) (map-elt data 'last))
-		     (`(,defb ,deff ,deft) (map-elt data 'default))
-		     (age (min lastt deft))
+	(pcase-let* ((`(,last-bufs ,last-files ,last-time) (map-elt data 'last))
+		     (`(,default-bufs ,default-files ,default-time) (map-elt data 'default))
+		     (age (min last-time default-time))
 		     (ann (format "%s:%s|%s %s:%s|%s "
 				  (propertize "buffers" 'face 'bold)
-				  (propertize (format "%2d" lastb) 'face 'success)
-				  (propertize (format "%-2d" defb) 'face 'warning)
+				  (propertize (format "%2d" last-bufs) 'face 'success)
+				  (propertize (format "%-2d" default-bufs) 'face 'warning)
 				  (propertize "files" 'face 'bold)
-				  (propertize (format "%2d" lastf) 'face 'success)
-				  (propertize (format "%-2d" deff) 'face 'warning)))
+				  (propertize (format "%2d" last-files) 'face 'success)
+				  (propertize (format "%-2d" default-files) 'face 'warning)))
 		     (age-color (or (cdr (vc-annotate-compcar
 					  (* (/ age max-age) oldest-possible)
 					  vc-annotate-color-map))
 				    vc-annotate-very-old-color))
-		     (age-ann
-		      (propertize (apply #'format "[%d %s]" (activities--age age)) 'face
-				  `( :foreground ,age-color
-				     :background ,vc-annotate-background))))
-	  (when (< (length age-ann) age-len) ; left-pad
-	    (setq age-ann
-		  (concat (make-string (- age-len (length age-ann)) ?\s)
-			  age-ann)))
+		     (age-ann (propertize
+			       (format "%15s" (apply #'format "[%d %s]"
+						     (activities--age age)))
+			       'face `( :foreground ,age-color
+					:background ,vc-annotate-background))))
 	  (concat (propertize " " 'display
-			      `(space :align-to (- right ,(+ (length ann) age-len))))
-		    ann age-ann))))))
+			      `( space :align-to
+				 (- right ,(+ (length ann) (length age-ann)))))
+		  ann age-ann))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
