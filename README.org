@@ -135,6 +135,10 @@ Key bindings are, as always, ultimately up to the user.  However, in [[Configura
 
 When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored when a new activity is made.  This allows the command ~bookmark-jump~ (~C-x r b~) to be used to resume an activity (helping to universalize the bookmark system).
 
+** Annotation Info
+
+When selecting an activity in the minibuffer using an interface that supports /annotations/, additional information is shown: the number of buffers and files the activity contains, a color-coded age since the activity was last updated, and a final ~*~ if the activity's list of buffers has been modified from its default state.
+
 * FAQ
 
 + How is this different from [[https://github.com/alphapapa/burly.el][Burly.el]] or [[https://github.com/alphapapa/bufler.el/][Bufler.el]]? :: Burly is a well-polished tool for restoring window and frame configurations, which could be considered an incubator for some of the ideas furthered here.  Bufler's ~bufler-workspace~ library uses Burly to provide some similar functionality, which is at an exploratory stage.  ~activities~ hopes to provide a longer-term solution more suitable for integration into Emacs.
