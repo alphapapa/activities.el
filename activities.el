@@ -850,11 +850,9 @@ Adapted from `magit--age'."
   (cl-loop for (_name . act) in activities maximize
 	   (cl-loop
 	    for type in '(default last)
-	    for func = (intern (format "activities-activity-%s" type))
-	    maximize
-	    (float-time
-	     (time-since
-	      (map-elt (activities-activity-state-etc (funcall func act)) 'time))))))
+ 	    for state = (cl-struct-slot-value 'activities-activity type act)
+	    for etc = (activities-activity-state-etc state)
+	    maximize (float-time (time-since (map-elt etc 'time))))))
 
 (defun activities-annotate (max-age oldest-possible)
   "Return an activity annotation function.
@@ -864,8 +862,7 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
     (when-let ((activity (map-elt activities-activities name)))
       (let (data (age-len 14))
 	(dolist (type '(last default))
-	  (let* ((func (intern (format "activities-activity-%s" type)))
-		 (state (funcall func activity))
+	  (let* ((state (cl-struct-slot-value 'activities-activity type activity))
 		 (time (map-elt (activities-activity-state-etc state) 'time))
 		 (window-state (activities-activity-state-window-state state))
 		 (buffers (window-state-buffers window-state))
