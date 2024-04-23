@@ -864,7 +864,8 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 		 (time (map-elt (activities-activity-state-etc state) 'time))
 		 (window-state (activities-activity-state-window-state state))
 		 (buffers (window-state-buffers window-state))
-		 (files (activities--map-window-state-leafs window-state
+		 (files (activities--map-window-state-leafs
+			 window-state
 			 (lambda (leaf)
 			   (bookmark-get-filename
 			    (activities-buffer-bookmark
