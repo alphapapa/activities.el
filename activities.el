@@ -901,6 +901,11 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 					(format "%15s" (apply #'format "[%d %s]"
 							      (activities--age age)))
 					'face `(:foreground ,age-color
+							    :background ,vc-annotate-background)))
+		       (dirty-char (cond ((and activep dirtyp) "*")
+					 (activep "+") (dirtyp "-") (t " ")))
+		       (dirty-annotation (propertize dirty-char 'face 'bold)))
+	    (concat (propertize " " 'display
 				`(space :align-to (- right ,(+ 1 (length annotation)
 							       (length age-annotation)))))
 		    annotation age-annotation dirty-annotation)))))))
