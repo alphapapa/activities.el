@@ -889,8 +889,10 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 		       (dirtyp (when last-buffers-and-files
 				 (buffers-and-files-differ-p last-buffers-and-files
 							     default-buffers-and-files)))
-		       (activep (activities-activity-active-p activity))
-		       (annotation (format "%s bufs %s files "
+		       (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " "))
+		       (annotation (format "%s%s bufs %s files "
+					   (if (activities-activity-active-p activity)
+					       (propertize "@" 'face 'bold) " ")
 					   (propertize (format "%2d" num-buffers) 'face 'success)
 					   (propertize (format "%2d" num-files) 'face 'warning)))
 		       (age-color (or (cdr (vc-annotate-compcar
@@ -901,10 +903,7 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 					(format "%15s" (apply #'format "[%d %s]"
 							      (activities--age age)))
 					'face `(:foreground ,age-color
-							    :background ,vc-annotate-background)))
-		       (dirty-char (cond ((and activep dirtyp) "*")
-					 (activep "+") (dirtyp "-") (t " ")))
-		       (dirty-annotation (propertize dirty-char 'face 'bold)))
+							    :background ,vc-annotate-background))))
 	    (concat (propertize " " 'display
 				`(space :align-to (- right ,(+ 1 (length annotation)
 							       (length age-annotation)))))
