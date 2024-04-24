@@ -863,42 +863,47 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 	(dolist (type '(last default))
 	  (when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
 	    (let* ((time (map-elt (activities-activity-state-etc state) 'time))
-		   (window-state (activities-activity-state-window-state state))
-		   (buffers (window-state-buffers window-state))
-		   (files (activities--map-window-state-leafs
-			   window-state
-			   (lambda (leaf)
-			     (bookmark-get-filename
-			      (activities-buffer-bookmark
-			       (map-nested-elt (cdr leaf)
-			 		       '(parameters activities-buffer))))))))
+		   (buffers-and-files
+		    (activities--map-window-state-leafs
+		     (activities-activity-state-window-state state)
+		     (lambda (leaf)
+		       (let ((rec (map-nested-elt (cdr leaf) '(parameters activities-buffer))))
+			 (cons (activities-buffer-name rec) (activities-buffer-filename rec)))))))
 	      (setf (alist-get type data)
-		    (list (length (delq nil files))
-			  (and time (float-time (time-since time))) buffers)))))
-	(pcase-let* ((`(,num-last-files ,last-age ,last-buffers) (map-elt data 'last))
-		     (`(,num-default-files ,default-age ,default-buffers) (map-elt data 'default))
-		     (age (if last-age (min last-age default-age) default-age))
-		     (num-buffers (length (or last-buffers default-buffers)))
-		     (num-files (or num-last-files num-default-files))
-		     (dirtyp (when last-buffers
-			       (or (/= (length last-buffers) (length default-buffers))
-				   (not (seq-set-equal-p last-buffers default-buffers)))))
-		     (annotation (format "%s bufs %s files "
-					 (propertize (format "%2d" num-buffers) 'face 'success)
-					 (propertize (format "%2d" num-files) 'face 'warning)))
-		     (age-color (or (cdr (vc-annotate-compcar
-					  (* (/ age max-age) oldest-possible)
-					  vc-annotate-color-map))
-				    vc-annotate-very-old-color))
-		     (age-annotation (propertize
-				      (format "%15s" (apply #'format "[%d %s]" (activities--age age)))
-				      'face `(:foreground ,age-color
-							  :background ,vc-annotate-background)))
-		     (dirty-annotation (propertize (if dirtyp "*" " ") 'face 'bold)))
-	  (concat (propertize " " 'display
-			      `(space :align-to
-				      (- right ,(+ (length annotation) (length age-annotation) 1))))
-		  annotation age-annotation dirty-annotation))))))
+		    (list (and time (float-time (time-since time))) buffers-and-files)))))
+	(cl-labels ((file-or-buffer (cell)
+		      "Given (buffer . file), return the true filename or (if none) buffer."
+		      (if (cdr cell) (file-truename (cdr cell)) (car cell)))
+		    (buffers-and-files-differ-p (bf1 bf2)
+		      "Return t if BF1 and BF2 are not the same set of files or buffers."
+		      (not (seq-set-equal-p (mapcar #'file-or-buffer bf1)
+					    (mapcar #'file-or-buffer bf2)))))
+	  (pcase-let* ((`(,last-age ,last-buffers-and-files) (map-elt data 'last)) ;possibly nil
+		       (`(,default-age ,default-buffers-and-files) (map-elt data 'default))
+		       (age (if last-age (min last-age default-age) default-age))
+		       (buffers-and-files (if last-age
+					      last-buffers-and-files
+					    default-buffers-and-files))
+		       (num-buffers (length buffers-and-files))
+		       (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
+		       (dirtyp (when last-buffers-and-files
+				 (buffers-and-files-differ-p last-buffers-and-files
+							     default-buffers-and-files)))
+		       (activep (activities-activity-active-p activity))
+		       (annotation (format "%s bufs %s files "
+					   (propertize (format "%2d" num-buffers) 'face 'success)
+					   (propertize (format "%2d" num-files) 'face 'warning)))
+		       (age-color (or (cdr (vc-annotate-compcar
+					    (* (/ age max-age) oldest-possible)
+					    vc-annotate-color-map))
+				      vc-annotate-very-old-color))
+		       (age-annotation (propertize
+					(format "%15s" (apply #'format "[%d %s]"
+							      (activities--age age)))
+					'face `(:foreground ,age-color
+				`(space :align-to (- right ,(+ 1 (length annotation)
+							       (length age-annotation)))))
+		    annotation age-annotation dirty-annotation)))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
