@@ -890,11 +890,13 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 				 (buffers-and-files-differ-p last-buffers-and-files
 							     default-buffers-and-files)))
 		       (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " "))
-		       (annotation (format "%s%s bufs %s files "
+		       (annotation (format "%s%s buf%s %s file%s "
 					   (if (activities-activity-active-p activity)
 					       (propertize "@" 'face 'bold) " ")
 					   (propertize (format "%2d" num-buffers) 'face 'success)
-					   (propertize (format "%2d" num-files) 'face 'warning)))
+					   (if (> num-buffers 1) "s" " ")
+					   (propertize (format "%2d" num-files) 'face 'warning)
+					   (if (> num-files 1) "s" " ")))
 		       (age-color (or (cdr (vc-annotate-compcar
 					    (* (/ age max-age) oldest-possible)
 					    vc-annotate-color-map))
