@@ -904,9 +904,9 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 					   (if (activities-activity-active-p activity)
 					       (propertize "@" 'face 'bold) " ")
 					   (propertize (format "%2d" num-buffers) 'face 'success)
-					   (if (> num-buffers 1) "s" " ")
+					   (if (= num-buffers 1) " " "s")
 					   (propertize (format "%2d" num-files) 'face 'warning)
-					   (if (> num-files 1) "s" " ")))
+					   (if (= num-files 1) " " "s")))
 		       (age-color (or (cdr (vc-annotate-compcar
 					    (* (/ age max-age) oldest-possible)
 					    vc-annotate-color-map))
