@@ -332,6 +332,16 @@ Kills buffers that have only been shown in that activity's
 frame/tab."
   :type 'boolean)
 
+(defcustom activities-sort-function #'activities-sort-by-active-age
+  "A function to use to sort by when prompting for activities.
+If nil, no sorting will be applied.  The function should take two
+arguments, both activity names (strings).  It should return
+non-nil if the first activity should sort before the second.  By
+default, a function is used which sorts active activities first,
+and then by age since modification."
+  :type '(choice (const :tag "No sorting" nil)
+		 (function :tag "A specific function")))
+
 ;;;; Commands
 
 ;;;###autoload
@@ -911,6 +921,37 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 							       (length age-annotation)))))
 		    annotation age-annotation dirty-annotation)))))))
 
+(defun activities-sort-by-active-age (names)
+  "Return the list activity NAMES sorted active first, then by age."
+  (sort names
+	(lambda (a b)
+	  (let* ((activity-a (map-elt activities-activities a))
+		 (state-a (or (activities-activity-last activity-a)
+			      (activities-activity-default activity-a)))
+		 (time-a (map-elt (activities-activity-state-etc state-a) 'time))
+		 (activep-a (activities-activity-active-p activity-a))
+		 (activity-b (map-elt activities-activities b))
+		 (state-b (or (activities-activity-last activity-b)
+			      (activities-activity-default activity-b)))
+		 (time-b (map-elt (activities-activity-state-etc state-b) 'time))
+		 (activep-b (activities-activity-active-p activity-b)))
+	    (message "Comparing %s %s timeA: %S timeB: %S activeA: %S activeB: %S" a b
+		     (format-time-string "%F %r" time-a) (format-time-string "%F %r" time-b) activep-a activep-b)
+	    (or (and activep-a (not activep-b)) (time-less-p time-b time-a))))))
+
+(defun activities--completion-table (activities)
+  "Return a completion table function to complete ACTIVITIES."
+  (let ((names (activities-names activities)))
+    (lambda (str pred action)
+      (if (eq action 'metadata)
+	  `(metadata
+	    (annotation-function . ,(activities-annotate (activities--oldest-age activities)
+							 (vc-annotate-oldest-in-map
+							  vc-annotate-color-map)))
+	    ,@(when activities-sort-function
+		`(,(cons 'display-sort-function activities-sort-function))))
+	(complete-with-action action names str pred)))))
+
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
           (default (when (activities-current)
@@ -920,13 +961,8 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 PROMPT is passed to `completing-read' by way of `format-prompt',
 which see, with DEFAULT."
   (let* ((prompt (format-prompt prompt default))
-         (names (activities-names activities))
-	 (completion-extra-properties `(:annotation-function
-					,(activities-annotate
-					  (activities--oldest-age activities)
-					  (vc-annotate-oldest-in-map
-					   vc-annotate-color-map))))
-         (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
+         (name (completing-read prompt (activities--completion-table activities) nil t nil
+				'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
