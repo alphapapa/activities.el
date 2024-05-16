@@ -436,12 +436,17 @@ With PERSISTP, persist to disk (otherwise see
 this demotes errors."
   (interactive)
   (with-demoted-errors "activities-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (let ((activities-saving-p t)
-            ;; Don't write to disk for each activity.
-            (activities-always-persist nil))
-        (activities-save activity :lastp t)))
-    (activities--persist persistp)))
+    (let ((wconfig (when (active-minibuffer-window)
+                     (current-window-configuration))))
+      (unwind-protect
+          (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
+            (let ((activities-saving-p t)
+                  ;; Don't write to disk for each activity.
+                  (activities-always-persist nil))
+              (activities-save activity :lastp t)))
+        (activities--persist persistp)
+        (when wconfig
+          (set-window-configuration wconfig))))))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
