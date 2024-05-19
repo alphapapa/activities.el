@@ -935,8 +935,6 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 			      (activities-activity-default activity-b)))
 		 (time-b (map-elt (activities-activity-state-etc state-b) 'time))
 		 (activep-b (activities-activity-active-p activity-b)))
-	    (message "Comparing %s %s timeA: %S timeB: %S activeA: %S activeB: %S" a b
-		     (format-time-string "%F %r" time-a) (format-time-string "%F %r" time-b) activep-a activep-b)
 	    (or (and activep-a (not activep-b)) (time-less-p time-b time-a))))))
 
 (defun activities--completion-table (activities)
