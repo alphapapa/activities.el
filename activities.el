@@ -513,6 +513,39 @@ To be called from `kill-emacs-hook'."
 
 ;;;; Functions
 
+(defun activities--map-window-state-leafs (state func)
+  "Call FUNC on all the leaf nodes in window-state STATE.
+The resulting values are returned as a list."
+  (let (ret)
+    (cl-labels ((map-leafs (state func)
+		  (pcase state
+		    (`(leaf . ,_attrs)
+		     (push (funcall func state) ret))
+		    ((pred proper-list-p)
+		     (if-let ((leaf-pos (cl-position 'leaf state)))
+			 (push (funcall func (cl-subseq state leaf-pos)) ret)
+		       (dolist (s state) (map-leafs s func)))))))
+      (map-leafs state func))
+    (nreverse ret)))
+
+(defun activities--buffers-and-files (state)
+  "Return a list of buffers and files from STATE.
+STATE is a window-state.  The returned list contains elements of
+form (BUFFER . FILE) assocaited with the activity."
+  (activities--map-window-state-leafs
+   (activities-activity-state-window-state state)
+   (lambda (leaf)
+     (let ((rec (map-nested-elt (cdr leaf) '(parameters activities-buffer))))
+       (cons (activities-buffer-name rec) (activities-buffer-filename rec))))))
+
+(defun activities--buffers-and-files-differ-p (bf1 bf2)
+  "Return t if BF1 and BF2 are not the same set of files or buffers."
+  (cl-labels ((file-or-buffer (cell)
+		"Given (buffer . file), return the true filename or (if none) buffer."
+		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
+    (not (seq-set-equal-p (mapcar #'file-or-buffer bf1)
+			  (mapcar #'file-or-buffer bf2)))))
+
 (cl-defun activities-save (activity &key defaultp lastp persistp)
   "Save states of ACTIVITY.
 If DEFAULTP, save its default state; if LASTP, its last.  If
@@ -661,21 +694,6 @@ activity's name is NAME."
 	       (selected-frame)
 	       ;; NOTE: We copy the state so as not to mutate the one in storage.
 	       (activities--bufferize-window-state (copy-tree state))))
-
-(defun activities--map-window-state-leafs (state func)
-  "Call FUNC on all the leaf nodes in window-state STATE.
-The resulting values are returned as a list."
-  (let (ret)
-    (cl-labels ((map-leafs (state func)
-		  (pcase state
-		    (`(leaf . ,_attrs)
-		     (push (funcall func state) ret))
-		    ((pred proper-list-p)
-		     (if-let ((leaf-pos (cl-position 'leaf state)))
-			 (push (funcall func (cl-subseq state leaf-pos)) ret)
-		       (dolist (s state) (map-leafs s func)))))))
-      (map-leafs state func))
-    (nreverse ret)))
 
 (defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
@@ -873,53 +891,42 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 	(dolist (type '(last default))
 	  (when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
 	    (let* ((time (map-elt (activities-activity-state-etc state) 'time))
-		   (buffers-and-files
-		    (activities--map-window-state-leafs
-		     (activities-activity-state-window-state state)
-		     (lambda (leaf)
-		       (let ((rec (map-nested-elt (cdr leaf) '(parameters activities-buffer))))
-			 (cons (activities-buffer-name rec) (activities-buffer-filename rec)))))))
+		   (buffers-and-files (activities--buffers-and-files state)))
 	      (setf (alist-get type data)
 		    (list (and time (float-time (time-since time))) buffers-and-files)))))
-	(cl-labels ((file-or-buffer (cell)
-		      "Given (buffer . file), return the true filename or (if none) buffer."
-		      (if (cdr cell) (file-truename (cdr cell)) (car cell)))
-		    (buffers-and-files-differ-p (bf1 bf2)
-		      "Return t if BF1 and BF2 are not the same set of files or buffers."
-		      (not (seq-set-equal-p (mapcar #'file-or-buffer bf1)
-					    (mapcar #'file-or-buffer bf2)))))
-	  (pcase-let* ((`(,last-age ,last-buffers-and-files) (map-elt data 'last)) ;possibly nil
-		       (`(,default-age ,default-buffers-and-files) (map-elt data 'default))
-		       (age (if last-age (min last-age default-age) default-age))
-		       (buffers-and-files (if last-age
-					      last-buffers-and-files
-					    default-buffers-and-files))
-		       (num-buffers (length buffers-and-files))
-		       (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
-		       (dirtyp (when last-buffers-and-files
-				 (buffers-and-files-differ-p last-buffers-and-files
-							     default-buffers-and-files)))
-		       (annotation (format "%s%s buf%s %s file%s "
-					   (if (activities-activity-active-p activity)
-					       (propertize "@" 'face 'bold) " ")
-					   (propertize (format "%2d" num-buffers) 'face 'success)
-					   (if (= num-buffers 1) " " "s")
-					   (propertize (format "%2d" num-files) 'face 'warning)
-					   (if (= num-files 1) " " "s")))
-		       (age-color (or (cdr (vc-annotate-compcar
-					    (* (/ age max-age) oldest-possible)
-					    vc-annotate-color-map))
-				      vc-annotate-very-old-color))
-		       (age-annotation (propertize
-					(format "%15s" (apply #'format "[%d %s]"
-							      (activities--age age)))
-					'face `(:foreground ,age-color
-							    :background ,vc-annotate-background)))
-		       (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
-	    (concat (propertize " " 'display
-				`(space :align-to (- right ,(+ 1 (length annotation)
-							       (length age-annotation)))))
-		    annotation age-annotation dirty-annotation)))))))
+	(pcase-let* ((`(,default-age ,default-buffers-and-files) (map-elt data 'default))
+		     (`(,last-age ,last-buffers-and-files) (map-elt data 'last)) ;possibly nil
+		     (age (if last-age (min last-age default-age) default-age))
+		     (buffers-and-files (if last-age
+					    last-buffers-and-files
+					  default-buffers-and-files))
+		     (num-buffers (length buffers-and-files))
+		     (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
+		     (dirtyp (when last-buffers-and-files
+			       (activities--buffers-and-files-differ-p
+				last-buffers-and-files
+				default-buffers-and-files)))
+		     (annotation (format "%s%s buf%s %s file%s "
+					 (if (activities-activity-active-p activity)
+					     (propertize "@" 'face 'bold) " ")
+					 (propertize (format "%2d" num-buffers) 'face 'success)
+					 (if (= num-buffers 1) " " "s")
+					 (propertize (format "%2d" num-files) 'face 'warning)
+					 (if (= num-files 1) " " "s")))
+		     (age-color (or (cdr (vc-annotate-compcar
+					  (* (/ age max-age) oldest-possible)
+					  vc-annotate-color-map))
+				    vc-annotate-very-old-color))
+		     (age-annotation (propertize
+				      (format "%15s" (apply #'format "[%d %s]"
+							    (activities--age age)))
+				      'face `(:foreground ,age-color
+							  :background ,vc-annotate-background)))
+		     (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
+	  (concat (propertize " " 'display
+			      `(space :align-to (- right ,(+ 1 (length annotation)
+							     (length age-annotation)))))
+		  annotation age-annotation dirty-annotation))))))
 
 (defun activities-sort-by-active-age (names)
   "Return the list activity NAMES sorted active first, then by age."
