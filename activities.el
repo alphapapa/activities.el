@@ -863,7 +863,7 @@ Adapted from `magit--age'."
 	    for etc = (activities-activity-state-etc state)
 	    maximize (float-time (time-since (map-elt etc 'time))))))
 
-(defun activities-annotate (max-age oldest-possible)
+(defun activities--annotate (max-age oldest-possible)
   "Return an activity annotation function.
 MAX-AGE is the maximum age of any activity in seconds.
 OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
@@ -899,7 +899,6 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 		       (dirtyp (when last-buffers-and-files
 				 (buffers-and-files-differ-p last-buffers-and-files
 							     default-buffers-and-files)))
-		       (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " "))
 		       (annotation (format "%s%s buf%s %s file%s "
 					   (if (activities-activity-active-p activity)
 					       (propertize "@" 'face 'bold) " ")
@@ -915,7 +914,8 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 					(format "%15s" (apply #'format "[%d %s]"
 							      (activities--age age)))
 					'face `(:foreground ,age-color
-							    :background ,vc-annotate-background))))
+							    :background ,vc-annotate-background)))
+		       (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
 	    (concat (propertize " " 'display
 				`(space :align-to (- right ,(+ 1 (length annotation)
 							       (length age-annotation)))))
@@ -945,7 +945,7 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
     (lambda (str pred action)
       (if (eq action 'metadata)
 	  `(metadata
-	    (annotation-function . ,(activities-annotate (activities--oldest-age activities)
+	    (annotation-function . ,(activities--annotate (activities--oldest-age activities)
 							 (vc-annotate-oldest-in-map
 							  vc-annotate-color-map)))
 	    ,@(when activities-sort-function
