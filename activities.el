@@ -556,6 +556,12 @@ according to option `activities-always-persist', which see)."
       (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
         (pcase-let* (((cl-struct activities-activity default last) activity)
                      (new-state (activities-state)))
+	  (when (and lastp last
+		     (not (activities--buffers-and-files-differ-p
+			   (activities--buffers-and-files last)
+			   (activities--buffers-and-files new-state))))
+	    (setf (map-elt (activities-activity-state-etc new-state) 'time)
+		  (map-elt (activities-activity-state-etc last) 'time)))
           (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
                 (activities-activity-last activity) (if (or lastp (not last)) new-state last)))))
     ;; Always set the value so, e.g. the activity can be modified
