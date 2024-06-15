@@ -513,9 +513,10 @@ To be called from `kill-emacs-hook'."
 
 ;;;; Functions
 
-(defun activities--map-window-state-leafs (state func)
-  "Call FUNC on all the leaf nodes in window-state STATE.
-The resulting values are returned as a list."
+(defun activities--mapcar-window-state-leafs (state func)
+  "Return a list of leaf nodes value from window-state STATE.
+The returned list contains the values obtained by calling FUNC on
+each of the leaf nodes in STATE."
   (let (ret)
     (cl-labels ((map-leafs (state func)
 		  (pcase state
@@ -532,7 +533,7 @@ The resulting values are returned as a list."
   "Return a list of buffers and files from STATE.
 STATE is a window-state.  The returned list contains elements of
 form (BUFFER . FILE) assocaited with the activity."
-  (activities--map-window-state-leafs
+  (activities--mapcar-window-state-leafs
    (activities-activity-state-window-state state)
    (lambda (leaf)
      (let ((buffer-rec (map-nested-elt (cdr leaf)
