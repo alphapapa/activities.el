@@ -66,7 +66,7 @@
 (require 'map)
 (require 'persist)
 (require 'subr-x)
-(require 'vc-annotate)
+(require 'color)
 
 ;;;; Types
 
@@ -341,6 +341,16 @@ default, a function is used which sorts active activities first,
 and then by age since modification."
   :type '(choice (const :tag "No sorting" nil)
 		 (function :tag "A specific function")))
+
+(defcustom activities-annotation-colors '("blue" "red" 0.65)
+  "Colors to use for annotating activity age.
+A list (OLD-COLOR NEW-COLOR BLEND-FRAC).  These are used during
+activity selection, with the activity color chosen between
+OLD-COLOR and NEW-COLOR, based on the activity's age.  This color
+is blended into the default foreground with a fraction
+BLEND-FRAC, and used to display the activity age."
+  :type '(list (color :tag "Old Color") (color :tag "New Color")
+	       (float :tag "Blend Fraction")))
 
 ;;;; Commands
 
@@ -893,53 +903,6 @@ Adapted from `magit--age'."
 	    for etc = (activities-activity-state-etc state)
 	    maximize (float-time (time-since (map-elt etc 'time))))))
 
-(defun activities--annotate (max-age oldest-possible)
-  "Return an activity annotation function.
-MAX-AGE is the maximum age of any activity in seconds.
-OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
-  (lambda (name)
-    (when-let ((activity (map-elt activities-activities name)))
-      (let (data)
-	(dolist (type '(last default))
-	  (when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
-	    (let* ((time (map-elt (activities-activity-state-etc state) 'time))
-		   (buffers-and-files (activities--buffers-and-files state)))
-	      (setf (alist-get type data)
-		    (list (and time (float-time (time-since time))) buffers-and-files)))))
-	(pcase-let* ((`(,default-age ,default-buffers-and-files) (map-elt data 'default))
-		     (`(,last-age ,last-buffers-and-files) (map-elt data 'last)) ;possibly nil
-		     (age (if last-age (min last-age default-age) default-age))
-		     (buffers-and-files (if last-age
-					    last-buffers-and-files
-					  default-buffers-and-files))
-		     (num-buffers (length buffers-and-files))
-		     (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
-		     (dirtyp (when last-buffers-and-files
-			       (activities--buffers-and-files-differ-p
-				last-buffers-and-files
-				default-buffers-and-files)))
-		     (annotation (format "%s%s buf%s %s file%s "
-					 (if (activities-activity-active-p activity)
-					     (propertize "@" 'face 'bold) " ")
-					 (propertize (format "%2d" num-buffers) 'face 'success)
-					 (if (= num-buffers 1) " " "s")
-					 (propertize (format "%2d" num-files) 'face 'warning)
-					 (if (= num-files 1) " " "s")))
-		     (age-color (or (cdr (vc-annotate-compcar
-					  (* (/ age max-age) oldest-possible)
-					  vc-annotate-color-map))
-				    vc-annotate-very-old-color))
-		     (age-annotation (propertize
-				      (format "%15s" (apply #'format "[%d %s]"
-							    (activities--age age)))
-				      'face `(:foreground ,age-color
-							  :background ,vc-annotate-background)))
-		     (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
-	  (concat (propertize " " 'display
-			      `(space :align-to (- right ,(+ 1 (length annotation)
-							     (length age-annotation)))))
-		  annotation age-annotation dirty-annotation))))))
-
 (defun activities-sort-by-active-age (names)
   "Return the list activity NAMES sorted active first, then by age."
   (sort names
@@ -964,19 +927,61 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read' by way of `format-prompt',
 which see, with DEFAULT."
-  (let* ((names (activities-names activities))
-	 (table (lambda (str pred action)
-		  (if (eq action 'metadata)
-		      `(metadata
-			( annotation-function .
-			  ,(activities--annotate (activities--oldest-age activities)
-						 (vc-annotate-oldest-in-map
-						  vc-annotate-color-map)))
-			,@(when activities-sort-function
-			    `(,(cons 'display-sort-function activities-sort-function))))
-		    (complete-with-action action names str pred))))
-	 (prompt (format-prompt prompt default))
-         (name (completing-read prompt table nil t nil 'activities-completing-read-history default)))
+  (pcase-let*
+      ((names (activities-names activities))
+       (max-age (activities--oldest-age activities))
+       (`(,old-col ,new-col ,blend-frac) activities-annotation-colors)
+       (annotation-function
+	(lambda (name)
+	  (when-let ((activity (map-elt activities-activities name)))
+	    (let (activity-data)
+	      (dolist (type '(last default))
+		(when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
+		  (let* ((time (map-elt (activities-activity-state-etc state) 'time))
+			 (buffers-and-files (activities--buffers-and-files state)))
+		    (setf (alist-get type activity-data)
+			  (list (and time (float-time (time-since time))) buffers-and-files)))))
+	      (pcase-let*
+		  ((`(,default-age ,default-buffers-and-files) (map-elt activity-data 'default))
+		   (`(,last-age ,last-buffers-and-files) (map-elt activity-data 'last)) ;possibly nil
+		   (age (if last-age (min last-age default-age) default-age))
+		   (buffers-and-files (if last-age last-buffers-and-files default-buffers-and-files))
+		   (num-buffers (length buffers-and-files))
+		   (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
+		   (dirtyp (when last-buffers-and-files
+			     (activities--buffers-and-files-differ-p
+			      last-buffers-and-files
+			      default-buffers-and-files)))
+		   (annotation (format "%s%s buf%s %s file%s "
+				       (if (activities-activity-active-p activity)
+					   (propertize "@" 'face 'bold) " ")
+				       (propertize (format "%2d" num-buffers) 'face 'success)
+				       (if (= num-buffers 1) " " "s")
+				       (propertize (format "%2d" num-files) 'face 'warning)
+				       (if (= num-files 1) " " "s")))
+		   (age-color  (apply #'color-rgb-to-hex
+				      (cl-loop for co in (color-name-to-rgb old-col)
+					       for cn in (color-name-to-rgb new-col)
+					       for cd in (color-name-to-rgb (face-foreground 'default))
+					       collect (+ (* blend-frac (+ cn (* (- co cn) (/ age max-age))))
+							  (* (- 1. blend-frac) cd)))))
+		   (age-annotation (propertize
+				    (format "%15s" (apply #'format "[%d %s]"
+							  (activities--age age)))
+				    'face `(:foreground ,age-color :weight bold)))
+		   (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
+		(concat (propertize " " 'display
+				    `(space :align-to (- right ,(+ 1 (length annotation)
+								   (length age-annotation)))))
+			annotation age-annotation dirty-annotation))))))
+       (table (lambda (str pred action)
+		(if (eq action 'metadata)
+		    `(metadata (annotation-function . ,annotation-function)
+			       ,@(when activities-sort-function
+				   `(,(cons 'display-sort-function activities-sort-function))))
+		  (complete-with-action action names str pred))))
+       (prompt (format-prompt prompt default))
+       (name (completing-read prompt table nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
