@@ -950,19 +950,6 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
 		 (activep-b (activities-activity-active-p activity-b)))
 	    (or (and activep-a (not activep-b)) (time-less-p time-b time-a))))))
 
-(defun activities--completion-table (activities)
-  "Return a completion table function to complete ACTIVITIES."
-  (let ((names (activities-names activities)))
-    (lambda (str pred action)
-      (if (eq action 'metadata)
-	  `(metadata
-	    (annotation-function . ,(activities--annotate (activities--oldest-age activities)
-							 (vc-annotate-oldest-in-map
-							  vc-annotate-color-map)))
-	    ,@(when activities-sort-function
-		`(,(cons 'display-sort-function activities-sort-function))))
-	(complete-with-action action names str pred)))))
-
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
           (default (when (activities-current)
@@ -971,9 +958,19 @@ OLDEST-POSSIBLE is the oldest age in the `vc-annotate-color-map'."
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read' by way of `format-prompt',
 which see, with DEFAULT."
-  (let* ((prompt (format-prompt prompt default))
-         (name (completing-read prompt (activities--completion-table activities) nil t nil
-				'activities-completing-read-history default)))
+  (let* ((names (activities-names activities))
+	 (table (lambda (str pred action)
+		  (if (eq action 'metadata)
+		      `(metadata
+			( annotation-function .
+			  ,(activities--annotate (activities--oldest-age activities)
+						 (vc-annotate-oldest-in-map
+						  vc-annotate-color-map)))
+			,@(when activities-sort-function
+			    `(,(cons 'display-sort-function activities-sort-function))))
+		    (complete-with-action action names str pred))))
+	 (prompt (format-prompt prompt default))
+         (name (completing-read prompt table nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
