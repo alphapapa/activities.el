@@ -524,20 +524,20 @@ To be called from `kill-emacs-hook'."
 ;;;; Functions
 
 (defun activities--mapcar-window-state-leafs (state func)
-  "Return a list of leaf nodes value from window-state STATE.
+  "Return a list of leaf node values from window-state STATE.
 The returned list contains the values obtained by calling FUNC on
 each of the leaf nodes in STATE."
-  (let (ret)
+  (let (values)
     (cl-labels ((map-leafs (state func)
 		  (pcase state
 		    (`(leaf . ,_attrs)
-		     (push (funcall func state) ret))
+		     (push (funcall func state) values))
 		    ((pred proper-list-p)
 		     (if-let ((leaf-pos (cl-position 'leaf state)))
-			 (push (funcall func (cl-subseq state leaf-pos)) ret)
+			 (push (funcall func (cl-subseq state leaf-pos)) values)
 		       (dolist (s state) (map-leafs s func)))))))
       (map-leafs state func))
-    (nreverse ret)))
+    (nreverse values)))
 
 (defun activities--buffers-and-files (state)
   "Return a list of buffers and files from STATE.
