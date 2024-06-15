@@ -539,7 +539,9 @@ form (BUFFER . FILE) assocaited with the activity."
        (cons (activities-buffer-name rec) (activities-buffer-filename rec))))))
 
 (defun activities--buffers-and-files-differ-p (bf1 bf2)
-  "Return t if BF1 and BF2 are not the same set of files or buffers."
+  "Return non-nil if BF1 and BF2 are not the same set of files or buffers.
+Each of BF1 and BF2 is a list of buffer and files, as returned
+from `activities--buffers-and-files'."
   (cl-labels ((file-or-buffer (cell)
 		"Given (buffer . file), return the true filename or (if none) buffer."
 		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
