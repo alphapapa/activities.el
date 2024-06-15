@@ -542,7 +542,7 @@ each of the leaf nodes in STATE."
 (defun activities--buffers-and-files (state)
   "Return a list of buffers and files from STATE.
 STATE is a window-state.  The returned list contains elements of
-form (BUFFER . FILE) assocaited with the activity."
+form (BUFFER . FILE) associated with the activity."
   (activities--mapcar-window-state-leafs
    (activities-activity-state-window-state state)
    (lambda (leaf)
