@@ -535,8 +535,10 @@ form (BUFFER . FILE) assocaited with the activity."
   (activities--map-window-state-leafs
    (activities-activity-state-window-state state)
    (lambda (leaf)
-     (let ((rec (map-nested-elt (cdr leaf) '(parameters activities-buffer))))
-       (cons (activities-buffer-name rec) (activities-buffer-filename rec))))))
+     (let ((buffer-rec (map-nested-elt (cdr leaf)
+				       '(parameters activities-buffer))))
+       (cons (activities-buffer-name buffer-rec)
+	     (activities-buffer-filename buffer-rec))))))
 
 (defun activities--buffers-and-files-differ-p (bf1 bf2)
   "Return non-nil if BF1 and BF2 are not the same set of files or buffers.
