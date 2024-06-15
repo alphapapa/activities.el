@@ -546,7 +546,8 @@ form (BUFFER . FILE) assocaited with the activity."
 Each of BF1 and BF2 is a list of buffer and files, as returned
 from `activities--buffers-and-files'."
   (cl-labels ((file-or-buffer (cell)
-		"Given (buffer . file), return the true filename or (if none) buffer."
+		"Given a CELL, return the true filename or buffer.
+The CELL is a (BUFFER . FILE) cons.  If the file is nil, BUFFER is returned."
 		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
     (not (seq-set-equal-p (mapcar #'file-or-buffer bf1)
 			  (mapcar #'file-or-buffer bf2)))))
