@@ -648,8 +648,9 @@ activity's name is NAME."
     ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
     ;; function after handling the bookmark, we use an immediate timer to
     ;; set the window configuration.
-    (run-at-time nil nil (lambda ()
-                           (window-state-put state (frame-root-window) 'safe)))))
+    (let ((frame (selected-frame)))
+      (run-at-time nil nil
+		   (lambda () (window-state-put state (frame-root-window frame) 'safe))))))
 
 (defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
