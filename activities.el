@@ -640,17 +640,17 @@ activity's name is NAME."
 (defun activities--windows-set (state)
   "Set window configuration according to STATE."
   (setf window-persistent-parameters (copy-sequence activities-window-persistent-parameters))
-  (pcase-let* ((window-persistent-parameters (append activities-window-persistent-parameters
-                                                     window-persistent-parameters))
-               (state
-                ;; NOTE: We copy the state so as not to mutate the one in storage.
-                (activities--bufferize-window-state (copy-tree state))))
+  (let ((window-persistent-parameters (append activities-window-persistent-parameters
+                                              window-persistent-parameters))
+        (state
+         ;; NOTE: We copy the state so as not to mutate the one in storage.
+         (activities--bufferize-window-state (copy-tree state)))
+	(frame (selected-frame)))
     ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
     ;; function after handling the bookmark, we use an immediate timer to
     ;; set the window configuration.
-    (let ((frame (selected-frame)))
-      (run-at-time nil nil
-		   (lambda () (window-state-put state (frame-root-window frame) 'safe))))))
+    (run-at-time nil nil
+		 (lambda () (window-state-put state (frame-root-window frame) 'safe)))))
 
 (defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
