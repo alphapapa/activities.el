@@ -366,7 +366,9 @@ activity."
   (let ((activity (make-activities-activity :name name)))
     (activities-switch activity)
     (activities-set activity :state nil)
-    (activities-save activity :defaultp t)))
+    (activities-save activity :defaultp t)
+    (when activities-bookmark-store
+      (activities-bookmark-store activity))))
 
 (defun activities-rename (activity name)
   "Rename ACTIVITY to NAME."
@@ -375,10 +377,14 @@ activity."
           (name (read-string (format "Rename activity %S to: "
                                      (activities-activity-name activity)))))
      (list activity name)))
+  (when activities-bookmark-store
+    (activities-bookmark-delete activity))
   (setf activities-activities (map-delete activities-activities
                                           (activities-activity-name activity))
         (activities-activity-name activity) name
         (map-elt activities-activities name) activity)
+  (when activities-bookmark-store
+    (activities-bookmark-store activity))
   (activities--persist))
 
 ;;;###autoload
@@ -454,7 +460,6 @@ this demotes errors."
 (defun activities-discard (activity)
   "Discard ACTIVITY and its state.
 It will not be recoverable."
-  ;; TODO: Discard relevant bookmarks when `activities-bookmark-store' is enabled.
   (interactive
    (list (activities-completing-read :prompt "Discard activity")))
   (when (yes-or-no-p (format "Discard activity %S permanently?" (activities-activity-name activity)))
@@ -462,7 +467,10 @@ It will not be recoverable."
       ;; FIXME: After fixing all the bugs, remove ignore-errors.
       (when (activities-activity-active-p activity)
         (activities-close activity)))
-    (setf activities-activities (map-delete activities-activities (activities-activity-name activity)))))
+    (setf activities-activities (map-delete activities-activities (activities-activity-name activity)))
+    (when activities-bookmark-store
+      (activities-bookmark-delete activity)))
+  )
 
 ;;;; Activity mode
 
@@ -881,12 +889,17 @@ with prefix argument, choose another activity."
 
 (defun activities-bookmark-store (activity)
   "Store a `bookmark' record for ACTIVITY."
-  (bookmark-maybe-load-default-file)
   (let* ((activities-name (activities-activity-name activity))
          (bookmark-name (concat activities-bookmark-name-prefix activities-name))
          (props `((activities-name . ,activities-name)
                   (handler . activities-bookmark-handler))))
     (bookmark-store bookmark-name props nil)))
+
+(defun activities-bookmark-delete (activity)
+  "Delete the `bookmark' record for ACTIVITY."
+  (let* ((activities-name (activities-activity-name activity))
+         (bookmark-name (concat activities-bookmark-name-prefix activities-name)))
+    (bookmark-delete bookmark-name)))
 
 (defun activities-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
