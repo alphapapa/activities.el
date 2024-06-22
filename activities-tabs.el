@@ -35,6 +35,10 @@
   "Records the original value of `tab-bar-tab-face-function'.
 When `activities-tabs-mode' is enabled.")
 
+(defvar activities-tabs-tab-bar-tab-group-face-function-original nil
+  "Records the original value of `tab-bar-tab-group-face-function'.
+When `activities-tabs-mode' is enabled.")
+
 (defvar activities-kill-buffers)
 
 ;;;; Customization
@@ -86,14 +90,20 @@ accordingly."
           ;; reevaluated when they are already active.
           (unless activities-tabs-tab-bar-tab-face-function-original
             (setf activities-tabs-tab-bar-tab-face-function-original tab-bar-tab-face-function
-                  tab-bar-tab-face-function #'activities-tabs--tab-bar-tab-face-function)))
+                  tab-bar-tab-face-function #'activities-tabs--tab-bar-tab-face-function))
+          (unless activities-tabs-tab-bar-tab-group-face-function-original
+            (setf activities-tabs-tab-bar-tab-group-face-function-original tab-bar-tab-group-face-function
+                  tab-bar-tab-group-face-function #'activities-tabs--tab-bar-tab-group-face-function)))
       (remove-hook 'window-configuration-change-hook #'activities-tabs--window-configuration-change)
       (advice-remove #'activities-resume #'activities-tabs-before-resume)
       (pcase-dolist (`(,symbol . ,function) override-map)
         (advice-remove symbol function))
       (when activities-tabs-tab-bar-tab-face-function-original
         (setf tab-bar-tab-face-function activities-tabs-tab-bar-tab-face-function-original
-              activities-tabs-tab-bar-tab-face-function-original nil)))))
+              activities-tabs-tab-bar-tab-face-function-original nil))
+      (when activities-tabs-tab-bar-tab-group-face-function-original
+        (setf tab-bar-tab-group-face-function activities-tabs-tab-bar-tab-group-face-function-original
+              activities-tabs-tab-bar-tab-group-face-function-original nil)))))
 
 ;;;; Commands
 
@@ -207,6 +217,15 @@ inherited."
         `(:inherit (activities-tabs ,face))
       face)))
 
+(defun activities-tabs--tab-bar-tab-group-face-function (tab)
+  "Return a face for TAB when group formatting is set in the tab-bar.
+If grouped TAB represents an activity, face `activities-tabs' is added as
+inherited."
+  (let ((face (funcall activities-tabs-tab-bar-tab-group-face-function-original tab)))
+    (if (activities-tabs--tab-parameter 'activity tab)
+        `(:inherit (activities-tabs ,face))
+      face)))
+
 (defun activities-tabs-activity--set (activity)
   "Set the current activity.
 Sets the current tab's `activity' parameter to ACTIVITY."
@@ -229,7 +248,7 @@ activity's name is NAME."
 ;;                (tab (cl-find-if (lambda (tab)
 ;;                                   (when-let ((tab-activity (alist-get 'activity tab)))
 ;;                                     (equal name (activity-name tab-activity))))
-;;                                 (funcall tab-bar-tabs-function))) 
+;;                                 (funcall tab-bar-tabs-function)))
 ;;                (tab-name (if tab
 ;;                              (alist-get 'name tab)
 ;;                            (concat activity-tabs-prefix
