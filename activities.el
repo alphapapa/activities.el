@@ -875,23 +875,30 @@ activity's name is NAME."
     (?w "week"   "weeks"   ,(* 60 60 24 7))
     (?d "day"    "days"    ,(* 60 60 24))
     (?h "hour"   "hours"   ,(* 60 60))
-    (?m "minute" "minutes" 60)
-    (?s "second" "seconds" 1))
+    (?m "min"    "mins"    60)
+    (?s "sec"    "secs"    1))
   "Age specification.  See `magit--age-spec', which this duplicates.")
 
-(defun activities--age (age &optional abbreviate)
-  "Summarize AGE and possibly ABBREVIATE.
-Adapted from `magit--age'."
-  (cl-labels ((fn (age spec)
-                (pcase-let ((`(,char ,unit ,units ,weight) (car spec)))
-                  (let ((cnt (round (/ age weight 1.0))))
-                    (if (or (not (cdr spec))
-                            (>= (/ age weight) 1))
-                        (list cnt (cond (abbreviate char)
-                                        ((= cnt 1) unit)
-                                        (t units)))
-                      (fn age (cdr spec)))))))
-    (fn age activities--age-spec)))
+(defun activities--age (age &optional abbrev)
+  "Summarize AGE.
+Abbreviate the units if ABBREV is non-nil.  Based on
+`magit--age'."
+  ;; TODO: replace this if seconds-to-string adds READABLE support
+  (let ((half t)
+	(age-spec activities--age-spec)
+	age-unit cnt)
+    (if (= (round age (if half 0.5 1.)) 0)
+	(format "0%s" (if abbrev "s" " seconds"))
+      (while (and (setq age-unit (pop age-spec)) age-spec
+                  (< (/ age (nth 3 age-unit)) 1)))
+      (setq cnt (round (/ (float age) (nth 3 age-unit)) (if half 0.5 1.)))
+      (concat (let ((c (if half (/ cnt 2) cnt)))
+		(and (> c 0) (number-to-string c)))
+	      (and half (= (mod cnt 2) 1) "½")
+	      (or abbrev " ")
+	      (cond (abbrev (car age-unit))
+		    ((<= cnt (if half 2 1)) (nth 1 age-unit))
+		    (t (nth 2 age-unit)))))))
 
 (defun activities--oldest-age (activities)
   "Return the age in seconds of the oldest activity in ACTIVITIES."
@@ -966,8 +973,7 @@ which see, with DEFAULT."
 					       collect (+ (* blend-frac (+ cn (* (- co cn) (/ age max-age))))
 							  (* (- 1. blend-frac) cd)))))
 		   (age-annotation (propertize
-				    (format "%15s" (apply #'format "[%d %s]"
-							  (activities--age age)))
+				    (format "%10s" (activities--age age))
 				    'face `(:foreground ,age-color :weight bold)))
 		   (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
 		(concat (propertize " " 'display
