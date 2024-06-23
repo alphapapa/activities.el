@@ -66,6 +66,7 @@
 (require 'map)
 (require 'persist)
 (require 'subr-x)
+(require 'color)
 
 ;;;; Types
 
@@ -332,6 +333,26 @@ Kills buffers that have only been shown in that activity's
 frame/tab."
   :type 'boolean)
 
+(defcustom activities-sort-function #'activities-sort-by-active-age
+  "A function to use to sort by when prompting for activities.
+If nil, no sorting will be applied.  The function should take two
+arguments, both activity names (strings).  It should return
+non-nil if the first activity should sort before the second.  By
+default, a function is used which sorts active activities first,
+and then by age since modification."
+  :type '(choice (const :tag "No sorting" nil)
+		 (function :tag "A specific function")))
+
+(defcustom activities-annotation-colors '("blue" "red" 0.65)
+  "Colors to use for annotating activity age.
+A list (OLD-COLOR NEW-COLOR BLEND-FRAC).  These are used during
+activity selection, with the activity color chosen between
+OLD-COLOR and NEW-COLOR, based on the activity's age.  This color
+is blended into the default foreground with a fraction
+BLEND-FRAC, and used to display the activity age."
+  :type '(list (color :tag "Old Color") (color :tag "New Color")
+	       (float :tag "Blend Fraction")))
+
 ;;;; Commands
 
 ;;;###autoload
@@ -503,6 +524,45 @@ To be called from `kill-emacs-hook'."
 
 ;;;; Functions
 
+(defun activities--mapcar-window-state-leafs (state func)
+  "Return a list of leaf node values from window-state STATE.
+The returned list contains the values obtained by calling FUNC on
+each of the leaf nodes in STATE."
+  (let (values)
+    (cl-labels ((map-leafs (state func)
+		  (pcase state
+		    (`(leaf . ,_attrs)
+		     (push (funcall func state) values))
+		    ((pred proper-list-p)
+		     (if-let ((leaf-pos (cl-position 'leaf state)))
+			 (push (funcall func (cl-subseq state leaf-pos)) values)
+		       (dolist (s state) (map-leafs s func)))))))
+      (map-leafs state func))
+    (nreverse values)))
+
+(defun activities--buffers-and-files (state)
+  "Return a list of buffers and files from STATE.
+STATE is a window-state.  The returned list contains elements of
+form (BUFFER . FILE) associated with the activity."
+  (activities--mapcar-window-state-leafs
+   (activities-activity-state-window-state state)
+   (lambda (leaf)
+     (let ((buffer-rec (map-nested-elt (cdr leaf)
+				       '(parameters activities-buffer))))
+       (cons (activities-buffer-name buffer-rec)
+	     (activities-buffer-filename buffer-rec))))))
+
+(defun activities--buffers-and-files-differ-p (bf1 bf2)
+  "Return non-nil if BF1 and BF2 are not the same set of files or buffers.
+Each of BF1 and BF2 is a list of buffer and files, as returned
+from `activities--buffers-and-files'."
+  (cl-labels ((file-or-buffer (cell)
+		"Given a CELL, return the true filename or buffer.
+The CELL is a (BUFFER . FILE) cons.  If the file is nil, BUFFER is returned."
+		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
+    (not (seq-set-equal-p (mapcar #'file-or-buffer bf1)
+			  (mapcar #'file-or-buffer bf2)))))
+
 (cl-defun activities-save (activity &key defaultp lastp persistp)
   "Save states of ACTIVITY.
 If DEFAULTP, save its default state; if LASTP, its last.  If
@@ -513,6 +573,12 @@ according to option `activities-always-persist', which see)."
       (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
         (pcase-let* (((cl-struct activities-activity default last) activity)
                      (new-state (activities-state)))
+	  (when (and lastp last
+		     (not (activities--buffers-and-files-differ-p
+			   (activities--buffers-and-files last)
+			   (activities--buffers-and-files new-state))))
+	    (setf (map-elt (activities-activity-state-etc new-state) 'time)
+		  (map-elt (activities-activity-state-etc last) 'time)))
           (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
                 (activities-activity-last activity) (if (or lastp (not last)) new-state last)))))
     ;; Always set the value so, e.g. the activity can be modified
@@ -801,6 +867,63 @@ activity's name is NAME."
                   "In the meantime, it's recommended to not use buffers of this major mode in an activity's layout; or you may simply ignore this error and use the other buffers in the activity.")
           (current-buffer)))))
 
+(defvar activities--age-spec
+  `((?Y "year"   "years"   ,(round (* 60 60 24 365.2425)))
+    (?M "month"  "months"  ,(round (* 60 60 24 30.436875)))
+    (?w "week"   "weeks"   ,(* 60 60 24 7))
+    (?d "day"    "days"    ,(* 60 60 24))
+    (?h "hour"   "hours"   ,(* 60 60))
+    (?m "min"    "mins"    60)
+    (?s "sec"    "secs"    1))
+  "Age specification.  See `magit--age-spec', which this duplicates.")
+
+(defun activities--age (age &optional abbrev)
+  "Summarize AGE.
+Abbreviate the units if ABBREV is non-nil.  Based on
+`magit--age'."
+  ;; TODO: replace this if seconds-to-string adds READABLE support
+  (let ((half t)
+	(age-spec activities--age-spec)
+	age-unit cnt)
+    (if (= (round age (if half 0.5 1.)) 0)
+	(format "0%s" (if abbrev "s" " seconds"))
+      (while (and (setq age-unit (pop age-spec)) age-spec
+                  (< (/ age (nth 3 age-unit)) 1)))
+      (setq cnt (round (/ (float age) (nth 3 age-unit)) (if half 0.5 1.)))
+      (concat (let ((c (if half (/ cnt 2) cnt)))
+		(and (> c 0) (number-to-string c)))
+	      (and half (= (mod cnt 2) 1) "½")
+	      (or abbrev " ")
+	      (cond (abbrev (car age-unit))
+		    ((<= cnt (if half 2 1)) (nth 1 age-unit))
+		    (t (nth 2 age-unit)))))))
+
+(defun activities--oldest-age (activities)
+  "Return the age in seconds of the oldest activity in ACTIVITIES."
+  (cl-loop for (_name . act) in activities maximize
+	   (cl-loop
+	    for type in '(default last)
+ 	    for state = (cl-struct-slot-value 'activities-activity type act)
+	    if state
+	    for etc = (activities-activity-state-etc state)
+	    maximize (float-time (time-since (map-elt etc 'time))))))
+
+(defun activities-sort-by-active-age (names)
+  "Return the list activity NAMES sorted active first, then by age."
+  (sort names
+	(lambda (a b)
+	  (let* ((activity-a (map-elt activities-activities a))
+		 (state-a (or (activities-activity-last activity-a)
+			      (activities-activity-default activity-a)))
+		 (time-a (map-elt (activities-activity-state-etc state-a) 'time))
+		 (activep-a (activities-activity-active-p activity-a))
+		 (activity-b (map-elt activities-activities b))
+		 (state-b (or (activities-activity-last activity-b)
+			      (activities-activity-default activity-b)))
+		 (time-b (map-elt (activities-activity-state-etc state-b) 'time))
+		 (activep-b (activities-activity-active-p activity-b)))
+	    (or (and activep-a (not activep-b)) (time-less-p time-b time-a))))))
+
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
           (default (when (activities-current)
@@ -809,9 +932,60 @@ activity's name is NAME."
   "Return an activity read with completion from ACTIVITIES.
 PROMPT is passed to `completing-read' by way of `format-prompt',
 which see, with DEFAULT."
-  (let* ((prompt (format-prompt prompt default))
-         (names (activities-names activities))
-         (name (completing-read prompt names nil t nil 'activities-completing-read-history default)))
+  (pcase-let*
+      ((names (activities-names activities))
+       (max-age (activities--oldest-age activities))
+       (`(,old-col ,new-col ,blend-frac) activities-annotation-colors)
+       (annotation-function
+	(lambda (name)
+	  (when-let ((activity (map-elt activities-activities name)))
+	    (let (activity-data)
+	      (dolist (type '(last default))
+		(when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
+		  (let* ((time (map-elt (activities-activity-state-etc state) 'time))
+			 (buffers-and-files (activities--buffers-and-files state)))
+		    (setf (alist-get type activity-data)
+			  (list (and time (float-time (time-since time))) buffers-and-files)))))
+	      (pcase-let*
+		  ((`(,default-age ,default-buffers-and-files) (map-elt activity-data 'default))
+		   (`(,last-age ,last-buffers-and-files) (map-elt activity-data 'last)) ;possibly nil
+		   (age (if last-age (min last-age default-age) default-age))
+		   (buffers-and-files (if last-age last-buffers-and-files default-buffers-and-files))
+		   (num-buffers (length buffers-and-files))
+		   (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
+		   (dirtyp (when last-buffers-and-files
+			     (activities--buffers-and-files-differ-p
+			      last-buffers-and-files
+			      default-buffers-and-files)))
+		   (annotation (format "%s%s buf%s %s file%s "
+				       (if (activities-activity-active-p activity)
+					   (propertize "@" 'face 'bold) " ")
+				       (propertize (format "%2d" num-buffers) 'face 'success)
+				       (if (= num-buffers 1) " " "s")
+				       (propertize (format "%2d" num-files) 'face 'warning)
+				       (if (= num-files 1) " " "s")))
+		   (age-color  (apply #'color-rgb-to-hex
+				      (cl-loop for co in (color-name-to-rgb old-col)
+					       for cn in (color-name-to-rgb new-col)
+					       for cd in (color-name-to-rgb (face-foreground 'default))
+					       collect (+ (* blend-frac (+ cn (* (- co cn) (/ age max-age))))
+							  (* (- 1. blend-frac) cd)))))
+		   (age-annotation (propertize
+				    (format "%10s" (activities--age age))
+				    'face `(:foreground ,age-color :weight bold)))
+		   (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
+		(concat (propertize " " 'display
+				    `(space :align-to (- right ,(+ 1 (length annotation)
+								   (length age-annotation)))))
+			annotation age-annotation dirty-annotation))))))
+       (table (lambda (str pred action)
+		(if (eq action 'metadata)
+		    `(metadata (annotation-function . ,annotation-function)
+			       ,@(when activities-sort-function
+				   `(,(cons 'display-sort-function activities-sort-function))))
+		  (complete-with-action action names str pred))))
+       (prompt (format-prompt prompt default))
+       (name (completing-read prompt table nil t nil 'activities-completing-read-history default)))
     (or (map-elt activities-activities name)
         (make-activities-activity :name name))))
 
