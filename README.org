@@ -153,7 +153,8 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.8-pre
 
-Nothing new yet.
+*Fixes*
++ Race condition when restoring multiple activities in rapid succession from user code.  ([[https://github.com/alphapapa/activity.el/pull/98][#98]].  Thanks to [[https://github.com/jdtsmith][JD Smith]].)
 
 ** v0.7
 
