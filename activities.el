@@ -881,9 +881,9 @@ activity's name is NAME."
 
 (defun activities--age (age &optional abbrev)
   "Summarize AGE.
-Abbreviate the units if ABBREV is non-nil.  Based on
-`magit--age'."
-  ;; TODO: replace this if seconds-to-string adds READABLE support
+Abbreviate the units if ABBREV is non-nil."
+  ;; Based orginally on `magit--age'."
+  ;; TODO: replace this if seconds-to-string adds READABLE support; see bug#71572
   (let ((half t)
 	(age-spec activities--age-spec)
 	age-unit cnt)
