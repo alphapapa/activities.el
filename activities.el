@@ -346,11 +346,9 @@ non-nil if the first activity should sort before the second."
 
 (defcustom activities-annotation-colors '("blue" "red" 0.65)
   "Colors to use for annotating activity age.
-A list (OLD-COLOR NEW-COLOR BLEND-FRAC).  These are used during
-activity selection, with the activity color chosen between
-OLD-COLOR and NEW-COLOR, based on the activity's age.  This color
-is blended into the default foreground with a fraction
-BLEND-FRAC, and used to display the activity age."
+A list (OLD-COLOR NEW-COLOR ALPHA).  Activity color is based on
+the activity's age, varying between OLD-COLOR and NEW-COLOR, and
+blended with fraction ALPHA into the default foreground."
   :type '(list (color :tag "Old Color") (color :tag "New Color")
 	       (float :tag "Blend Fraction")))
 
