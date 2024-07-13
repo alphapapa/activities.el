@@ -332,15 +332,17 @@ Kills buffers that have only been shown in that activity's
 frame/tab."
   :type 'boolean)
 
-(defcustom activities-sort-function #'activities-sort-by-active-age
-  "A function to use to sort by when prompting for activities.
-If nil, no sorting will be applied.  The function should take two
-arguments, both activity names (strings).  It should return
-non-nil if the first activity should sort before the second.  By
+(defcustom activities-sort-by #'activities-sort-by-active-age
+  "How to sort activities during selection.
+Function used to sort by when prompting for activities.  By
 default, a function is used which sorts active activities first,
-and then by age since modification."
-  :type '(choice (const :tag "No sorting" nil)
-		 (function :tag "A specific function")))
+and then by age since modification.  If nil, no sorting will be
+applied.  A custom predicate function may also be set.  It should
+take two arguments, both activity names (strings), and return
+non-nil if the first activity should sort before the second."
+  :type `(choice (const :tag "No sorting" nil)
+		 (const :tag "Active state and age" ,#'activities-sort-by-active-age)
+		 (function :tag "Custom predicate")))
 
 (defcustom activities-annotation-colors '("blue" "red" 0.65)
   "Colors to use for annotating activity age.
@@ -983,8 +985,8 @@ which see, with DEFAULT."
        (table (lambda (str pred action)
 		(if (eq action 'metadata)
 		    `(metadata (annotation-function . ,annotation-function)
-			       ,@(when activities-sort-function
-				   `(,(cons 'display-sort-function activities-sort-function))))
+			       ,@(when activities-sort-by
+				   `(,(cons 'display-sort-function activities-sort-by))))
 		  (complete-with-action action names str pred))))
        (prompt (format-prompt prompt default))
        (name (completing-read prompt table nil t nil 'activities-completing-read-history default)))
