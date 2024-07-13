@@ -135,7 +135,7 @@ Key bindings are, as always, ultimately up to the user.  However, in [[Configura
 
 When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored when a new activity is made.  This allows the command ~bookmark-jump~ (~C-x r b~) to be used to resume an activity (helping to universalize the bookmark system).
 
-** Annotation and Sort
+** Completion
 
 When selecting an activity in the mini-buffer, annotations are sorted active first, then by most recent modification age.  If you are using an interface that supports /annotations/, additional information is shown alongside the activity name:
 
