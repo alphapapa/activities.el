@@ -936,58 +936,61 @@ which see, with DEFAULT."
       ((names (activities-names activities))
        (max-age (activities--oldest-age activities))
        (`(,old-col ,new-col ,blend-frac) activities-annotation-colors)
-       (annotation-function
-	(lambda (name)
-	  (when-let ((activity (map-elt activities-activities name)))
-	    (let (activity-data)
-	      (dolist (type '(last default))
-		(when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
-		  (let* ((time (map-elt (activities-activity-state-etc state) 'time))
-			 (buffers-and-files (activities--buffers-and-files state)))
-		    (setf (alist-get type activity-data)
-			  (list (and time (float-time (time-since time))) buffers-and-files)))))
-	      (pcase-let*
-		  ((`(,default-age ,default-buffers-and-files) (map-elt activity-data 'default))
-		   (`(,last-age ,last-buffers-and-files) (map-elt activity-data 'last)) ;possibly nil
-		   (age (if last-age (min last-age default-age) default-age))
-		   (buffers-and-files (if last-age last-buffers-and-files default-buffers-and-files))
-		   (num-buffers (length buffers-and-files))
-		   (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
-		   (dirtyp (when last-buffers-and-files
-			     (activities--buffers-and-files-differ-p
-			      last-buffers-and-files
-			      default-buffers-and-files)))
-		   (annotation (format "%s%s buf%s %s file%s "
-				       (if (activities-activity-active-p activity)
-					   (propertize "@" 'face 'bold) " ")
-				       (propertize (format "%2d" num-buffers) 'face 'success)
-				       (if (= num-buffers 1) " " "s")
-				       (propertize (format "%2d" num-files) 'face 'warning)
-				       (if (= num-files 1) " " "s")))
-		   (age-color  (apply #'color-rgb-to-hex
-				      (cl-loop for co in (color-name-to-rgb old-col)
-					       for cn in (color-name-to-rgb new-col)
-					       for cd in (color-name-to-rgb (face-foreground 'default))
-					       collect (+ (* blend-frac (+ cn (* (- co cn) (/ age max-age))))
-							  (* (- 1. blend-frac) cd)))))
-		   (age-annotation (propertize
-				    (format "%10s" (activities--age age))
-				    'face `(:foreground ,age-color :weight bold)))
-		   (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
-		(concat (propertize " " 'display
-				    `(space :align-to (- right ,(+ 1 (length annotation)
-								   (length age-annotation)))))
-			annotation age-annotation dirty-annotation))))))
-       (table (lambda (str pred action)
-		(if (eq action 'metadata)
-		    `(metadata (annotation-function . ,annotation-function)
-			       ,@(when activities-sort-by
-				   `(,(cons 'display-sort-function activities-sort-by))))
-		  (complete-with-action action names str pred))))
-       (prompt (format-prompt prompt default))
-       (name (completing-read prompt table nil t nil 'activities-completing-read-history default)))
-    (or (map-elt activities-activities name)
-        (make-activities-activity :name name))))
+       (prompt (format-prompt prompt default)))
+    (cl-labels
+	((activity-annotation-function (name)
+	   "Add buffer and file count, age, active and changed status to activity NAME."
+	   (when-let ((activity (map-elt activities-activities name)))
+	     (let (activity-data)
+	       (dolist (type '(last default))
+		 (when-let ((state (cl-struct-slot-value 'activities-activity type activity)))
+		   (let* ((time (map-elt (activities-activity-state-etc state) 'time))
+			  (buffers-and-files (activities--buffers-and-files state)))
+		     (setf (alist-get type activity-data)
+			   (list (and time (float-time (time-since time))) buffers-and-files)))))
+	       (pcase-let*
+		   ((`(,default-age ,default-buffers-and-files) (map-elt activity-data 'default))
+		    (`(,last-age ,last-buffers-and-files) (map-elt activity-data 'last)) ;possibly nil
+		    (age (if last-age (min last-age default-age) default-age))
+		    (buffers-and-files (if last-age last-buffers-and-files default-buffers-and-files))
+		    (num-buffers (length buffers-and-files))
+		    (num-files (seq-count #'stringp (mapcar #'cdr buffers-and-files)))
+		    (dirtyp (when last-buffers-and-files
+			      (activities--buffers-and-files-differ-p
+			       last-buffers-and-files
+			       default-buffers-and-files)))
+		    (annotation (format "%s%s buf%s %s file%s "
+					(if (activities-activity-active-p activity)
+					    (propertize "@" 'face 'bold) " ")
+					(propertize (format "%2d" num-buffers) 'face 'success)
+					(if (= num-buffers 1) " " "s")
+					(propertize (format "%2d" num-files) 'face 'warning)
+					(if (= num-files 1) " " "s")))
+		    (age-color  (apply #'color-rgb-to-hex
+				       (cl-loop for co in (color-name-to-rgb old-col)
+						for cn in (color-name-to-rgb new-col)
+						for cd in (color-name-to-rgb (face-foreground 'default))
+						collect (+ (* blend-frac (+ cn (* (- co cn) (/ age max-age))))
+							   (* (- 1. blend-frac) cd)))))
+		    (age-annotation (propertize
+				     (format "%10s" (activities--age age))
+				     'face `(:foreground ,age-color :weight bold)))
+		    (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
+		 (concat (propertize " " 'display
+				     `(space :align-to (- right ,(+ 1 (length annotation)
+								    (length age-annotation)))))
+			 annotation age-annotation dirty-annotation)))))
+	 (activity-table (str pred action)
+	   "Complete activities from STR, using completion PRED and ACTION."
+	   (if (eq action 'metadata)
+	       `(metadata (annotation-function . ,#'activity-annotation-function)
+			  ,@(when activities-sort-by
+			      `(,(cons 'display-sort-function activities-sort-by))))
+	     (complete-with-action action names str pred))))
+      (let ((name (completing-read prompt #'activity-table nil t nil
+				   'activities-completing-read-history default)))
+	(or (map-elt activities-activities name)
+            (make-activities-activity :name name))))))
 
 (cl-defun activities-names (&optional (activities activities-activities))
   "Return list of names of ACTIVITIES."
