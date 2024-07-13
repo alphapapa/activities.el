@@ -391,7 +391,7 @@ available."
          :resetp current-prefix-arg))
   (let ((already-active-p (activities-activity-active-p activity)))
     (activities--switch activity)
-    (unless (or resetp already-active-p)
+    (when (or resetp (not already-active-p))
       (activities-set activity :state (if resetp 'default 'last)))))
 
 (defun activities-switch (activity)
