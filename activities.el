@@ -551,16 +551,16 @@ form (BUFFER . FILE) associated with the activity."
        (cons (activities-buffer-name buffer-rec)
 	     (activities-buffer-filename buffer-rec))))))
 
-(defun activities--buffers-and-files-differ-p (bf1 bf2)
-  "Return non-nil if BF1 and BF2 are not the same set of files or buffers.
-Each of BF1 and BF2 is a list of buffer and files, as returned
+(defun activities--buffers-and-files-differ-p (bfa bfb)
+  "Return non-nil if BFA and BFB are not the same set of files or buffers.
+Each of BFA and BFB is a list of buffer and files, as returned
 from `activities--buffers-and-files'."
   (cl-labels ((file-or-buffer (cell)
 		"Given a CELL, return the true filename or buffer.
 The CELL is a (BUFFER . FILE) cons.  If the file is nil, BUFFER is returned."
 		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
-    (not (seq-set-equal-p (mapcar #'file-or-buffer bf1)
-			  (mapcar #'file-or-buffer bf2)))))
+    (not (seq-set-equal-p (mapcar #'file-or-buffer bfa)
+			  (mapcar #'file-or-buffer bfb)))))
 
 (cl-defun activities-save (activity &key defaultp lastp persistp)
   "Save states of ACTIVITY.
