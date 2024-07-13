@@ -911,20 +911,18 @@ Abbreviate the units if ABBREV is non-nil."
 	    maximize (float-time (time-since (map-elt etc 'time))))))
 
 (defun activities-sort-by-active-age (names)
-  "Return the list activity NAMES sorted active first, then by age."
-  (sort names
-	(lambda (a b)
-	  (let* ((activity-a (map-elt activities-activities a))
-		 (state-a (or (activities-activity-last activity-a)
-			      (activities-activity-default activity-a)))
-		 (time-a (map-elt (activities-activity-state-etc state-a) 'time))
-		 (activep-a (activities-activity-active-p activity-a))
-		 (activity-b (map-elt activities-activities b))
-		 (state-b (or (activities-activity-last activity-b)
-			      (activities-activity-default activity-b)))
-		 (time-b (map-elt (activities-activity-state-etc state-b) 'time))
-		 (activep-b (activities-activity-active-p activity-b)))
-	    (or (and activep-a (not activep-b)) (time-less-p time-b time-a))))))
+  "Return the list of activity NAMES sorted active first, then by age."
+  (cl-labels ((time-active-p (name)
+		(pcase-let* ((activity (map-elt activities-activities name))
+			     (active-p (activities-activity-active-p activity))
+			     ((cl-struct activities-activity last default) activity)
+			     (state (or last default))
+			     (time (map-elt (activities-activity-state-etc state) 'time)))
+		  (cons time active-p))))
+    (sort names (pcase-lambda ((app time-active-p `(,time-a . ,activep-a))
+			       (app time-active-p `(,time-b . ,activep-b)))
+		  (or (and activep-a (not activep-b))
+		      (time-less-p time-b time-a))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
