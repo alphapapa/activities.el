@@ -902,13 +902,12 @@ Abbreviate the units if ABBREV is non-nil."
 
 (defun activities--oldest-age (activities)
   "Return the age in seconds of the oldest activity in ACTIVITIES."
-  (cl-loop for (_name . act) in activities maximize
-	   (cl-loop
-	    for type in '(default last)
- 	    for state = (cl-struct-slot-value 'activities-activity type act)
-	    if state
-	    for etc = (activities-activity-state-etc state)
-	    maximize (float-time (time-since (map-elt etc 'time))))))
+  (cl-loop for (_name . activity) in activities
+	   for state = (pcase-let (((cl-struct activities-activity default last) activity))
+			 (or last default))
+	   if state
+	   for etc = (activities-activity-state-etc state)
+	   maximize (float-time (time-since (map-elt etc 'time)))))
 
 (defun activities-sort-by-active-age (names)
   "Return the list of activity NAMES sorted active first, then by age."
