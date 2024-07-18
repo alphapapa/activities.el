@@ -921,8 +921,8 @@ Abbreviate the units if ABBREV is non-nil."
 		  (cons time active-p))))
     (sort names (pcase-lambda ((app time-active-p `(,time-a . ,activep-a))
 			       (app time-active-p `(,time-b . ,activep-b)))
-		  (or (and activep-a (not activep-b))
-		      (time-less-p time-b time-a))))))
+		  (if (xor activep-a activep-b) activep-a
+		    (time-less-p time-b time-a))))))
 
 (cl-defun activities-completing-read
     (&key (activities activities-activities)
