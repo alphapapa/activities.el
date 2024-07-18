@@ -341,7 +341,9 @@ applied.  A custom predicate function may also be set.  It should
 take two arguments, both activity names (strings), and return
 non-nil if the first activity should sort before the second."
   :type `(choice (const :tag "No sorting" nil)
-		 (const :tag "Active state and age" ,#'activities-sort-by-active-age)
+		 (function-item :tag "Active state and age"
+				:doc "Sort by active state and age."
+				,#'activities-sort-by-active-age)
 		 (function :tag "Custom predicate")))
 
 (defcustom activities-annotation-colors '("blue" "red" 0.65)
