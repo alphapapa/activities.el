@@ -336,12 +336,11 @@ frame/tab."
   "How to sort activities during selection.
 Function used to sort by when prompting for activities.  By
 default, a function is used which sorts active activities first,
-and then by age since modification.  If nil, no sorting will be
-applied.  A custom predicate function may also be set.  It should
-take two arguments, both activity names (strings), and return
-non-nil if the first activity should sort before the second."
-  :type `(choice (const :tag "No sorting" nil)
-		 (function-item :tag "Active state and age"
+and then by age since modification.  A custom predicate function
+may also be set.  It should take two arguments, both activity
+names (strings), and return non-nil if the first activity should
+sort before the second."
+  :type `(choice (function-item :tag "Active state and age"
 				:doc "Sort by active state and age."
 				,#'activities-sort-by-active-age)
 		 (function :tag "Custom predicate")))
@@ -985,8 +984,7 @@ which see, with DEFAULT."
 	   "Complete activities from STR, using completion PRED and ACTION."
 	   (if (eq action 'metadata)
 	       `(metadata (annotation-function . ,#'activity-annotation-function)
-			  ,@(when activities-sort-by
-			      `(,(cons 'display-sort-function activities-sort-by))))
+			  (display-sort-function . ,activities-sort-by))
 	     (complete-with-action action names str pred))))
       (let ((name (completing-read prompt #'activity-table nil t nil
 				   'activities-completing-read-history default)))
