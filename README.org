@@ -164,7 +164,11 @@ The sort order when completing activities can be configured using ~activities-so
 
 ** v0.8-pre
 
-Nothing new yet.
+*Additions*
++ New completion interface with rich annotations. (See #83.)
+
+*Changes*
++ During save, the ~time~ slot for an activity remains unchanged unless its buffers or files differ from their last saved state. (See #83.)
 
 ** v0.7.2
 
