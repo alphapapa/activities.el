@@ -6,6 +6,7 @@
 #+TEXINFO_DIR_TITLE: Activities: (activities)
 #+TEXINFO_DIR_DESC: Suspend/resume activities (sets of windows, frames, and buffers)
 
+# ELPA badge image.
 [[https://elpa.gnu.org/packages/activities.html][file:https://elpa.gnu.org/packages/activities.svg]]
 
 Inspired by Genera's and KDE's concepts of "activities", this Emacs library allows the user to manage frames/tabs, windows, and buffers according to their purpose.  An "activity" comprises a frame or tab, its window configuration, and the buffers displayed in them--its "state"; this state would be related to a certain task the user performs at various times, such as developing a certain software project, reading and writing email, working with one's Org mode system, etc.
@@ -152,7 +153,11 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.7.1-pre
 
-Nothing new yet.
+*Fixes*
++ Race condition when restoring multiple activities in rapid succession from user code.  ([[https://github.com/alphapapa/activity.el/pull/98][#98]].  Thanks to [[https://github.com/jdtsmith][JD Smith]].)
++ Command ~activities-resume~ resets when called with a universal prefix argument.  ([[https://github.com/alphapapa/activities.el/pull/75][#75]].  Thanks to [[https://breatheoutbreathe.in][Joseph Turner]].)
++ Refreshing activities list.  ([[https://github.com/alphapapa/activities.el/pull/77][#77]].  Thanks to [[https://breatheoutbreathe.in][Joseph Turner]].)
++ Autoload bookmark handler.  ([[https://github.com/alphapapa/activity.el/pull/114][#114]].  Thanks to [[https://breatheoutbreathe.in][Joseph Turner]].)
 
 ** v0.7
 
@@ -166,6 +171,7 @@ Nothing new yet.
 *Fixes*
 + Suspending/killing an activity when only one frame/tab is open.
 + Generation of Info manual on GNU ELPA.  (Thanks to Stefan Monnier.)
++ Ignore minimum window sizes and fixed size restrictions.  ([[https://github.com/alphapapa/activity.el/issues/56][#56]].  Thanks to [[https://github.com/jellelicht][Jelle Licht]].)
 
 ** v0.6
 
@@ -278,7 +284,7 @@ This package is part of [[https://www.gnu.org/software/emacs/][GNU Emacs]], bein
 
 # Copied from org-super-agenda's readme, in which much was borrowed from Org's =org-manual.org=.
 
-#+OPTIONS: broken-links:t *:t num:1
+#+OPTIONS: broken-links:t *:t num:1 toc:1
 
 ** Info export options
 
@@ -287,8 +293,6 @@ This package is part of [[https://www.gnu.org/software/emacs/][GNU Emacs]], bein
 ** File-local variables
 
 # NOTE: Setting org-comment-string buffer-locally is a nasty hack to work around GitHub's org-ruby's HTML rendering, which does not respect noexport tags.  The only way to hide this tree from its output is to use the COMMENT keyword, but that prevents Org from processing the export options declared in it.  So since these file-local variables don't affect org-ruby, wet set org-comment-string to an unused keyword, which prevents Org from deleting this tree from the export buffer, which allows it to find the export options in it.  And since org-export does respect the noexport tag, the tree is excluded from the info page.
-
-# after-save-hook: (lambda nil (when (and (require 'ox-texinfo nil t) (org-texinfo-export-to-info)) (delete-file "README.texi") (rename-file "README.info" "activities.info" t)))
 
 # Local Variables:
 # before-save-hook: org-make-toc
