@@ -888,6 +888,7 @@ with prefix argument, choose another activity."
                   (handler . activities-bookmark-handler))))
     (bookmark-store bookmark-name props nil)))
 
+;;;###autoload
 (defun activities-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
   (activities-resume (map-elt activities-activities (bookmark-prop-get bookmark 'activities-name))))
