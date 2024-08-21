@@ -250,8 +250,7 @@ discarded, such a bookmark could become stale."
         (cons 'window-side 'writable)
         (cons 'window-slot 'writable))
   "Additional window parameters to persist.
-See Info node `(elisp)Window Parameters'.  See also option
-`activities-set-window-persistent-parameters'."
+See Info node `(elisp)Window Parameters'."
   :type '(alist :key-type (symbol :tag "Window parameter")
                 :value-type (choice (const :tag "Not saved" nil)
                                     (const :tag "Saved" writable))))
@@ -392,7 +391,7 @@ available."
          :resetp current-prefix-arg))
   (let ((already-active-p (activities-activity-active-p activity)))
     (activities--switch activity)
-    (unless (or resetp already-active-p)
+    (when (or resetp (not already-active-p))
       (activities-set activity :state (if resetp 'default 'last)))))
 
 (defun activities-switch (activity)
@@ -639,17 +638,18 @@ activity's name is NAME."
 
 (defun activities--windows-set (state)
   "Set window configuration according to STATE."
-  (setf window-persistent-parameters (copy-sequence activities-window-persistent-parameters))
-  (pcase-let* ((window-persistent-parameters (append activities-window-persistent-parameters
-                                                     window-persistent-parameters))
-               (state
-                ;; NOTE: We copy the state so as not to mutate the one in storage.
-                (activities--bufferize-window-state (copy-tree state))))
-    ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
-    ;; function after handling the bookmark, we use an immediate timer to
-    ;; set the window configuration.
-    (run-at-time nil nil (lambda ()
-                           (window-state-put state (frame-root-window) 'safe)))))
+  ;; HACK: Since `bookmark--jump-via' insists on calling a buffer-display
+  ;; function after handling the bookmark, we use an immediate timer to
+  ;; set the window configuration.
+  (run-at-time nil nil
+	       (lambda (frame state)
+		 (let ((window-persistent-parameters
+			(append activities-window-persistent-parameters
+				window-persistent-parameters)))
+		   (window-state-put state (frame-root-window frame) 'safe)))
+	       (selected-frame)
+	       ;; NOTE: We copy the state so as not to mutate the one in storage.
+	       (activities--bufferize-window-state (copy-tree state))))
 
 (defun activities--bufferize-window-state (state)
   "Return window state STATE with its buffers reincarnated."
@@ -888,6 +888,7 @@ with prefix argument, choose another activity."
                   (handler . activities-bookmark-handler))))
     (bookmark-store bookmark-name props nil)))
 
+;;;###autoload
 (defun activities-bookmark-handler (bookmark)
   "Switch to BOOKMARK's activity."
   (activities-resume (map-elt activities-activities (bookmark-prop-get bookmark 'activities-name))))
