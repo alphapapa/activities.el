@@ -476,21 +476,22 @@ It will not be recoverable."
 
 (defcustom activities-mode-idle-frequency 5
   "Automatically save activities when Emacs has been idle this many seconds."
-  :type 'natnum)
+  :type 'natnum) ; TODO: add a setter?
 
 (defvar activities-mode-map (make-sparse-keymap)
   "The mode keymap for `activities-mode'.")
 
 (defun activities-mode-line-format ()
-  (when-let ((cur (activities-current)))
-    (let ((cur-activity-title (concat " " (activities-name-for cur))))
+  "Activities mode line format."
+  (when-let ((current-activity (activities-current)))
+    (let ((current-activity-title (concat " " (activities-name-for current-activity))))
       `(:propertize
-        ,cur-activity-title
+        ,current-activity-title
         mouse-face mode-line-highlight
         help-echo
         ,(lambda (&rest _)
            (concat
-            (format "Current activity:%s\n" cur-activity-title)
+            (format "Current activity:%s\n" current-activity-title)
             "mouse-1: Display minor mode menu\n"
             "mouse-2: Show help for minor mode"))
         keymap
@@ -505,10 +506,9 @@ It will not be recoverable."
                          (describe-function 'activities-mode)))
            map)))))
 
-(defcustom activities-mode-line '(:eval (activities-mode-line-format))
+(defcustom activities-mode-line-lighter '(:eval (activities-mode-line-format))
   "Activities mode line definition."
   :type 'sexp
-  :group 'activities
   :risky t)
 
 ;;;###autoload
@@ -517,78 +517,85 @@ It will not be recoverable."
 accordingly."
   :global t
   :group 'activities
-  :lighter activities-mode-line
+  :lighter activities-mode-line-lighter
   :keymap activities-mode-map
   (if activities-mode
       (progn
-        (setf activities-mode-timer
-              (run-with-idle-timer activities-mode-idle-frequency t #'activities-save-all))
+        (when activities-mode-idle-frequency
+          (setf activities-mode-timer
+                (run-with-idle-timer activities-mode-idle-frequency t #'activities-save-all)))
         (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs))
     (when (timerp activities-mode-timer)
       (cancel-timer activities-mode-timer)
       (setf activities-mode-timer nil))
     (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)))
 
+;;;; Menu Bar and mode-line Lighter Menu
+
 (require 'easymenu)
 
-(setq activities-menu-item-resume
-      '("Resume..."
-        :help "Resume an existing activity"
-        :filter (lambda (&optional _)
-                  (let ((current-activity-name
-                         (when-let ((current-activity (activities-current)))
-                           (activities-activity-name current-activity))))
-                    (mapcar (lambda (act)
-                              (vector act `(activities-resume (activities-named ,act))
-                                      :style 'radio
-                                      :selected (equal current-activity-name act)
-                                      ))
-                            (activities-names))))
-        ))
+(defvar activities-menu-item-resume
+  '("Resume/Switch..."
+    :help "Resume to an existing activity, or switch to a live activity"
+    :filter (lambda (&optional _)
+              (let ((current-activity-name
+                     (when-let ((current-activity (activities-current)))
+                       (activities-activity-name current-activity))))
+                (mapcar (lambda (act)
+                          (vector act `(activities-resume (activities-named ,act))
+                                  :style 'radio
+                                  :selected (equal current-activity-name act)
+                                  ))
+                        (activities-names))))))
 
-(easy-menu-define activities-menu activities-mode-map
-  "Activities Menu"
+(easy-menu-define activities-menu activities-mode-map "Activities"
   `("Activities" :visible activities-mode
+    ;; creation
     ["New" activities-new
      :help "Create a new, empty activity"]
     ["Define" activities-define
      :help "Create a new activity using the current frame/tab"]
-    ["Resume" activities-resume
+    "--"
+    ;; state management
+    ["Resume..." activities-resume
      :help "Resume an existing activity"]
     ,activities-menu-item-resume
     ["Revert" activities-revert
-     :help "Revert the current activity to its original state"]
-    ["Suspend" activities-suspend
+     :help "Revert the current activity to its most recently stored state"]
+    ["Suspend..." activities-suspend
      :help "Suspend the specified live activity and save its current state"]
     ["Kill" activities-kill
-     :help "Revert and suspend the specified live activity"]
-    ["Switch" activities-switch
-     :help "Focus on the specified live activity"]
-    ["Switch Buffer" activities-switch-buffer
-     :help "Focus on the specified buffer from a live activity (activities-tabs-mode only)"]
-    ["List" activities-list
-     :help "Show the master list of known activities"]
-    ["Rename" activities-rename
-     :help "Rename the specified activity"]
-    ["Discard" activities-discard
-     :help "Discard the specified activity (this is undoable)"]
+     :help "Suspend the specified live activity without saving its state"]
     ["Save All" activities-save-all
-     :help "Save all live activities to disk"]
-    ))
+     :help "Save all live activities to disk (useful when activities-mode-idle-frequency is nil or infrequent)"]
+    ["Rename..." activities-rename
+     :help "Rename the specified activity"]
+    ["Discard..." activities-discard
+     :help "Discard the specified activity (this is undoable)"]
+    "--"
+    ;; switching
+    ["Switch..." activities-switch
+     :help "Focus on the specified live activity"]
+    ["Switch Buffer..." activities-switch-buffer
+     :help "Focus on the specified buffer from a live activity (activities-tabs-mode only)"]
+    ["List Defined Activities" activities-list
+     :help "Show the master list of defined activities"]
+    "--"
+    ;; customize
+    ["Customize Activities" (lambda () (interactive) (customize-group "activities"))]))
 
 (easy-menu-define activities-mode-line-menu nil
   "Activities Mode Line Menu"
   `("Activities"
-    ,activities-menu-item-resume
-    ))
+    ,activities-menu-item-resume))
+
+;;;; Functions
 
 (defun activities-mode--killing-emacs ()
   "Persist all activities' states.
 To be called from `kill-emacs-hook'."
   (let ((activities-always-persist t))
     (activities-save-all)))
-
-;;;; Functions
 
 (cl-defun activities-save (activity &key defaultp lastp persistp)
   "Save states of ACTIVITY.
