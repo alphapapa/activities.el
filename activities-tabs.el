@@ -48,10 +48,6 @@ When `activities-tabs-mode' is enabled.")
 Each is called with one argument, the activity."
   :type 'hook)
 
-(defcustom activities-tabs-prefix "α:"
-  "Prepended to activity names in tabs."
-  :type 'string)
-
 (defface activities-tabs
   `((t :inherit font-lock-function-name-face))
   "Applied to tab-bar faces for tabs representing activities.")
@@ -222,19 +218,6 @@ activity's name is NAME."
 (defun activities-tabs-before-resume (activity &rest _)
   "Called before resuming ACTIVITY."
   (run-hook-with-args 'activities-tabs-before-resume-functions activity))
-
-;; (defun activity-tabs-switch-to-tab (activity)
-;;   "Switch to a tab for ACTIVITY."
-;;   (pcase-let* (((cl-struct activity name) activity)
-;;                (tab (cl-find-if (lambda (tab)
-;;                                   (when-let ((tab-activity (alist-get 'activity tab)))
-;;                                     (equal name (activity-name tab-activity))))
-;;                                 (funcall tab-bar-tabs-function))) 
-;;                (tab-name (if tab
-;;                              (alist-get 'name tab)
-;;                            (concat activity-tabs-prefix
-;;                                    (string-remove-prefix activity-bookmark-prefix name)))))
-;;     (tab-bar-switch-to-tab tab-name)))
 
 ;;;; Footer
 
