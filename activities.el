@@ -66,6 +66,7 @@
 (require 'map)
 (require 'persist)
 (require 'subr-x)
+(require 'xref)
 
 ;;;; Types
 
@@ -200,6 +201,12 @@ deserialized back to the buffer after it is reincarnated.")
 
 (defvar activities-saving-p nil
   "Non-nil when saving activities' states.")
+
+(defvar activities-xref-history-storage-function-original nil
+  "Original function for updating xref history, to be called when not in activity.")
+
+(defvar activities-xref-activity-history nil
+  "(ACTIVITY . (BACKWARD-STACK . FORWARD-STACK)) alist of Xref markers for each activity.")
 
 ;;;; Customization
 
@@ -499,6 +506,20 @@ accordingly."
 To be called from `kill-emacs-hook'."
   (let ((activities-always-persist t))
     (activities-save-all)))
+
+;;;###autoload
+(define-minor-mode activities-xref-history-mode
+  "Keep separate Xref history for each activity."
+  :global t
+  :group 'activities
+  (if activities-xref-history-mode
+      (progn
+        (unless activities-xref-history-storage-function-original
+          (setq activities-xref-history-storage-function-original xref-history-storage))
+        (setq xref-history-storage 'activities--xref-history))
+    (when activities-xref-history-storage-function-original
+      (setq xref-history-storage activities-xref-history-storage-function-original)
+      (setq activities-xref-history-storage-function-original nil))))
 
 ;;;; Functions
 
@@ -900,6 +921,22 @@ ignored."
   (cl-loop for variable in variables
            when (buffer-local-boundp variable (current-buffer))
            collect (cons variable (buffer-local-value variable (current-buffer)))))
+
+(defun activities--xref-history (&optional new-value)
+  "Return the xref history of the current activity.
+
+If not in activity, call the original xref function.
+
+Override existing value with NEW-VALUE if NEW-VALUE is set."
+  (let ((current-activity (activities-current)))
+    (if current-activity
+        (progn
+          (unless (map-contains-key activities-xref-activity-history current-activity)
+            (setf (map-elt activities-xref-activity-history current-activity) (xref--make-xref-history)))
+          (when new-value
+            (setf (map-elt activities-xref-activity-history current-activity) new-value))
+          (map-elt activities-xref-activity-history current-activity))
+      (funcall activities-xref-history-storage-function-original new-value))))
 
 ;;;; Footer
 
