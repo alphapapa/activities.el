@@ -495,16 +495,10 @@ accordingly."
       (progn
         (setf activities-mode-timer
               (run-with-idle-timer activities-mode-idle-frequency t #'activities-save-all))
-        (unless activities-xref-history-storage-function-original
-          (setq activities-xref-history-storage-function-original xref-history-storage))
-        (setq xref-history-storage 'activities--xref-history)
         (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs))
     (when (timerp activities-mode-timer)
       (cancel-timer activities-mode-timer)
       (setf activities-mode-timer nil))
-    (when activities-xref-history-storage-function-original
-      (setq xref-history-storage activities-xref-history-storage-function-original)
-      (setq activities-xref-history-storage-function-original nil))
     (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)))
 
 (defun activities-mode--killing-emacs ()
@@ -512,6 +506,20 @@ accordingly."
 To be called from `kill-emacs-hook'."
   (let ((activities-always-persist t))
     (activities-save-all)))
+
+;;;###autoload
+(define-minor-mode activities-xref-history-mode
+  "Keep separate Xref history for each activity."
+  :global t
+  :group 'activities
+  (if activities-xref-history-mode
+      (progn
+        (unless activities-xref-history-storage-function-original
+          (setq activities-xref-history-storage-function-original xref-history-storage))
+        (setq xref-history-storage 'activities--xref-history))
+    (when activities-xref-history-storage-function-original
+      (setq xref-history-storage activities-xref-history-storage-function-original)
+      (setq activities-xref-history-storage-function-original nil))))
 
 ;;;; Functions
 
