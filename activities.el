@@ -206,7 +206,7 @@ deserialized back to the buffer after it is reincarnated.")
   "Original function for updating xref history, to be called when not in activity.")
 
 (defvar activities-xref-activity-history nil
-  "(ACTIVITY-NAME . (BACKWARD-STACK . FORWARD-STACK)) alist of Xref markers for each activity.")
+  "(ACTIVITY . (BACKWARD-STACK . FORWARD-STACK)) alist of Xref markers for each activity.")
 
 ;;;; Customization
 
@@ -928,16 +928,14 @@ ignored."
 If not in activity, call the original xref function.
 
 Override existing value with NEW-VALUE if NEW-VALUE is set."
-  (let ((current-activity (activities-current))
-        (activity-name (when (activities-current)
-                         (activities-activity-name (activities-current)))))
+  (let ((current-activity (activities-current)))
     (if current-activity
         (progn
-          (unless (map-contains-key activities-xref-activity-history activity-name)
-            (map-put activities-xref-activity-history activity-name (xref--make-xref-history)))
+          (unless (map-contains-key activities-xref-activity-history current-activity)
+            (map-put activities-xref-activity-history current-activity (xref--make-xref-history)))
           (when new-value
-            (map-put activities-xref-activity-history activity-name new-value))
-          (map-elt activities-xref-activity-history activity-name))
+            (map-put activities-xref-activity-history current-activity new-value))
+          (map-elt activities-xref-activity-history current-activity))
       (funcall activities-xref-history-storage-function-original new-value))))
 
 ;;;; Footer
