@@ -932,9 +932,9 @@ Override existing value with NEW-VALUE if NEW-VALUE is set."
     (if current-activity
         (progn
           (unless (map-contains-key activities-xref-activity-history current-activity)
-            (map-put activities-xref-activity-history current-activity (xref--make-xref-history)))
+            (setf (map-elt activities-xref-activity-history current-activity) (xref--make-xref-history)))
           (when new-value
-            (map-put activities-xref-activity-history current-activity new-value))
+            (setf (map-elt activities-xref-activity-history current-activity) new-value))
           (map-elt activities-xref-activity-history current-activity))
       (funcall activities-xref-history-storage-function-original new-value))))
 
