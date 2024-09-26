@@ -159,6 +159,7 @@ Selects ACTIVITY's frame/tab and then switches back."
   (let ((original-state-var (gensym)))
     `(let ((,original-state-var `( :frame ,(selected-frame)
                                    :window ,(selected-window)
+                                   :window-point ,(window-point (selected-window))
                                    :tab-index ,(when (bound-and-true-p tab-bar-mode)
                                                  (tab-bar--current-tab-index)))))
        (unless (activities-activity-active-p ,activity)
@@ -167,13 +168,14 @@ Selects ACTIVITY's frame/tab and then switches back."
            (progn
              (activities--switch ,activity)
              ,@body)
-         (pcase-let (((map :frame :window :tab-index) ,original-state-var))
+         (pcase-let (((map :frame :window :window-point :tab-index) ,original-state-var))
            (when frame
              (select-frame frame))
            (when tab-index
              (tab-bar-select-tab (1+ tab-index)))
            (when window
-             (select-window window)))))))
+             (select-window window)
+             (goto-char window-point)))))))
 
 ;;;; Variables
 
