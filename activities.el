@@ -511,7 +511,7 @@ according to option `activities-always-persist', which see)."
     (when (or defaultp lastp)
       (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
 	(when activities-bookmark-store
-	  (activities-bookmark-store activity))
+	  (activities-bookmark-store activity 'create-only))
 	(pcase-let* (((cl-struct activities-activity default last) activity)
                      (new-state (activities-state)))
           (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
@@ -881,14 +881,18 @@ with prefix argument, choose another activity."
 
 ;;;; Bookmark support
 
-(defun activities-bookmark-store (activity)
-  "Store a `bookmark' record for ACTIVITY."
+(defun activities-bookmark-store (activity &optional create-only)
+  "Store a `bookmark' record for ACTIVITY.
+If CREATE-ONLY is non-nil, store the activity bookmark only if it
+does not yet exist."
   (bookmark-maybe-load-default-file)
   (let* ((activities-name (activities-activity-name activity))
          (bookmark-name (concat activities-bookmark-name-prefix activities-name))
          (props `((activities-name . ,activities-name)
                   (handler . activities-bookmark-handler))))
-    (bookmark-store bookmark-name props nil)))
+    (unless (and create-only
+		 (bookmark-get-bookmark bookmark-name 'noerror))
+     (bookmark-store bookmark-name props nil))))
 
 ;;;###autoload
 (defun activities-bookmark-handler (bookmark)
