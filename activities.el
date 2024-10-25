@@ -510,7 +510,9 @@ according to option `activities-always-persist', which see)."
   (activities-with activity
     (when (or defaultp lastp)
       (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
-        (pcase-let* (((cl-struct activities-activity default last) activity)
+	(when activities-bookmark-store
+	  (activities-bookmark-store activity))
+	(pcase-let* (((cl-struct activities-activity default last) activity)
                      (new-state (activities-state)))
           (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
                 (activities-activity-last activity) (if (or lastp (not last)) new-state last)))))
