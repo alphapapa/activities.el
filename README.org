@@ -155,6 +155,11 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 Nothing new yet.
 
+** v0.7.2
+
+*Fixes*
++ Handle errors from window parameter deserializers.  ([[https://github.com/alphapapa/activities.el/issues/44][#44]].  Thanks to [[https://github.com/karthink][Karthik Chikmagalur]] and [[https://github.com/stardiviner][stardiviner]] for reporting.)
+
 ** v0.7.1
 
 *Fixes*
