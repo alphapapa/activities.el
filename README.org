@@ -135,6 +135,17 @@ Key bindings are, as always, ultimately up to the user.  However, in [[Configura
 
 When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored when a new activity is made.  This allows the command ~bookmark-jump~ (~C-x r b~) to be used to resume an activity (helping to universalize the bookmark system).
 
+** Completion
+
+When selecting an activity in the minibuffer, if you are using an interface that supports /annotations/, additional information is shown alongside the activity name:
+
+- An ~@~ symbol for active activities,
+- The number of buffers and files the activity contains,
+- A color-coded age (elapsed time since the activity was last updated), and
+- A final ~*~ if the activity's list of buffers and files has been modified from its default state.
+
+The sort order when completing activities can be configured using ~activities-sort-by~.
+
 * FAQ
 
 + How is this different from [[https://github.com/alphapapa/burly.el][Burly.el]] or [[https://github.com/alphapapa/bufler.el/][Bufler.el]]? :: Burly is a well-polished tool for restoring window and frame configurations, which could be considered an incubator for some of the ideas furthered here.  Bufler's ~bufler-workspace~ library uses Burly to provide some similar functionality, which is at an exploratory stage.  ~activities~ hopes to provide a longer-term solution more suitable for integration into Emacs.
@@ -153,7 +164,11 @@ When option ~activities-bookmark-store~ is enabled, an Emacs bookmark is stored 
 
 ** v0.8-pre
 
-Nothing new yet.
+*Additions*
++ New completion interface with rich annotations.  ([[https://github.com/alphapapa/activity.el/pull/83][#83]].  Thanks to [[https://github.com/jdtsmith][JD Smith]].)
+
+*Changes*
++ During save, the ~time~ slot for an activity remains unchanged unless its buffers or files differ from their last saved state.  ([[https://github.com/alphapapa/activity.el/pull/83][#83]].  Thanks to [[https://github.com/jdtsmith][JD Smith]].)
 
 ** v0.7.2
 
