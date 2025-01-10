@@ -510,17 +510,38 @@ accordingly."
       (progn
         (setf activities-mode-timer
               (run-with-idle-timer activities-mode-idle-frequency t #'activities-save-all))
-        (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs))
+        (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs)
+        (add-hook 'delete-frame-functions #'activities-mode--deleting-frame))
     (when (timerp activities-mode-timer)
       (cancel-timer activities-mode-timer)
       (setf activities-mode-timer nil))
-    (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)))
+    (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)
+    (remove-hook 'delete-frame-functions #'activities-mode--deleting-frame)))
 
 (defun activities-mode--killing-emacs ()
   "Persist all activities' states.
 To be called from `kill-emacs-hook'."
   (let ((activities-always-persist t))
     (activities-save-all)))
+
+(defun activities-mode--deleting-frame (&rest _)
+  "Save the current frame's activity.
+If `activities-tabs-mode' is enabled, instead save any activities
+open in the current frame's tabs. Also kill the activity's
+buffers if `activities-kill-buffers' is non-nil. To be called
+from `delete-frame-functions'."
+  (if (and (boundp 'activities-tabs-mode)
+           activities-tabs-mode
+           tab-bar-mode)
+      (let ((tabs (tab-bar-tabs)))
+        (dolist (tab tabs)
+          (tab-bar-switch-to-tab (alist-get 'name tab))
+          (when-let ((activity (activities-current)))
+            (activities-save activity :lastp t)
+            (activities-tabs--kill-buffers))))
+    (when-let ((activity (activities-current)))
+      (activities-save activity :lastp t)
+      (activities--kill-buffers))))
 
 ;;;; Functions
 
