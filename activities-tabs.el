@@ -95,12 +95,13 @@ accordingly."
 
 (defun activities-tabs-mode--closing-tab (&rest _)
   "Save the current tab's activity.
-Also kill the activity's buffers if `activities-kill-buffers' is
-non-nil.
-To be called from `tab-bar-tab-pre-close-functions'."
+Also kill the activity's buffers if `activities-kill-buffers' and
+`activities-kill-buffers-deleting-frame-tab' are non-nil. To be
+called from `tab-bar-tab-pre-close-functions'."
   (when-let ((activity (activities-tabs-current)))
     (activities-save activity :lastp t)
-    (activities-tabs--kill-buffers)))
+    (when activities-kill-buffers-deleting-frame-tab
+      (activities-tabs--kill-buffers))))
 
 ;;;; Commands
 
