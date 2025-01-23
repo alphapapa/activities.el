@@ -559,7 +559,11 @@ from `activities--buffers-and-files'."
   (cl-labels ((file-or-buffer (cell)
 		"Given a CELL, return the true filename or buffer.
 The CELL is a (BUFFER . FILE) cons.  If the file is nil, BUFFER is returned."
-		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
+		(if-let  ((file (cdr cell)))
+		    (if (file-remote-p file)
+			file
+		      (file-truename file))
+		  (car cell))))
     (not (seq-set-equal-p (mapcar #'file-or-buffer bfa)
 			  (mapcar #'file-or-buffer bfb)))))
 
