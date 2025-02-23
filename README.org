@@ -170,6 +170,9 @@ The sort order when completing activities can be configured using ~activities-so
 *Changes*
 + During save, the ~time~ slot for an activity remains unchanged unless its buffers or files differ from their last saved state.  ([[https://github.com/alphapapa/activity.el/pull/83][#83]].  Thanks to [[https://github.com/jdtsmith][JD Smith]].)
 
+*Fixes*
++ Don't try to compute true filenames for remote files.  (See [[https://github.com/alphapapa/activities.el/issues/130][#130]], [[https://github.com/alphapapa/activities.el/pull/133][#133]].  Thanks to [[https://github.com/jdtsmith][JD Smith]].)
+
 ** v0.7.2
 
 *Fixes*

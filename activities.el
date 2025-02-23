@@ -558,8 +558,15 @@ Each of BFA and BFB is a list of buffer and files, as returned
 from `activities--buffers-and-files'."
   (cl-labels ((file-or-buffer (cell)
 		"Given a CELL, return the true filename or buffer.
-The CELL is a (BUFFER . FILE) cons.  If the file is nil, BUFFER is returned."
-		(if (cdr cell) (file-truename (cdr cell)) (car cell))))
+If the file is a remote one, return its value as-is, not
+necessarily its true name.  The CELL is a (BUFFER . FILE) cons.
+If the file is nil, BUFFER is returned."
+                (pcase-let ((`(,buffer . ,file) cell))
+                  (if file
+                      (if (file-remote-p file)
+                          file
+                        (file-truename file))
+                    buffer))))
     (not (seq-set-equal-p (mapcar #'file-or-buffer bfa)
 			  (mapcar #'file-or-buffer bfb)))))
 
