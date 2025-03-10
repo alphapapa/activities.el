@@ -345,6 +345,12 @@ sort before the second."
 				,#'activities-sort-by-active-age)
 		 (function :tag "Custom predicate")))
 
+(defcustom activities-annotate t
+  "Annotate activities when selecting.
+Annotations include age, buffer and file count, as well as
+active (`@') and modified (`*') flags."
+  :type 'boolean)
+
 (defcustom activities-annotation-colors '("blue" "red" 0.65)
   "Colors to use for annotating activity age.
 A list (OLD-COLOR NEW-COLOR ALPHA).  Activity color is based on
@@ -990,7 +996,7 @@ which see, with DEFAULT."
 	 (activity-table (str pred action)
 	   "Complete activities from STR, using completion PRED and ACTION."
 	   (if (eq action 'metadata)
-	       `(metadata (annotation-function . ,#'activity-annotation-function)
+	       `(metadata (annotation-function . ,(and activities-annotate #'activity-annotation-function))
 			  (display-sort-function . ,activities-sort-by))
 	     (complete-with-action action names str pred))))
       (let ((name (completing-read prompt #'activity-table nil t nil
