@@ -271,6 +271,11 @@ Called with one argument, the activity."
 Called with one argument, the activity."
   :type 'hook)
 
+(defcustom activities-switch-display-all t
+  "Non-nil means show all activities in `activities-switch`.
+  Nil means only show currently active activities."
+  :type 'boolean)
+
 (defcustom activities-default-name-fn 'activities--project-name
   "Function that returns the default name for a new activity.
 The string should not be prefixed by, e.g. \"Activity\" because
@@ -417,14 +422,21 @@ available."
       (activities-set activity :state (if resetp 'default 'last)))))
 
 (defun activities-switch (activity)
-  "Switch to ACTIVITY.
-Interactively, offers active activities."
+  "Interactively switch to ACTIVITY.
+      If ACTIVITY has no active frame, create a new frame and switch to it."
   (interactive
-   (list (activities-completing-read
-          :activities (cl-remove-if-not #'activities-activity-active-p activities-activities :key #'cdr)
-          :prompt "Switch to activity")))
-  (activities--switch activity)
-  (run-hook-with-args 'activities-after-switch-functions activity))
+   (let* ((activities
+           (if activities-switch-display-all
+               activities-activities
+      	     (cl-remove-if-not #'activities-activity-active-p
+                               activities-activities :key #'cdr))))
+     (list (activities-completing-read
+      	    :activities activities
+      	    :prompt "Switch to activity"))))
+  ;; Ensure new frames are created if needed
+  (let ((activities-resume-into-frame 'new))
+    (activities-resume activity))
+  (run-hook-with-args 'activities-after-switch-functions activity)))
 
 (defun activities-suspend (activity)
   "Suspend ACTIVITY.
