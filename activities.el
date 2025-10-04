@@ -178,8 +178,7 @@ Selects ACTIVITY's frame/tab and then switches back."
 
 ;;;; Variables
 
-(with-demoted-errors "activities: Variable `activities-activities' failed to load persisted data: %S"
-  (persist-defvar activities-activities nil "FIXME: Docstring."))
+(persist-defvar activities-activities nil "FIXME: Docstring.")
 
 (defvar activities-buffer-local-variables nil
   "Variables whose value are saved and restored by activities.
@@ -456,13 +455,12 @@ With PERSISTP, persist to disk (otherwise see
 `activities-always-persist').  To be safe for `kill-emacs-hook',
 this demotes errors."
   (interactive)
-  (with-demoted-errors "activities-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (let ((activities-saving-p t)
-            ;; Don't write to disk for each activity.
-            (activities-always-persist nil))
-        (activities-save activity :lastp t)))
-    (activities--persist persistp)))
+  (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
+    (let ((activities-saving-p t)
+          ;; Don't write to disk for each activity.
+          (activities-always-persist nil))
+      (activities-save activity :lastp t)))
+  (activities--persist persistp))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
