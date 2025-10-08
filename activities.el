@@ -416,6 +416,15 @@ available."
     (when (or resetp (not already-active-p))
       (activities-set activity :state (if resetp 'default 'last)))))
 
+(defun activities-resume-named (name &optional reset)
+  "Resume an activity given by NAME.
+If non-nil RESET roll back to activity's default configuration."
+  (let ((activity (activities-named name)))
+    (unless activity
+      (user-error "No activity: %s" name))
+    (activities-resume activity :resetp reset)
+    (message "Activity: %s." name)))
+
 (defun activities-switch (activity)
   "Switch to ACTIVITY.
 Interactively, offers active activities."
@@ -471,6 +480,12 @@ this demotes errors."
     (user-error "No active activity"))
   ;; TODO: Consider resetting the activity's buffers list.
   (activities-set activity :state 'default))
+
+(defun activities-revert-current ()
+  "Revert current activity to its default configuration."
+  (let ((activity (activities-current)))
+    (activities-revert activity)
+    (message "Reverted: '%s'." (activities-name-for activity))))
 
 (defun activities-discard (activity)
   "Discard ACTIVITY and its state.
