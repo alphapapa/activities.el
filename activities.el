@@ -411,6 +411,10 @@ available."
   (interactive
    (list (activities-completing-read :prompt "Resume activity" :default nil)
          :resetp current-prefix-arg))
+  (when (stringp activity)
+    (unless (activities-named activity)
+      (user-error "No activity: %s" activity))
+    (setq activity (activities-named activity)))
   (let ((already-active-p (activities-activity-active-p activity)))
     (activities--switch activity)
     (when (or resetp (not already-active-p))
@@ -464,10 +468,10 @@ this demotes errors."
         (activities-save activity :lastp t)))
     (activities--persist persistp)))
 
-(defun activities-revert (activity)
+(defun activities-revert (&optional activity)
   "Reset ACTIVITY to its default state."
-  (interactive (list (activities-current)))
-  (unless activity
+  (interactive)
+  (unless (or activity (setq activity (activities-current)))
     (user-error "No active activity"))
   ;; TODO: Consider resetting the activity's buffers list.
   (activities-set activity :state 'default))
