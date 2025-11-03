@@ -403,22 +403,23 @@ activity."
   (activities--persist))
 
 ;;;###autoload
-(cl-defun activities-resume (activity &key resetp)
-  "Resume ACTIVITY.
+(cl-defun activities-resume (activity-or-name &key resetp)
+  "Resume ACTIVITY-OR-NAME.
 If RESETP (interactively, with universal prefix), reset to
-ACTIVITY's default state; otherwise, resume its last state, if
+ACTIVITY-OR-NAME's default state; otherwise, resume its last state, if
 available."
   (interactive
    (list (activities-completing-read :prompt "Resume activity" :default nil)
          :resetp current-prefix-arg))
-  (when (stringp activity)
-    (unless (activities-named activity)
-      (user-error "No activity: %s" activity))
-    (setq activity (activities-named activity)))
-  (let ((already-active-p (activities-activity-active-p activity)))
-    (activities--switch activity)
-    (when (or resetp (not already-active-p))
-      (activities-set activity :state (if resetp 'default 'last)))))
+  (let ((activity (if (stringp activity-or-name)
+                      (activities-named activity-or-name)
+                    activity-or-name)))
+    (unless activity
+      (user-error "No activity: %s" activity-or-name))
+    (let ((already-active-p (activities-activity-active-p activity)))
+      (activities--switch activity)
+      (when (or resetp (not already-active-p))
+        (activities-set activity :state (if resetp 'default 'last))))))
 
 (defun activities-switch (activity)
   "Switch to ACTIVITY.
