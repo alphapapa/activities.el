@@ -332,6 +332,13 @@ Kills buffers that have only been shown in that activity's
 frame/tab."
   :type 'boolean)
 
+(defcustom activities-kill-buffers-deleting-frame-tab nil
+  "Kill buffers when deleting an activity's frame/tab.
+When deleting a frame or closing a tab containing an activity,
+kills buffers that have only been shown in that activity's
+frame/tab if `activities-kill-buffers' is also non-nil."
+  :type 'boolean)
+
 (defcustom activities-sort-by #'activities-sort-by-active-age
   "How to sort activities during selection.
 Function used to sort by when prompting for activities.  By
@@ -510,17 +517,41 @@ accordingly."
       (progn
         (setf activities-mode-timer
               (run-with-idle-timer activities-mode-idle-frequency t #'activities-save-all))
-        (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs))
+        (add-hook 'kill-emacs-hook #'activities-mode--killing-emacs)
+        (add-hook 'delete-frame-functions #'activities-mode--deleting-frame))
     (when (timerp activities-mode-timer)
       (cancel-timer activities-mode-timer)
       (setf activities-mode-timer nil))
-    (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)))
+    (remove-hook 'kill-emacs-hook #'activities-mode--killing-emacs)
+    (remove-hook 'delete-frame-functions #'activities-mode--deleting-frame)))
 
 (defun activities-mode--killing-emacs ()
   "Persist all activities' states.
 To be called from `kill-emacs-hook'."
   (let ((activities-always-persist t))
     (activities-save-all)))
+
+(defun activities-mode--deleting-frame (&rest _)
+  "Save the current frame's activity.
+If `activities-tabs-mode' is enabled, instead save any activities
+open in the current frame's tabs. Also kill the activity's
+buffers if `activities-kill-buffers' and
+`activities-kill-buffers-deleting-frame-tab' are non-nil. To be
+called from `delete-frame-functions'."
+  (if (and (boundp 'activities-tabs-mode)
+           activities-tabs-mode
+           tab-bar-mode)
+      (let ((tabs (tab-bar-tabs)))
+        (dolist (tab tabs)
+          (tab-bar-switch-to-tab (alist-get 'name tab))
+          (when-let ((activity (activities-current)))
+            (activities-save activity :lastp t)
+            (when activities-kill-buffers-deleting-frame-tab
+              (activities-tabs--kill-buffers)))))
+    (when-let ((activity (activities-current)))
+      (activities-save activity :lastp t)
+      (when activities-kill-buffers-deleting-frame-tab
+        (activities--kill-buffers)))))
 
 ;;;; Functions
 
