@@ -984,7 +984,8 @@ which see, with DEFAULT."
                                      'face `(:foreground ,age-color :weight bold)))
                     (dirty-annotation (if dirtyp (propertize "*" 'face 'bold) " ")))
                  (concat (propertize " " 'display
-                                     `(space :align-to (- right ,(+ 1 (length annotation)
+                                     `(space :align-to (- right ,(+ (if (display-graphic-p) 1 2)
+                                                                    (length annotation)
                                                                     (length age-annotation)))))
                          annotation age-annotation dirty-annotation)))))
          (activity-table (str pred action)
