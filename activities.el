@@ -7,7 +7,7 @@
 ;; URL: https://github.com/alphapapa/activities.el
 ;; Keywords: convenience
 ;; Version: 0.8-pre
-;; Package-Requires: ((emacs "29.1") (persist "0.6"))
+;; Package-Requires: ((emacs "28.2") (persist "0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
