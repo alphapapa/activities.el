@@ -456,13 +456,14 @@ With PERSISTP, persist to disk (otherwise see
 `activities-always-persist').  To be safe for `kill-emacs-hook',
 this demotes errors."
   (interactive)
-  (with-demoted-errors "activities-save-all: ERROR: %S"
-    (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
-      (let ((activities-saving-p t)
-            ;; Don't write to disk for each activity.
-            (activities-always-persist nil))
-        (activities-save activity :lastp t)))
-    (activities--persist persistp)))
+  (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
+    (with-demoted-errors "activities-save-all: ERROR: %S"
+      (dolist (activity (cl-remove-if-not #'activities-activity-active-p (map-values activities-activities)))
+        (let ((activities-saving-p t)
+              ;; Don't write to disk for each activity.
+              (activities-always-persist nil))
+          (activities-save activity :lastp t)))
+      (activities--persist persistp))))
 
 (defun activities-revert (activity)
   "Reset ACTIVITY to its default state."
@@ -519,7 +520,8 @@ accordingly."
 (defun activities-mode--killing-emacs ()
   "Persist all activities' states.
 To be called from `kill-emacs-hook'."
-  (let ((activities-always-persist t))
+  (let ((activities-always-persist t)
+        (activities-anti-save-predicates nil))
     (activities-save-all)))
 
 ;;;; Functions
@@ -575,9 +577,9 @@ If the file is nil, BUFFER is returned."
 If DEFAULTP, save its default state; if LASTP, its last.  If
 PERSISTP, force persisting of data (otherwise, data is persisted
 according to option `activities-always-persist', which see)."
-  (activities-with activity
-    (when (or defaultp lastp)
-      (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
+  (unless (run-hook-with-args-until-success 'activities-anti-save-predicates)
+    (activities-with activity
+      (when (or defaultp lastp)
         (pcase-let* (((cl-struct activities-activity default last) activity)
                      (new-state (activities-state)))
           (when (and lastp last
@@ -587,10 +589,10 @@ according to option `activities-always-persist', which see)."
             (setf (map-elt (activities-activity-state-etc new-state) 'time)
                   (map-elt (activities-activity-state-etc last) 'time)))
           (setf (activities-activity-default activity) (if (or defaultp (not default)) new-state default)
-                (activities-activity-last activity) (if (or lastp (not last)) new-state last)))))
-    ;; Always set the value so, e.g. the activity can be modified
-    ;; externally and saved here.
-    (setf (map-elt activities-activities (activities-activity-name activity)) activity))
+                (activities-activity-last activity) (if (or lastp (not last)) new-state last))))
+      ;; Always set the value so, e.g. the activity can be modified
+      ;; externally and saved here.
+      (setf (map-elt activities-activities (activities-activity-name activity)) activity)))
   (activities--persist persistp))
 
 (cl-defun activities-set (activity &key (state 'last))
